@@ -17,14 +17,6 @@ export default function HomePage() {
         >
           {SITE_CONFIG.name}
         </motion.h1>
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 2.3 }}
-          className="mt-4 text-sm tracking-[0.2em] text-muted"
-        >
-          {SITE_CONFIG.tagline}
-        </motion.p>
       </div>
     </>
   );
