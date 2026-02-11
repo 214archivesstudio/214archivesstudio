@@ -12,7 +12,7 @@ export default function HomePage() {
         <motion.h1
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 2.8 }}
+          transition={{ duration: 0.8, delay: 1.8 }}
           className="text-4xl font-light tracking-[0.3em] text-foreground md:text-6xl"
         >
           {SITE_CONFIG.name}
@@ -20,7 +20,7 @@ export default function HomePage() {
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 3.4 }}
+          transition={{ duration: 0.6, delay: 2.3 }}
           className="mt-4 text-sm tracking-[0.2em] text-muted"
         >
           {SITE_CONFIG.tagline}
