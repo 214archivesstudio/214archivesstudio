@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { LightboxProps } from "@/types";
-import { buildCloudinaryUrl } from "@/lib/cloudinary";
+import { getCldImageUrl } from "next-cloudinary";
 
 export default function Lightbox({
   images,
@@ -83,7 +83,13 @@ export default function Lightbox({
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
           transition={{ duration: 0.3 }}
-          src={buildCloudinaryUrl(currentImage.publicId, { width: 1920 })}
+          src={getCldImageUrl({
+            src: currentImage.publicId,
+            width: 1920,
+            height: 1280,
+            quality: "auto",
+            format: "auto",
+          })}
           alt={currentImage.alt}
           className="max-h-[90vh] max-w-[90vw] object-contain"
           onClick={(e) => e.stopPropagation()}

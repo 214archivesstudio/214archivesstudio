@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { PHOTOGRAPHY } from "@/data/photography";
-import { buildCloudinaryUrl } from "@/lib/cloudinary";
+import { CldImage } from "next-cloudinary";
 import FadeIn from "@/components/common/FadeIn";
 import Lightbox from "@/components/ui/Lightbox";
 
@@ -37,11 +37,15 @@ export default function PhotographyDetailPage() {
             className="cursor-pointer"
             onClick={() => setLightboxIndex(index)}
           >
-            <img
-              src={buildCloudinaryUrl(photo.publicId, { width: 1200 })}
+            <CldImage
+              src={photo.publicId}
+              width={1200}
+              height={800}
               alt={photo.alt}
+              sizes="(max-width: 768px) 100vw, 896px"
+              quality="auto"
+              priority={index === 0}
               className="w-full rounded-sm"
-              loading="lazy"
             />
           </motion.div>
         ))}

@@ -2,13 +2,19 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { CldImage } from "next-cloudinary";
 import type { ThumbnailGridProps } from "@/types";
-import { buildCloudinaryUrl } from "@/lib/cloudinary";
 
 const columnClasses = {
   2: "grid-cols-1 md:grid-cols-2",
   3: "grid-cols-1 md:grid-cols-2 lg:grid-cols-3",
   4: "grid-cols-2 md:grid-cols-3 lg:grid-cols-4",
+} as const;
+
+const columnSizes = {
+  2: "(max-width: 768px) 100vw, 50vw",
+  3: "(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw",
+  4: "(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw",
 } as const;
 
 export default function ThumbnailGrid({
@@ -30,13 +36,14 @@ export default function ThumbnailGrid({
         >
           <Link href={`${basePath}/${item.id}`} className="group block">
             <div className="relative aspect-[3/2] overflow-hidden rounded-sm bg-background">
-              <img
-                src={buildCloudinaryUrl(item.thumbnail.publicId, {
-                  width: 600,
-                })}
+              <CldImage
+                src={item.thumbnail.publicId}
+                width={600}
+                height={400}
                 alt={item.thumbnail.alt}
+                sizes={columnSizes[columns]}
+                quality="auto"
                 className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                loading="lazy"
               />
               <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/20" />
             </div>

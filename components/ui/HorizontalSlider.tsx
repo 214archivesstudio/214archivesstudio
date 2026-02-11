@@ -2,8 +2,8 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { CldImage } from "next-cloudinary";
 import type { HorizontalSliderProps } from "@/types";
-import { buildCloudinaryUrl } from "@/lib/cloudinary";
 
 export default function HorizontalSlider({
   items,
@@ -21,13 +21,13 @@ export default function HorizontalSlider({
         >
           <Link href={`${basePath}/${item.id}`} className="group block">
             <div className="relative h-[60vh] w-[40vw] min-w-[280px] overflow-hidden rounded-sm bg-background">
-              <img
-                src={buildCloudinaryUrl(item.thumbnail.publicId, {
-                  width: 800,
-                })}
+              <CldImage
+                src={item.thumbnail.publicId}
+                fill
+                sizes="(max-width: 640px) 280px, 40vw"
+                quality="auto"
                 alt={item.thumbnail.alt}
-                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                loading="lazy"
+                className="object-cover transition-transform duration-500 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/20" />
             </div>

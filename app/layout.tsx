@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import Header from "@/components/layout/Header";
 import BackgroundLayer from "@/components/layout/BackgroundLayer";
+import { getCldImageUrl } from "next-cloudinary";
 import "@/styles/globals.css";
 
 export const metadata: Metadata = {
@@ -43,7 +44,19 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body>
-        <BackgroundLayer />
+        <BackgroundLayer
+          media={{
+            type: "image",
+            src: getCldImageUrl({
+              src: "214archives/background/home-bg",
+              width: 1920,
+              height: 1080,
+              quality: "auto",
+              format: "auto",
+            }),
+            overlayOpacity: 0.6,
+          }}
+        />
         <Header />
         <main className="relative min-h-screen pt-20">{children}</main>
       </body>

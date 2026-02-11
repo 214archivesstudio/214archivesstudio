@@ -3,14 +3,27 @@
 import { motion } from "framer-motion";
 import FadeIn from "@/components/common/FadeIn";
 import { SOCIAL_LINKS } from "@/data/navigation";
+import { CldImage } from "next-cloudinary";
 
 export default function ContactPage() {
   return (
     <div className="flex min-h-[calc(100vh-5rem)] flex-col items-center justify-center px-6">
       <FadeIn>
-        <h1 className="mb-12 text-2xl font-light tracking-[0.2em] text-foreground">
-          Contact
-        </h1>
+        <div className="mb-12 flex flex-col items-center gap-8">
+          <CldImage
+            src="214archives/contact/silhouette"
+            width={400}
+            height={600}
+            alt="Silhouette"
+            sizes="400px"
+            quality="auto"
+            priority
+            className="h-48 w-auto object-contain opacity-80 md:h-64"
+          />
+          <h1 className="text-2xl font-light tracking-[0.2em] text-foreground">
+            Contact
+          </h1>
+        </div>
       </FadeIn>
 
       <div className="flex flex-col items-center gap-6">

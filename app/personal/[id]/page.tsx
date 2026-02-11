@@ -4,7 +4,7 @@ import { useParams } from "next/navigation";
 import { notFound } from "next/navigation";
 import { motion } from "framer-motion";
 import { PERSONAL_WORKS } from "@/data/personal";
-import { buildCloudinaryUrl } from "@/lib/cloudinary";
+import { CldImage } from "next-cloudinary";
 import FadeIn from "@/components/common/FadeIn";
 import VideoPlayer from "@/components/ui/VideoPlayer";
 import type { CloudinaryImage, VideoEmbed } from "@/types";
@@ -48,11 +48,15 @@ export default function PersonalDetailPage() {
             {isVideoEmbed(item) ? (
               <VideoPlayer video={item} />
             ) : (
-              <img
-                src={buildCloudinaryUrl(item.publicId, { width: 1200 })}
+              <CldImage
+                src={item.publicId}
+                width={1200}
+                height={800}
                 alt={item.alt}
+                sizes="(max-width: 768px) 100vw, 896px"
+                quality="auto"
+                priority={index === 0}
                 className="w-full rounded-sm"
-                loading="lazy"
               />
             )}
           </motion.div>

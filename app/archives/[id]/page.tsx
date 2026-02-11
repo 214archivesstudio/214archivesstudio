@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { ARCHIVES } from "@/data/archives";
-import { buildCloudinaryUrl } from "@/lib/cloudinary";
+import { CldImage } from "next-cloudinary";
 import { formatArchiveYear } from "@/lib/utils";
 import FadeIn from "@/components/common/FadeIn";
 import Lightbox from "@/components/ui/Lightbox";
@@ -38,11 +38,15 @@ export default function ArchiveDetailPage() {
             onClick={() => setLightboxIndex(index)}
           >
             <div className="group relative aspect-[3/2] overflow-hidden bg-background">
-              <img
-                src={buildCloudinaryUrl(photo.publicId, { width: 600 })}
+              <CldImage
+                src={photo.publicId}
+                width={600}
+                height={400}
                 alt={photo.alt}
+                sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                quality="auto"
+                priority={index < 4}
                 className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                loading="lazy"
               />
             </div>
           </motion.div>
