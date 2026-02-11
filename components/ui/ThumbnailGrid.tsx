@@ -43,6 +43,7 @@ export default function ThumbnailGrid({
                 alt={item.thumbnail.alt}
                 sizes={columnSizes[columns]}
                 quality="auto"
+                priority={index < columns}
                 className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/20" />

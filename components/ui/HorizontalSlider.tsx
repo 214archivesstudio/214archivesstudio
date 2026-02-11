@@ -26,6 +26,7 @@ export default function HorizontalSlider({
                 fill
                 sizes="(max-width: 640px) 280px, 40vw"
                 quality="auto"
+                priority={index < 3}
                 alt={item.thumbnail.alt}
                 className="object-cover transition-transform duration-500 group-hover:scale-105"
               />
