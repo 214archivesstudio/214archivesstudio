@@ -1,8 +1,8 @@
 import type { ArchiveItem } from "@/types";
 
-const createPlaceholderPhoto = (city: string, index: number) => ({
-  publicId: `214archives/archives/${city.toLowerCase().replace(/\s/g, "-")}/photo-${index}`,
-  alt: `${city} photo ${index}`,
+const createPlaceholderPhoto = (id: string, index: number) => ({
+  publicId: `214archives/archives/${id}/photo-${String(index).padStart(2, "0")}`,
+  alt: `${id} photo ${index}`,
   width: 1920,
   height: 1280,
 });
@@ -23,23 +23,23 @@ const createArchive = (
     height: 800,
   },
   photos: Array.from({ length: photoCount }, (_, i) =>
-    createPlaceholderPhoto(city, i + 1)
+    createPlaceholderPhoto(id, i + 1)
   ),
 });
 
 export const ARCHIVES: ReadonlyArray<ArchiveItem> = [
-  createArchive("24-shanghai", "Shanghai", "2024"),
-  createArchive("24-taipei", "Taipei", "2024"),
-  createArchive("24-tokyo", "Tokyo", "2024"),
-  createArchive("24-miyakojima", "Miyakojima", "2024"),
-  createArchive("24-newyork", "New York", "2024"),
-  createArchive("24-dubai", "Dubai", "2024"),
-  createArchive("24-hongkong", "Hong Kong", "2024"),
-  createArchive("24-hochiminh", "Ho Chi Minh", "2024"),
-  createArchive("24-sydney", "Sydney", "2024"),
-  createArchive("24-melbourne", "Melbourne", "2024"),
-  createArchive("24-rome", "Rome", "2024"),
-  createArchive("24-interlaken", "Interlaken", "2024"),
-  createArchive("24-paris", "Paris", "2024"),
-  createArchive("24-london", "London", "2024"),
+  createArchive("22-interlaken", "Interlaken", "2022", 15),
+  createArchive("22-london", "London", "2022", 10),
+  createArchive("22-paris", "Paris", "2022", 7),
+  createArchive("22-rome", "Rome", "2022", 5),
+  createArchive("23-hochiminh", "Ho Chi Minh", "2023", 14),
+  createArchive("23-hongkong", "Hong Kong", "2023", 18),
+  createArchive("23-melbourne", "Melbourne", "2023", 16),
+  createArchive("23-sydney", "Sydney", "2023", 12),
+  createArchive("24-dubai", "Dubai", "2024", 33),
+  createArchive("24-taipei", "Taipei", "2024", 26),
+  createArchive("25-miyakojima", "Miyakojima", "2025", 13),
+  createArchive("25-newyork", "New York", "2025", 53),
+  createArchive("25-sky", "Sky", "2025", 3),
+  createArchive("25-tokyo", "Tokyo", "2025", 15),
 ] as const;

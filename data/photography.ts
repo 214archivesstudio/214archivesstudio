@@ -16,7 +16,7 @@ const createPhotographyItem = (
     height: 1600,
   },
   photos: Array.from({ length: photoCount }, (_, i) => ({
-    publicId: `214archives/photography/${id}/photo-${i + 1}`,
+    publicId: `214archives/photography/${id}/photo-${String(i + 1).padStart(2, "0")}`,
     alt: `${title} photo ${i + 1}`,
     width: 1920,
     height: 1280,
@@ -24,15 +24,10 @@ const createPhotographyItem = (
 });
 
 export const PHOTOGRAPHY: ReadonlyArray<PhotographyItem> = [
-  createPhotographyItem(
-    "lookbook-cau-fashion",
-    "Lookbook",
-    "CAU Fashion",
-    10
-  ),
-  createPhotographyItem("lookbook-kimaeyoung", "Lookbook", "KimAeYoung", 8),
-  createPhotographyItem("lookbook-lark", "Lookbook", "LARK", 8),
-  createPhotographyItem("lookbook-youth", "Lookbook", "YOUTH", 8),
-  createPhotographyItem("lookbook-bready", "Lookbook", "B.Ready", 8),
-  createPhotographyItem("lookbook-not4nerd", "Lookbook", "NOT4NERD", 10),
+  createPhotographyItem("lookbook-cau-fashion", "Lookbook", "CAU Fashion", 7),
+  createPhotographyItem("lookbook-kimaeyoung", "Lookbook", "KimAeYoung", 5),
+  createPhotographyItem("lookbook-lark", "Lookbook", "LARK", 3),
+  createPhotographyItem("lookbook-youth", "Lookbook", "YOUTH", 6),
+  createPhotographyItem("lookbook-bready", "Lookbook", "B.Ready", 4),
+  createPhotographyItem("lookbook-not4nerd", "Lookbook", "NOT4NERD", 9),
 ] as const;

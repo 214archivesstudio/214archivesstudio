@@ -1,5 +1,12 @@
 import type { PersonalWorkItem } from "@/types";
 
+const createPhoto = (folder: string, index: number, title: string) => ({
+  publicId: `214archives/personal/${folder}/photo-${String(index).padStart(2, "0")}`,
+  alt: `${title} photo ${index}`,
+  width: 1920,
+  height: 1280,
+});
+
 export const PERSONAL_WORKS: ReadonlyArray<PersonalWorkItem> = [
   {
     id: "pony-project",
@@ -11,18 +18,9 @@ export const PERSONAL_WORKS: ReadonlyArray<PersonalWorkItem> = [
       height: 800,
     },
     media: [
-      {
-        publicId: "214archives/personal/pony-project/photo-1",
-        alt: "PONY Project photo 1",
-        width: 1920,
-        height: 1280,
-      },
-      {
-        publicId: "214archives/personal/pony-project/photo-2",
-        alt: "PONY Project photo 2",
-        width: 1920,
-        height: 1280,
-      },
+      ...Array.from({ length: 7 }, (_, i) =>
+        createPhoto("pony-project", i + 1, "PONY Project")
+      ),
       {
         platform: "youtube" as const,
         videoId: "placeholder",
@@ -40,20 +38,7 @@ export const PERSONAL_WORKS: ReadonlyArray<PersonalWorkItem> = [
       width: 1200,
       height: 800,
     },
-    media: [
-      {
-        publicId: "214archives/personal/about-me/photo-1",
-        alt: "About Me photo 1",
-        width: 1920,
-        height: 1280,
-      },
-      {
-        publicId: "214archives/personal/about-me/photo-2",
-        alt: "About Me photo 2",
-        width: 1920,
-        height: 1280,
-      },
-    ],
+    media: [createPhoto("about-me", 1, "About Me")],
     description: "A self-portrait and introspective series.",
   },
 ] as const;
