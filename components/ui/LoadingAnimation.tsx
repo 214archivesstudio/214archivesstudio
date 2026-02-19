@@ -5,8 +5,8 @@ import { getCldImageUrl } from "next-cloudinary";
 
 const logoUrl = getCldImageUrl({
   src: "214archives/background/logo",
-  width: 400,
-  height: 400,
+  width: 600,
+  height: 600,
   quality: "auto",
   format: "auto",
 });
@@ -25,7 +25,7 @@ export default function LoadingAnimation() {
         initial={{ clipPath: "inset(100% 0 0 0)" }}
         animate={{ clipPath: "inset(0% 0 0 0)" }}
         transition={{ duration: 1.2, ease: "easeOut" }}
-        className="h-32 w-auto md:h-48"
+        className="h-48 w-auto brightness-0 invert md:h-72"
       />
     </motion.div>
   );
