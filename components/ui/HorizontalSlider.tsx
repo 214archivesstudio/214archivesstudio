@@ -16,7 +16,7 @@ export default function HorizontalSlider({
           key={item.id}
           initial={{ opacity: 0, x: 40 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: index * 0.1 }}
+          transition={{ duration: 0.4, delay: Math.min(index * 0.08, 0.3) }}
           className="scroll-snap-center flex-shrink-0"
         >
           <Link href={`${basePath}/${item.id}`} className="group block">
@@ -24,9 +24,10 @@ export default function HorizontalSlider({
               <CldImage
                 src={item.thumbnail.publicId}
                 fill
-                sizes="(max-width: 640px) 280px, 40vw"
+                sizes="(max-width: 640px) 280px, 486px"
                 quality="auto"
-                priority={index < 3}
+                format="auto"
+                priority={index < 2}
                 alt={item.thumbnail.alt}
                 className="object-cover transition-transform duration-500 group-hover:scale-105"
               />
