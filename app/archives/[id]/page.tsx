@@ -27,7 +27,7 @@ export default function ArchiveDetailPage() {
         </h1>
       </FadeIn>
 
-      <div className="grid grid-cols-2 gap-2 md:grid-cols-3 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-2 md:grid-cols-3 lg:grid-cols-4">
         {archive.photos.map((photo, index) => (
           <motion.div
             key={photo.publicId}
@@ -43,7 +43,7 @@ export default function ArchiveDetailPage() {
                 width={600}
                 height={400}
                 alt={photo.alt}
-                sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                sizes="(max-width: 768px) 100vw, (max-width: 1024px) 33vw, 25vw"
                 quality="auto"
                 priority={index < 4}
                 className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
