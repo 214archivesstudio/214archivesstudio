@@ -22,8 +22,8 @@ export default function LoadingAnimation() {
       <motion.img
         src={logoUrl}
         alt="214 Archives Studio"
-        initial={{ opacity: 0, y: 60 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={{ clipPath: "inset(100% 0 0 0)" }}
+        animate={{ clipPath: "inset(0% 0 0 0)" }}
         transition={{ duration: 1.2, ease: "easeOut" }}
         className="h-32 w-auto md:h-48"
       />
