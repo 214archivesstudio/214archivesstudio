@@ -2,9 +2,12 @@
 
 import FadeIn from "@/components/common/FadeIn";
 import ThumbnailGrid from "@/components/ui/ThumbnailGrid";
+import { useHoverBackground } from "@/hooks/useHoverBackground";
 import { SHOWREELS } from "@/data/showreels";
 
 export default function ShowreelPage() {
+  const handleHover = useHoverBackground(SHOWREELS);
+
   const gridItems = SHOWREELS.map((item) => ({
     id: item.id,
     title: item.title,
@@ -18,7 +21,12 @@ export default function ShowreelPage() {
           Showreel
         </h1>
       </FadeIn>
-      <ThumbnailGrid items={gridItems} basePath="/showreel" columns={3} />
+      <ThumbnailGrid
+        items={gridItems}
+        basePath="/showreel"
+        columns={3}
+        onHover={handleHover}
+      />
     </div>
   );
 }
