@@ -20,7 +20,7 @@ export default function HorizontalSlider({
           className="scroll-snap-center flex-shrink-0"
         >
           <Link href={`${basePath}/${item.id}`} className="group block">
-            <div className="relative h-[60vh] w-[40vw] min-w-[280px] overflow-hidden rounded-sm bg-background">
+            <div className="relative h-[60vh] w-[45vh] min-w-[280px] overflow-hidden rounded-sm bg-background">
               <CldImage
                 src={item.thumbnail.publicId}
                 fill
