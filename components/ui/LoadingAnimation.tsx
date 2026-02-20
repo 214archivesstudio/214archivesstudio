@@ -16,17 +16,22 @@ export default function LoadingAnimation() {
     <motion.div
       initial={{ opacity: 1 }}
       animate={{ opacity: 0 }}
-      transition={{ duration: 0.5, delay: 1.5 }}
+      transition={{ duration: 0.5, delay: 2.0 }}
       className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center bg-black"
     >
-      <motion.img
-        src={logoUrl}
-        alt="214 Archives Studio"
-        initial={{ clipPath: "inset(100% 0 0 0)" }}
-        animate={{ clipPath: "inset(0% 0 0 0)" }}
-        transition={{ duration: 1.2, ease: "easeOut" }}
-        className="h-48 w-auto brightness-0 invert md:h-72"
-      />
+      <div className="relative overflow-hidden">
+        <img
+          src={logoUrl}
+          alt="214 Archives Studio"
+          className="h-48 w-auto brightness-0 invert md:h-72"
+        />
+        <motion.div
+          initial={{ y: 0 }}
+          animate={{ y: "-100%" }}
+          transition={{ duration: 1.6, ease: [0.65, 0, 0.35, 1] }}
+          className="absolute inset-0 bg-black"
+        />
+      </div>
     </motion.div>
   );
 }
