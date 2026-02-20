@@ -17,6 +17,7 @@ export default function ContactPage() {
             alt="Silhouette"
             sizes="400px"
             quality="auto"
+            format="auto"
             priority
             className="h-48 w-auto object-contain opacity-80 md:h-64"
           />

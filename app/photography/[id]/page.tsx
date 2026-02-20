@@ -44,6 +44,7 @@ export default function PhotographyDetailPage() {
               alt={photo.alt}
               sizes="(max-width: 768px) 100vw, 896px"
               quality="auto"
+              format="auto"
               priority={index === 0}
               className="w-full rounded-sm"
             />

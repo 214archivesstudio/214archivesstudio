@@ -46,6 +46,23 @@ export default function Lightbox({
 
   const currentImage = images[currentIndex];
 
+  useEffect(() => {
+    const indices = [
+      (currentIndex + 1) % images.length,
+      (currentIndex - 1 + images.length) % images.length,
+    ];
+    for (const i of indices) {
+      const img = new Image();
+      img.src = getCldImageUrl({
+        src: images[i].publicId,
+        width: 1920,
+        height: 1280,
+        quality: "auto",
+        format: "auto",
+      });
+    }
+  }, [currentIndex, images]);
+
   return (
     <AnimatePresence>
       <motion.div

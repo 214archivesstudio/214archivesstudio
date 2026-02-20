@@ -45,6 +45,7 @@ export default function ArchiveDetailPage() {
                 alt={photo.alt}
                 sizes="(max-width: 768px) 100vw, (max-width: 1024px) 33vw, 25vw"
                 quality="auto"
+                format="auto"
                 priority={index < 4}
                 className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
