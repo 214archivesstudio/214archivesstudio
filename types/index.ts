@@ -48,6 +48,15 @@ export interface PhotographyItem {
   readonly description?: string;
 }
 
+export interface FilmItem {
+  readonly id: string;
+  readonly title: string;
+  readonly thumbnail: CloudinaryImage;
+  readonly video: VideoEmbed;
+  readonly photos: ReadonlyArray<CloudinaryImage>;
+  readonly description?: string;
+}
+
 export interface PersonalWorkItem {
   readonly id: string;
   readonly title: string;

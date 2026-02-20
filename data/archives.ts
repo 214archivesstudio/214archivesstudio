@@ -42,4 +42,21 @@ export const ARCHIVES: ReadonlyArray<ArchiveItem> = [
   createArchive("22-paris", "Paris", "2022", 7),
   createArchive("22-london", "London", "2022", 10),
   createArchive("22-interlaken", "Interlaken", "2022", 15),
+  {
+    id: "22-switzerland",
+    city: "Switzerland",
+    year: "2022",
+    thumbnail: {
+      publicId: "214archives/archives/22-switzerland/01",
+      alt: "Switzerland 2022",
+      width: 1200,
+      height: 800,
+    },
+    photos: Array.from({ length: 15 }, (_, i) => ({
+      publicId: `214archives/archives/22-switzerland/${String(i + 1).padStart(2, "0")}`,
+      alt: `Switzerland 2022 photo ${i + 1}`,
+      width: 1920,
+      height: 1280,
+    })),
+  },
 ] as const;

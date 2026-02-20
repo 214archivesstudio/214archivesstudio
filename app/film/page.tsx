@@ -1,24 +1,24 @@
 "use client";
 
-import { motion } from "framer-motion";
 import FadeIn from "@/components/common/FadeIn";
+import ThumbnailGrid from "@/components/ui/ThumbnailGrid";
+import { FILMS } from "@/data/films";
 
 export default function FilmPage() {
+  const gridItems = FILMS.map((item) => ({
+    id: item.id,
+    title: item.title,
+    thumbnail: item.thumbnail,
+  }));
+
   return (
-    <div className="flex min-h-[calc(100vh-5rem)] flex-col items-center justify-center px-6">
+    <div className="px-6 py-12 md:px-12">
       <FadeIn>
-        <h1 className="mb-6 text-2xl font-light tracking-[0.2em] text-foreground">
+        <h1 className="mb-12 text-2xl font-light tracking-[0.2em] text-foreground">
           Film
         </h1>
       </FadeIn>
-      <motion.p
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.6, delay: 0.3 }}
-        className="text-sm tracking-wider text-muted"
-      >
-        Coming Soon
-      </motion.p>
+      <ThumbnailGrid items={gridItems} basePath="/film" columns={3} />
     </div>
   );
 }
