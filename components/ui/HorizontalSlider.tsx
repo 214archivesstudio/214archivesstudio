@@ -13,10 +13,6 @@ export default function HorizontalSlider({
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
-  const isDragging = useRef(false);
-  const dragStartX = useRef(0);
-  const scrollStartLeft = useRef(0);
-  const hasDragged = useRef(false);
 
   const updateScrollState = useCallback(() => {
     const el = scrollRef.current;
@@ -47,45 +43,12 @@ export default function HorizontalSlider({
     scrollRef.current.scrollBy({ left: e.deltaY * 2, behavior: "smooth" });
   }, []);
 
-  const onPointerDown = useCallback((e: React.PointerEvent) => {
-    if (e.button !== 0) return;
-    isDragging.current = true;
-    hasDragged.current = false;
-    dragStartX.current = e.clientX;
-    scrollStartLeft.current = scrollRef.current?.scrollLeft ?? 0;
-    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-  }, []);
-
-  const onPointerMove = useCallback((e: React.PointerEvent) => {
-    if (!isDragging.current || !scrollRef.current) return;
-    const dx = e.clientX - dragStartX.current;
-    if (Math.abs(dx) > 5) hasDragged.current = true;
-    scrollRef.current.scrollLeft = scrollStartLeft.current - dx;
-  }, []);
-
-  const onPointerUp = useCallback(() => {
-    isDragging.current = false;
-  }, []);
-
-  const onClickCapture = useCallback((e: React.MouseEvent) => {
-    if (hasDragged.current) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-  }, []);
-
   return (
     <div className="relative">
       <div
         ref={scrollRef}
         onWheel={onWheel}
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        onClickCapture={onClickCapture}
-        className={`no-scrollbar scroll-snap-x flex gap-6 overflow-x-auto px-8 py-4 ${
-          isDragging.current ? "cursor-grabbing" : "cursor-grab"
-        }`}
+        className="no-scrollbar scroll-snap-x flex gap-6 overflow-x-auto px-8 py-4"
       >
         {items.map((item, index) => (
           <motion.div
