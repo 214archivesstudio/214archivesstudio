@@ -12,17 +12,12 @@ export const NAV_ITEMS: ReadonlyArray<NavItem> = [
 export const SOCIAL_LINKS: ReadonlyArray<SocialLink> = [
   {
     platform: "Instagram",
-    url: "https://instagram.com/214archives",
-    label: "@214archives",
+    url: "https://instagram.com/214archives_",
+    label: "@214archives_",
   },
   {
     platform: "YouTube",
     url: "https://youtube.com/@214archives",
-    label: "214 Archives",
-  },
-  {
-    platform: "Vimeo",
-    url: "https://vimeo.com/214archives",
     label: "214 Archives",
   },
 ] as const;

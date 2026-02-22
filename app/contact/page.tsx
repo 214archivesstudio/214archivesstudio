@@ -11,7 +11,7 @@ export default function ContactPage() {
       <FadeIn>
         <div className="mb-12 flex flex-col items-center gap-8">
           <CldImage
-            src="214archives/contact/silhouette"
+            src="214archives/contact/silhouette-2"
             width={400}
             height={600}
             alt="Silhouette"
@@ -19,7 +19,7 @@ export default function ContactPage() {
             quality="auto"
             format="auto"
             priority
-            className="h-48 w-auto object-contain opacity-80 md:h-64"
+            className="h-64 w-auto object-contain opacity-80 md:h-96"
           />
           <h1 className="text-2xl font-light tracking-[0.2em] text-foreground">
             Contact
@@ -27,7 +27,7 @@ export default function ContactPage() {
         </div>
       </FadeIn>
 
-      <div className="flex flex-col items-center gap-6">
+      <div className="flex flex-row items-center gap-8">
         {SOCIAL_LINKS.map((link, index) => (
           <motion.a
             key={link.platform}
