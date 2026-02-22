@@ -41,7 +41,6 @@ export const ARCHIVES: ReadonlyArray<ArchiveItem> = [
   createArchive("22-rome", "Rome", "2022", 5),
   createArchive("22-paris", "Paris", "2022", 7),
   createArchive("22-london", "London", "2022", 10),
-  createArchive("22-interlaken", "Interlaken", "2022", 15),
   {
     id: "22-switzerland",
     city: "Switzerland",
