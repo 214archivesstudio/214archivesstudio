@@ -2,9 +2,12 @@
 
 import FadeIn from "@/components/common/FadeIn";
 import ThumbnailGrid from "@/components/ui/ThumbnailGrid";
+import { useHoverBackground } from "@/hooks/useHoverBackground";
 import { FILMS } from "@/data/films";
 
 export default function FilmPage() {
+  const handleHover = useHoverBackground(FILMS);
+
   const gridItems = FILMS.map((item) => ({
     id: item.id,
     title: item.title,
@@ -18,7 +21,12 @@ export default function FilmPage() {
           Film
         </h1>
       </FadeIn>
-      <ThumbnailGrid items={gridItems} basePath="/film" columns={3} />
+      <ThumbnailGrid
+        items={gridItems}
+        basePath="/film"
+        columns={3}
+        onHover={handleHover}
+      />
     </div>
   );
 }
