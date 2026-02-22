@@ -10,7 +10,7 @@ export default function Navigation() {
   const pathname = usePathname();
 
   return (
-    <nav className="hidden items-center gap-8 md:flex">
+    <nav className="hidden items-center gap-4 lg:flex xl:gap-8">
       {NAV_ITEMS.map((item) => {
         const isActive =
           pathname === item.href || pathname.startsWith(`${item.href}/`);

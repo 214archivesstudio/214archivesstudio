@@ -27,7 +27,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
-          className="fixed inset-0 z-40 flex flex-col items-center justify-center bg-background/95 backdrop-blur-sm md:hidden"
+          className="fixed inset-0 z-40 flex flex-col items-center justify-center bg-background/95 backdrop-blur-sm lg:hidden"
         >
           <nav className="flex flex-col items-center gap-8">
             {NAV_ITEMS.map((item, index) => {
