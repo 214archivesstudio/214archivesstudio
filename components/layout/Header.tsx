@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Navigation from "./Navigation";
 import MobileMenu from "./MobileMenu";
@@ -15,8 +15,20 @@ const logoUrl = getCldImageUrl({
   format: "auto",
 });
 
+const SCROLL_THRESHOLD = 10;
+
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > SCROLL_THRESHOLD);
+    };
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const toggleMenu = useCallback(() => {
     setMobileMenuOpen((prev) => !prev);
@@ -28,7 +40,12 @@ export default function Header() {
 
   return (
     <>
-      <header className="fixed left-0 right-0 top-0 z-50 flex items-center justify-between px-6 py-4 md:px-12">
+      <header
+        className={cn(
+          "fixed left-0 right-0 top-0 z-50 flex items-center justify-between px-6 py-4 transition-colors duration-300 md:px-12",
+          scrolled && "bg-black/60 backdrop-blur-md",
+        )}
+      >
         {/* Studio Name */}
         <Link href="/" className="flex flex-col">
           <span className="text-xl font-bold tracking-tight text-foreground md:text-2xl">
