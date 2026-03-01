@@ -12,26 +12,26 @@ export default function ContactPage() {
         <div className="flex flex-col items-center">
           <CldImage
             src="214archives/contact/silhouette-2"
-            width={400}
-            height={600}
+            width={500}
+            height={750}
             alt="Silhouette"
-            sizes="400px"
+            sizes="500px"
             quality="auto"
             format="auto"
             priority
-            className="h-64 w-auto object-contain opacity-80 md:h-96"
+            className="h-80 w-auto object-contain opacity-80 md:h-[480px]"
           />
 
-          <div className="mt-6 flex flex-col items-center gap-1">
-            <p className="text-sm tracking-wider text-muted">
+          <div className="mt-8 flex flex-col items-center gap-1.5">
+            <p className="text-base tracking-wider text-muted md:text-lg">
               Director | Cinematographer
             </p>
-            <p className="text-sm tracking-wider text-muted">
+            <p className="text-base tracking-wider text-muted md:text-lg">
               Based in Seoul S.Korea
             </p>
           </div>
 
-          <div className="mt-8 flex items-center gap-10">
+          <div className="mt-10 flex items-center gap-12">
             {SOCIAL_LINKS.map((link, index) => (
               <motion.a
                 key={link.platform}
@@ -49,13 +49,13 @@ export default function ContactPage() {
               >
                 <CldImage
                   src={link.iconPublicId}
-                  width={80}
-                  height={80}
+                  width={100}
+                  height={100}
                   alt={link.platform}
-                  sizes="32px"
+                  sizes="40px"
                   quality="auto"
                   format="auto"
-                  className="h-7 w-7 brightness-0 invert md:h-8 md:w-8"
+                  className="h-9 w-auto brightness-0 invert md:h-10"
                 />
               </motion.a>
             ))}
