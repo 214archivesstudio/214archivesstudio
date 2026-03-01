@@ -14,7 +14,7 @@ export const SHOWREELS: ReadonlyArray<ShowreelItem> = [
     },
     video: {
       platform: "youtube",
-      videoId: "placeholder",
+      videoId: "gpMopox52mE",
       title: "214 Archives 2025 Showreel",
     },
     description: "A collection of the best work from 2025.",

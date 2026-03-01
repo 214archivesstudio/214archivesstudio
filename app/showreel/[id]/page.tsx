@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { SHOWREELS } from "@/data/showreels";
+import { formatDate } from "@/lib/utils";
 import VideoPlayer from "@/components/ui/VideoPlayer";
 import FadeIn from "@/components/common/FadeIn";
 
@@ -24,9 +25,10 @@ export default async function ShowreelDetailPage({
   return (
     <div className="px-6 py-12 md:px-12">
       <FadeIn>
-        <h1 className="mb-8 text-2xl font-light tracking-[0.2em] text-foreground">
+        <h1 className="mb-2 text-2xl font-light tracking-[0.2em] text-foreground">
           {showreel.title}
         </h1>
+        <p className="mb-8 text-sm text-muted">{formatDate(showreel.date)}</p>
       </FadeIn>
       <FadeIn delay={0.2}>
         <VideoPlayer video={showreel.video} />

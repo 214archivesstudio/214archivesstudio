@@ -4,6 +4,7 @@ import FadeIn from "@/components/common/FadeIn";
 import ThumbnailGrid from "@/components/ui/ThumbnailGrid";
 import { useHoverBackground } from "@/hooks/useHoverBackground";
 import { SHOWREELS } from "@/data/showreels";
+import { formatDate } from "@/lib/utils";
 
 export default function ShowreelPage() {
   const handleHover = useHoverBackground(SHOWREELS);
@@ -11,6 +12,7 @@ export default function ShowreelPage() {
   const gridItems = SHOWREELS.map((item) => ({
     id: item.id,
     title: item.title,
+    date: formatDate(item.date),
     thumbnail: item.thumbnail,
   }));
 
