@@ -34,7 +34,7 @@ export default function Header() {
           <span className="text-xl font-bold tracking-tight text-foreground md:text-2xl">
             214Archives Studio
           </span>
-          <span className="text-[10px] font-light italic tracking-wide text-foreground/80 md:text-xs">
+          <span className="text-[10px] font-light tracking-wide text-foreground/80 md:text-xs">
             Every moment happens once. We archive it!
           </span>
         </Link>
@@ -60,19 +60,19 @@ export default function Header() {
           <span
             className={cn(
               "h-px w-5 bg-foreground transition-all duration-300",
-              mobileMenuOpen && "translate-y-[7px] rotate-45"
+              mobileMenuOpen && "translate-y-[7px] rotate-45",
             )}
           />
           <span
             className={cn(
               "h-px w-5 bg-foreground transition-all duration-300",
-              mobileMenuOpen && "opacity-0"
+              mobileMenuOpen && "opacity-0",
             )}
           />
           <span
             className={cn(
               "h-px w-5 bg-foreground transition-all duration-300",
-              mobileMenuOpen && "-translate-y-[7px] -rotate-45"
+              mobileMenuOpen && "-translate-y-[7px] -rotate-45",
             )}
           />
         </button>
