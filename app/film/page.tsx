@@ -1,20 +1,14 @@
 "use client";
 
 import FadeIn from "@/components/common/FadeIn";
-import ThumbnailGrid from "@/components/ui/ThumbnailGrid";
-import { useHoverBackground } from "@/hooks/useHoverBackground";
+import FilmThumbnailGrid from "@/components/ui/FilmThumbnailGrid";
+import { VideoPreloadProvider } from "@/context/VideoPreloadContext";
+import { useHoverBackgroundVideo } from "@/hooks/useHoverBackgroundVideo";
 import { FILMS } from "@/data/films";
 import { formatDate } from "@/lib/utils";
 
-export default function FilmPage() {
-  const handleHover = useHoverBackground(FILMS);
-
-  const gridItems = FILMS.map((item) => ({
-    id: item.id,
-    title: item.title,
-    date: formatDate(item.date),
-    thumbnail: item.thumbnail,
-  }));
+function FilmContent() {
+  const handleHover = useHoverBackgroundVideo(FILMS);
 
   return (
     <div className="px-6 py-12 md:px-12">
@@ -23,12 +17,20 @@ export default function FilmPage() {
           Film
         </h1>
       </FadeIn>
-      <ThumbnailGrid
-        items={gridItems}
+      <FilmThumbnailGrid
+        items={FILMS}
         basePath="/film"
-        columns={3}
         onHover={handleHover}
+        formatDate={formatDate}
       />
     </div>
+  );
+}
+
+export default function FilmPage() {
+  return (
+    <VideoPreloadProvider films={FILMS}>
+      <FilmContent />
+    </VideoPreloadProvider>
   );
 }

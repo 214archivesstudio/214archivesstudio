@@ -1,23 +1,41 @@
 "use client";
 
-import { motion } from "framer-motion";
 import LoadingAnimation from "@/components/ui/LoadingAnimation";
-import { SITE_CONFIG } from "@/data/navigation";
+import FilmThumbnailGrid from "@/components/ui/FilmThumbnailGrid";
+import FadeIn from "@/components/common/FadeIn";
+import { VideoPreloadProvider, useVideoPreload } from "@/context/VideoPreloadContext";
+import { useHoverBackgroundVideo } from "@/hooks/useHoverBackgroundVideo";
+import { FILMS } from "@/data/films";
+import { formatDate } from "@/lib/utils";
+
+function HomeContent() {
+  const { progress, isLoaded } = useVideoPreload();
+  const handleHover = useHoverBackgroundVideo(FILMS);
+
+  return (
+    <>
+      <LoadingAnimation progress={progress} isLoaded={isLoaded} />
+      <div className="px-6 py-12 md:px-12">
+        <FadeIn>
+          <h1 className="mb-12 text-2xl font-light tracking-[0.2em] text-foreground">
+            Film
+          </h1>
+        </FadeIn>
+        <FilmThumbnailGrid
+          items={FILMS}
+          basePath="/film"
+          onHover={handleHover}
+          formatDate={formatDate}
+        />
+      </div>
+    </>
+  );
+}
 
 export default function HomePage() {
   return (
-    <>
-      <LoadingAnimation />
-      <div className="flex min-h-[calc(100vh-5rem)] flex-col items-center justify-center">
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 1.8 }}
-          className="text-4xl font-light tracking-[0.3em] text-foreground md:text-6xl"
-        >
-          {SITE_CONFIG.name}
-        </motion.h1>
-      </div>
-    </>
+    <VideoPreloadProvider films={FILMS}>
+      <HomeContent />
+    </VideoPreloadProvider>
   );
 }
