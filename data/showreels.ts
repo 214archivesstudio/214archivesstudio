@@ -5,6 +5,7 @@ export const SHOWREELS: ReadonlyArray<ShowreelItem> = [
     id: "2025-showreel",
     title: "2025 Showreel",
     year: 2025,
+    date: "2026-02-23",
     thumbnail: {
       publicId: "214archives/showreel/2025-thumb",
       alt: "2025 Showreel Thumbnail",

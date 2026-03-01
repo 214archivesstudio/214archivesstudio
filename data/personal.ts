@@ -7,10 +7,12 @@ const createPhoto = (folder: string, index: number, title: string) => ({
   height: 1280,
 });
 
+// Sorted by date descending (newest first)
 export const PERSONAL_WORKS: ReadonlyArray<PersonalWorkItem> = [
   {
     id: "pony-project",
     title: "PONY Project",
+    date: "2026-02-23",
     thumbnail: {
       publicId: "214archives/personal/pony-project/thumbnail",
       alt: "PONY Project",
@@ -19,7 +21,7 @@ export const PERSONAL_WORKS: ReadonlyArray<PersonalWorkItem> = [
     },
     media: [
       ...Array.from({ length: 7 }, (_, i) =>
-        createPhoto("pony-project", i + 1, "PONY Project")
+        createPhoto("pony-project", i + 1, "PONY Project"),
       ),
       {
         platform: "youtube" as const,
@@ -32,6 +34,7 @@ export const PERSONAL_WORKS: ReadonlyArray<PersonalWorkItem> = [
   {
     id: "about-me",
     title: "About Me Project",
+    date: "2026-02-23",
     thumbnail: {
       publicId: "214archives/personal/about-me/thumbnail",
       alt: "About Me Project",

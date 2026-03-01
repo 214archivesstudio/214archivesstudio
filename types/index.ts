@@ -25,6 +25,7 @@ export interface ShowreelItem {
   readonly id: string;
   readonly title: string;
   readonly year: number;
+  readonly date: string;
   readonly thumbnail: CloudinaryImage;
   readonly video: VideoEmbed;
   readonly description?: string;
@@ -34,6 +35,7 @@ export interface ArchiveItem {
   readonly id: string;
   readonly city: string;
   readonly year: string;
+  readonly date: string;
   readonly thumbnail: CloudinaryImage;
   readonly photos: ReadonlyArray<CloudinaryImage>;
   readonly description?: string;
@@ -43,6 +45,7 @@ export interface PhotographyItem {
   readonly id: string;
   readonly title: string;
   readonly client: string;
+  readonly date: string;
   readonly thumbnail: CloudinaryImage;
   readonly photos: ReadonlyArray<CloudinaryImage>;
   readonly description?: string;
@@ -51,6 +54,7 @@ export interface PhotographyItem {
 export interface FilmItem {
   readonly id: string;
   readonly title: string;
+  readonly date: string;
   readonly thumbnail: CloudinaryImage;
   readonly video: VideoEmbed;
   readonly photos: ReadonlyArray<CloudinaryImage>;
@@ -60,6 +64,7 @@ export interface FilmItem {
 export interface PersonalWorkItem {
   readonly id: string;
   readonly title: string;
+  readonly date: string;
   readonly thumbnail: CloudinaryImage;
   readonly media: ReadonlyArray<CloudinaryImage | VideoEmbed>;
   readonly description?: string;
@@ -84,6 +89,7 @@ export interface ThumbnailGridProps {
   readonly items: ReadonlyArray<{
     readonly id: string;
     readonly title: string;
+    readonly date?: string;
     readonly thumbnail: CloudinaryImage;
   }>;
   readonly basePath: string;
@@ -95,6 +101,7 @@ export interface HorizontalSliderProps {
   readonly items: ReadonlyArray<{
     readonly id: string;
     readonly title: string;
+    readonly date?: string;
     readonly thumbnail: CloudinaryImage;
   }>;
   readonly basePath: string;

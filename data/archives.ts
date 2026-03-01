@@ -11,11 +11,13 @@ const createArchive = (
   id: string,
   city: string,
   year: string,
-  photoCount: number = 6
+  date: string,
+  photoCount: number = 6,
 ): ArchiveItem => ({
   id,
   city,
   year,
+  date,
   thumbnail: {
     publicId: `214archives/archives/${id}/thumbnail`,
     alt: `${city} ${year}`,
@@ -23,28 +25,27 @@ const createArchive = (
     height: 800,
   },
   photos: Array.from({ length: photoCount }, (_, i) =>
-    createPlaceholderPhoto(id, i + 1)
+    createPlaceholderPhoto(id, i + 1),
   ),
 });
 
+// Sorted by date descending (newest first)
 export const ARCHIVES: ReadonlyArray<ArchiveItem> = [
-  createArchive("25-tokyo", "Tokyo", "2025", 15),
-  createArchive("25-sky", "Sky", "2025", 3),
-  createArchive("25-newyork", "New York", "2025", 53),
-  createArchive("25-miyakojima", "Miyakojima", "2025", 13),
-  createArchive("24-taipei", "Taipei", "2024", 26),
-  createArchive("24-dubai", "Dubai", "2024", 33),
-  createArchive("23-sydney", "Sydney", "2023", 12),
-  createArchive("23-melbourne", "Melbourne", "2023", 16),
-  createArchive("23-hongkong", "Hong Kong", "2023", 18),
-  createArchive("23-hochiminh", "Ho Chi Minh", "2023", 14),
-  createArchive("22-rome", "Rome", "2022", 5),
-  createArchive("22-paris", "Paris", "2022", 7),
-  createArchive("22-london", "London", "2022", 10),
+  createArchive("24-taipei", "Taipei", "2024", "2025-07-04", 26),
+  createArchive("25-tokyo", "Tokyo", "2025", "2025-06-18", 15),
+  createArchive("25-miyakojima", "Miyakojima", "2025", "2025-04-12", 13),
+  createArchive("25-newyork", "New York", "2025", "2024-08-30", 53),
+  createArchive("24-dubai", "Dubai", "2024", "2024-02-20", 33),
+  createArchive("23-hongkong", "Hong Kong", "2023", "2023-11-18", 18),
+  createArchive("23-hochiminh", "Ho Chi Minh", "2023", "2023-08-25", 14),
+  createArchive("23-sydney", "Sydney", "2023", "2023-02-14", 12),
+  createArchive("23-melbourne", "Melbourne", "2023", "2023-02-10", 16),
+  createArchive("22-rome", "Rome", "2022", "2022-07-05", 5),
   {
     id: "22-switzerland",
     city: "Switzerland",
     year: "2022",
+    date: "2022-06-28",
     thumbnail: {
       publicId: "214archives/archives/22-switzerland/01",
       alt: "Switzerland 2022",
@@ -58,4 +59,6 @@ export const ARCHIVES: ReadonlyArray<ArchiveItem> = [
       height: 1280,
     })),
   },
+  createArchive("22-paris", "Paris", "2022", "2022-06-20", 7),
+  createArchive("22-london", "London", "2022", "2022-06-15", 10),
 ] as const;

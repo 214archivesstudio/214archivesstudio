@@ -15,6 +15,25 @@ export function formatArchiveYear(year: string): string {
   return `'${year.slice(-2)}`;
 }
 
+export function formatDate(dateStr: string): string {
+  const [year, month] = dateStr.split("-");
+  const monthNames = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+  return `${monthNames[Number(month) - 1]} ${year}`;
+}
+
 export function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
