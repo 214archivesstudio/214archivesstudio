@@ -6,6 +6,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { PHOTOGRAPHY } from "@/data/photography";
 import { CldImage } from "next-cloudinary";
+import { formatDate } from "@/lib/utils";
 import FadeIn from "@/components/common/FadeIn";
 import Lightbox from "@/components/ui/Lightbox";
 
@@ -24,7 +25,10 @@ export default function PhotographyDetailPage() {
         <h1 className="mb-2 text-2xl font-light tracking-[0.2em] text-foreground">
           {project.title}
         </h1>
-        <p className="mb-12 text-sm text-muted">{project.client}</p>
+        <p className="mb-1 text-sm text-muted">{project.client}</p>
+        <p className="mb-12 text-xs text-muted/60">
+          {formatDate(project.date)}
+        </p>
       </FadeIn>
 
       <div className="mx-auto max-w-4xl space-y-4">

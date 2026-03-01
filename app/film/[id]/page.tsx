@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { motion } from "framer-motion";
 import { CldImage } from "next-cloudinary";
 import { FILMS } from "@/data/films";
+import { formatDate } from "@/lib/utils";
 import FadeIn from "@/components/common/FadeIn";
 import VideoPlayer from "@/components/ui/VideoPlayer";
 
@@ -19,9 +20,10 @@ export default function FilmDetailPage() {
   return (
     <div className="px-6 py-12 md:px-12">
       <FadeIn>
-        <h1 className="mb-8 text-2xl font-light tracking-[0.2em] text-foreground">
+        <h1 className="mb-2 text-2xl font-light tracking-[0.2em] text-foreground">
           {film.title}
         </h1>
+        <p className="mb-8 text-sm text-muted">{formatDate(film.date)}</p>
       </FadeIn>
 
       <div className="mx-auto max-w-4xl space-y-6">

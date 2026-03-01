@@ -5,11 +5,14 @@ import { notFound } from "next/navigation";
 import { motion } from "framer-motion";
 import { PERSONAL_WORKS } from "@/data/personal";
 import { CldImage } from "next-cloudinary";
+import { formatDate } from "@/lib/utils";
 import FadeIn from "@/components/common/FadeIn";
 import VideoPlayer from "@/components/ui/VideoPlayer";
 import type { CloudinaryImage, VideoEmbed } from "@/types";
 
-function isVideoEmbed(media: CloudinaryImage | VideoEmbed): media is VideoEmbed {
+function isVideoEmbed(
+  media: CloudinaryImage | VideoEmbed,
+): media is VideoEmbed {
   return "platform" in media;
 }
 
@@ -24,9 +27,10 @@ export default function PersonalDetailPage() {
   return (
     <div className="px-6 py-12 md:px-12">
       <FadeIn>
-        <h1 className="mb-8 text-2xl font-light tracking-[0.2em] text-foreground">
+        <h1 className="mb-2 text-2xl font-light tracking-[0.2em] text-foreground">
           {work.title}
         </h1>
+        <p className="mb-8 text-sm text-muted">{formatDate(work.date)}</p>
       </FadeIn>
 
       {work.description && (

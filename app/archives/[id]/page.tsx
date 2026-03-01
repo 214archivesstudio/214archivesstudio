@@ -6,7 +6,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { ARCHIVES } from "@/data/archives";
 import { CldImage } from "next-cloudinary";
-import { formatArchiveYear } from "@/lib/utils";
+import { formatArchiveYear, formatDate } from "@/lib/utils";
 import FadeIn from "@/components/common/FadeIn";
 import Lightbox from "@/components/ui/Lightbox";
 
@@ -22,9 +22,10 @@ export default function ArchiveDetailPage() {
   return (
     <div className="px-6 py-12 md:px-12">
       <FadeIn>
-        <h1 className="mb-8 text-2xl font-light tracking-[0.2em] text-foreground">
+        <h1 className="mb-2 text-2xl font-light tracking-[0.2em] text-foreground">
           {archive.city} {formatArchiveYear(archive.year)}
         </h1>
+        <p className="mb-8 text-sm text-muted">{formatDate(archive.date)}</p>
       </FadeIn>
 
       <div className="grid grid-cols-1 gap-2 md:grid-cols-3 lg:grid-cols-4">

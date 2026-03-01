@@ -4,6 +4,7 @@ import FadeIn from "@/components/common/FadeIn";
 import ThumbnailGrid from "@/components/ui/ThumbnailGrid";
 import { useHoverBackground } from "@/hooks/useHoverBackground";
 import { FILMS } from "@/data/films";
+import { formatDate } from "@/lib/utils";
 
 export default function FilmPage() {
   const handleHover = useHoverBackground(FILMS);
@@ -11,6 +12,7 @@ export default function FilmPage() {
   const gridItems = FILMS.map((item) => ({
     id: item.id,
     title: item.title,
+    date: formatDate(item.date),
     thumbnail: item.thumbnail,
   }));
 

@@ -3,11 +3,13 @@
 import FadeIn from "@/components/common/FadeIn";
 import ThumbnailGrid from "@/components/ui/ThumbnailGrid";
 import { PERSONAL_WORKS } from "@/data/personal";
+import { formatDate } from "@/lib/utils";
 
 export default function PersonalPage() {
   const gridItems = PERSONAL_WORKS.map((item) => ({
     id: item.id,
     title: item.title,
+    date: formatDate(item.date),
     thumbnail: item.thumbnail,
   }));
 

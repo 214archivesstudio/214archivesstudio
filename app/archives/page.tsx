@@ -4,7 +4,7 @@ import FadeIn from "@/components/common/FadeIn";
 import ThumbnailGrid from "@/components/ui/ThumbnailGrid";
 import { useHoverBackground } from "@/hooks/useHoverBackground";
 import { ARCHIVES } from "@/data/archives";
-import { formatArchiveYear } from "@/lib/utils";
+import { formatArchiveYear, formatDate } from "@/lib/utils";
 
 export default function ArchivesPage() {
   const handleHover = useHoverBackground(ARCHIVES);
@@ -12,6 +12,7 @@ export default function ArchivesPage() {
   const gridItems = ARCHIVES.map((item) => ({
     id: item.id,
     title: `${item.city} ${formatArchiveYear(item.year)}`,
+    date: formatDate(item.date),
     thumbnail: item.thumbnail,
   }));
 

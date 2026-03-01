@@ -49,7 +49,12 @@ export default function ThumbnailGrid({
               />
               <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/20" />
             </div>
-            <p className="mt-2 text-sm text-accent">{item.title}</p>
+            <div className="mt-2 flex items-baseline justify-between gap-2">
+              <p className="text-sm text-accent">{item.title}</p>
+              {item.date && (
+                <p className="shrink-0 text-xs text-muted">{item.date}</p>
+              )}
+            </div>
           </Link>
         </motion.div>
       ))}
