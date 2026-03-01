@@ -56,9 +56,16 @@ export interface FilmItem {
   readonly title: string;
   readonly date: string;
   readonly thumbnail: CloudinaryImage;
+  readonly videoThumbnailUrl: string;
   readonly video: VideoEmbed;
   readonly photos: ReadonlyArray<CloudinaryImage>;
   readonly description?: string;
+}
+
+export interface VideoPreloadState {
+  readonly blobUrlMap: ReadonlyMap<string, string>;
+  readonly progress: number;
+  readonly isLoaded: boolean;
 }
 
 export interface PersonalWorkItem {

@@ -1,5 +1,24 @@
 import type { FilmItem } from "@/types";
 
+const VIDEO_THUMBNAIL_URLS: Record<string, string> = {
+  "01-unveil":
+    "https://res.cloudinary.com/dottudttp/video/upload/v1772384651/214archives/film/01-unveil/thumbnail.mp4",
+  "02-set-it-off":
+    "https://res.cloudinary.com/dottudttp/video/upload/v1772384653/214archives/film/02-set-it-off/thumbnail.mp4",
+  "03-not4nerd":
+    "https://res.cloudinary.com/dottudttp/video/upload/v1772384656/214archives/film/03-not4nerd/thumbnail.mp4",
+  "04-ewha":
+    "https://res.cloudinary.com/dottudttp/video/upload/v1772384660/214archives/film/04-ewha/thumbnail.mp4",
+  "05-all-at-once":
+    "https://res.cloudinary.com/dottudttp/video/upload/v1772384658/214archives/film/05-all-at-once/thumbnail.mp4",
+  "06-never-forget":
+    "https://res.cloudinary.com/dottudttp/video/upload/v1772384660/214archives/film/06-never-forget/thumbnail.mp4",
+  "07-shanghai":
+    "https://res.cloudinary.com/dottudttp/video/upload/v1772384663/214archives/film/07-shanghai/thumbnail.mp4",
+  "08-about":
+    "https://res.cloudinary.com/dottudttp/video/upload/v1772384665/214archives/film/08-about/thumbnail.mp4",
+};
+
 const createFilmPhotos = (id: string, count: number) =>
   Array.from({ length: count }, (_, i) => ({
     publicId: `214archives/film/${id}/${String(i + 1).padStart(2, "0")}`,
@@ -24,6 +43,7 @@ const createFilm = (
     width: 1200,
     height: 800,
   },
+  videoThumbnailUrl: VIDEO_THUMBNAIL_URLS[id] ?? "",
   video: {
     platform: "youtube",
     videoId,
