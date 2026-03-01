@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { getCldImageUrl } from "next-cloudinary";
 
 const logoUrl = getCldImageUrl({
@@ -11,7 +11,7 @@ const logoUrl = getCldImageUrl({
   format: "auto",
 });
 
-const MIN_DISPLAY_MS = 1000;
+const MIN_ANIMATION_MS = 1500;
 const SAFETY_TIMEOUT_MS = 15000;
 const FADE_DURATION_MS = 500;
 
@@ -24,28 +24,49 @@ export default function LoadingAnimation({
   progress,
   isLoaded,
 }: LoadingAnimationProps) {
-  const [canDismiss, setCanDismiss] = useState(false);
+  const [displayProgress, setDisplayProgress] = useState(0);
+  const [animationDone, setAnimationDone] = useState(false);
   const [fadingOut, setFadingOut] = useState(false);
   const [removed, setRemoved] = useState(false);
+  const startTimeRef = useRef(Date.now());
+  const rafRef = useRef<number>(0);
 
-  // Minimum display time
+  // Animate displayProgress: lerp toward real progress, but enforce min duration
   useEffect(() => {
-    const timer = setTimeout(() => setCanDismiss(true), MIN_DISPLAY_MS);
-    return () => clearTimeout(timer);
-  }, []);
+    const tick = () => {
+      const elapsed = Date.now() - startTimeRef.current;
+      const timeFraction = Math.min(elapsed / MIN_ANIMATION_MS, 1);
+
+      // displayProgress can't exceed either the time fraction or real progress
+      // This ensures: (1) at least 1.5s to reach 1.0, (2) never ahead of real download
+      const target = Math.min(progress, timeFraction);
+      setDisplayProgress(target);
+
+      if (target < 1) {
+        rafRef.current = requestAnimationFrame(tick);
+      } else {
+        setAnimationDone(true);
+      }
+    };
+
+    rafRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafRef.current);
+  }, [progress]);
 
   // Safety timeout — force dismiss after 15s
   useEffect(() => {
-    const timer = setTimeout(() => setCanDismiss(true), SAFETY_TIMEOUT_MS);
+    const timer = setTimeout(() => {
+      setAnimationDone(true);
+    }, SAFETY_TIMEOUT_MS);
     return () => clearTimeout(timer);
   }, []);
 
-  // Trigger fade-out when both loaded and min time elapsed
+  // Trigger fade-out when both loaded and animation complete
   useEffect(() => {
-    if (isLoaded && canDismiss && !fadingOut) {
+    if (isLoaded && animationDone && !fadingOut) {
       setFadingOut(true);
     }
-  }, [isLoaded, canDismiss, fadingOut]);
+  }, [isLoaded, animationDone, fadingOut]);
 
   // Remove from DOM after fade-out completes
   useEffect(() => {
@@ -56,7 +77,7 @@ export default function LoadingAnimation({
 
   if (removed) return null;
 
-  const coverTranslateY = -progress * 100;
+  const coverTranslateY = -displayProgress * 100;
 
   return (
     <div
@@ -76,7 +97,7 @@ export default function LoadingAnimation({
           className="absolute inset-0 bg-black"
           style={{
             transform: `translateY(${coverTranslateY}%)`,
-            transition: "transform 150ms ease-out",
+            transition: "transform 100ms linear",
           }}
         />
       </div>
