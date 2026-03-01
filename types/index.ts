@@ -83,6 +83,7 @@ export interface SocialLink {
   readonly platform: string;
   readonly url: string;
   readonly label: string;
+  readonly iconPublicId: string;
 }
 
 export interface NavItem {

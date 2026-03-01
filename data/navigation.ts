@@ -11,14 +11,22 @@ export const NAV_ITEMS: ReadonlyArray<NavItem> = [
 
 export const SOCIAL_LINKS: ReadonlyArray<SocialLink> = [
   {
-    platform: "Instagram",
-    url: "https://instagram.com/214archives_",
-    label: "@214archives_",
-  },
-  {
     platform: "YouTube",
     url: "https://youtube.com/@214archives",
     label: "214 Archives",
+    iconPublicId: "214archives/contact/youtube",
+  },
+  {
+    platform: "Phone",
+    url: "tel:010-7476-3245",
+    label: "010-7476-3245",
+    iconPublicId: "214archives/contact/phone",
+  },
+  {
+    platform: "Instagram",
+    url: "https://instagram.com/214archives_",
+    label: "@214archives_",
+    iconPublicId: "214archives/contact/instagram",
   },
 ] as const;
 
