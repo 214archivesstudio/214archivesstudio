@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useVideoPreload } from "@/context/VideoPreloadContext";
+import VideoThumbnail from "@/components/ui/VideoThumbnail";
 import type { FilmItem } from "@/types";
 
 interface FilmThumbnailGridProps {
@@ -23,8 +24,8 @@ export default function FilmThumbnailGrid({
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
       {items.map((item, index) => {
-        const videoSrc =
-          blobUrlMap.get(item.id) || item.videoThumbnailUrl || "";
+        const blobUrl = blobUrlMap.get(item.id) ?? "";
+        const originalUrl = item.videoThumbnailUrl ?? "";
 
         return (
           <motion.div
@@ -37,14 +38,11 @@ export default function FilmThumbnailGrid({
           >
             <Link href={`${basePath}/${item.id}`} className="group block">
               <div className="relative aspect-[3/2] overflow-hidden rounded-sm bg-background">
-                {videoSrc ? (
-                  <video
-                    src={videoSrc}
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                {(blobUrl || originalUrl) ? (
+                  <VideoThumbnail
+                    blobUrl={blobUrl}
+                    originalUrl={originalUrl}
+                    className="h-full w-full transition-transform duration-500 group-hover:scale-105"
                   />
                 ) : (
                   <div className="h-full w-full bg-background" />
