@@ -11,7 +11,8 @@ const logoUrl = getCldImageUrl({
   format: "auto",
 });
 
-const MIN_ANIMATION_MS = 1500;
+const MIN_ANIMATION_MS = 3000;
+const LOGO_REVEAL_HOLD_MS = 500;
 const SAFETY_TIMEOUT_MS = 15000;
 const FADE_DURATION_MS = 500;
 
@@ -30,6 +31,7 @@ export default function LoadingAnimation({
   const [removed, setRemoved] = useState(false);
   const startTimeRef = useRef(Date.now());
   const rafRef = useRef<number>(0);
+  const revealCompleteTimeRef = useRef<number | null>(null);
 
   // Animate displayProgress: lerp toward real progress, but enforce min duration
   useEffect(() => {
@@ -38,14 +40,23 @@ export default function LoadingAnimation({
       const timeFraction = Math.min(elapsed / MIN_ANIMATION_MS, 1);
 
       // displayProgress can't exceed either the time fraction or real progress
-      // This ensures: (1) at least 1.5s to reach 1.0, (2) never ahead of real download
+      // This ensures: (1) at least 3s to reach 1.0, (2) never ahead of real download
       const target = Math.min(progress, timeFraction);
       setDisplayProgress(target);
 
       if (target < 1) {
         rafRef.current = requestAnimationFrame(tick);
       } else {
-        setAnimationDone(true);
+        // Logo is fully revealed — hold for 0.5s before ending animation
+        if (revealCompleteTimeRef.current === null) {
+          revealCompleteTimeRef.current = Date.now();
+        }
+        const sinceReveal = Date.now() - revealCompleteTimeRef.current;
+        if (sinceReveal >= LOGO_REVEAL_HOLD_MS) {
+          setAnimationDone(true);
+        } else {
+          rafRef.current = requestAnimationFrame(tick);
+        }
       }
     };
 
