@@ -12,6 +12,7 @@ interface UseVideoAutoplayReturn {
   readonly videoRef: React.RefCallback<HTMLVideoElement>;
   readonly currentSrc: string;
   readonly isPlaying: boolean;
+  readonly handleLoadedData: () => void;
 }
 
 export function useVideoAutoplay({
@@ -20,45 +21,15 @@ export function useVideoAutoplay({
   enabled,
 }: UseVideoAutoplayParams): UseVideoAutoplayReturn {
   const elementRef = useRef<HTMLVideoElement | null>(null);
+  const enabledRef = useRef(enabled);
   const [currentSrc, setCurrentSrc] = useState(blobUrl || originalUrl);
   const [isPlaying, setIsPlaying] = useState(false);
   const gestureCleanupRef = useRef<(() => void) | null>(null);
+  const fellBackRef = useRef(false);
 
-  const attemptPlay = useCallback(
-    async (video: HTMLVideoElement) => {
-      try {
-        await video.play();
-        setIsPlaying(true);
-      } catch (error) {
-        if (error instanceof DOMException) {
-          if (
-            error.name === "NotSupportedError" &&
-            blobUrl &&
-            video.src !== originalUrl
-          ) {
-            // Blob URL not supported — fall back to original Cloudinary URL
-            setCurrentSrc(originalUrl);
-            video.src = originalUrl;
-            video.load();
-            try {
-              await video.play();
-              setIsPlaying(true);
-            } catch {
-              // Fallback also failed — wait for user gesture
-              waitForGesture(video);
-            }
-          } else if (error.name === "NotAllowedError") {
-            // Data-saver / low-power mode — wait for first touch/click
-            waitForGesture(video);
-          }
-        }
-      }
-    },
-    [blobUrl, originalUrl],
-  );
+  enabledRef.current = enabled;
 
   const waitForGesture = useCallback((video: HTMLVideoElement) => {
-    // Clean up any previous listener
     gestureCleanupRef.current?.();
 
     const handler = () => {
@@ -77,7 +48,38 @@ export function useVideoAutoplay({
     gestureCleanupRef.current = cleanup;
   }, []);
 
-  // Play/pause based on enabled (visibility)
+  const attemptPlay = useCallback(
+    async (video: HTMLVideoElement) => {
+      if (!enabledRef.current) return;
+
+      try {
+        await video.play();
+        setIsPlaying(true);
+      } catch (error) {
+        if (!(error instanceof DOMException)) return;
+
+        if (error.name === "NotSupportedError" && blobUrl && !fellBackRef.current) {
+          fellBackRef.current = true;
+          setCurrentSrc(originalUrl);
+        } else if (error.name === "NotAllowedError") {
+          waitForGesture(video);
+        }
+        // AbortError (src change race) is safe to ignore —
+        // onLoadedData will retry when the new source is ready
+      }
+    },
+    [blobUrl, originalUrl, waitForGesture],
+  );
+
+  // Called by <video onLoadedData> — fires every time a new src finishes loading
+  const handleLoadedData = useCallback(() => {
+    const video = elementRef.current;
+    if (video && enabledRef.current) {
+      attemptPlay(video);
+    }
+  }, [attemptPlay]);
+
+  // Play/pause based on visibility
   useEffect(() => {
     const video = elementRef.current;
     if (!video) return;
@@ -90,14 +92,11 @@ export function useVideoAutoplay({
     }
   }, [enabled, attemptPlay]);
 
-  // Sync src when blobUrl changes (e.g. preload completes after mount)
+  // Sync src when blobUrl arrives after mount
   useEffect(() => {
+    if (fellBackRef.current) return;
     const nextSrc = blobUrl || originalUrl;
-    setCurrentSrc((prev) => {
-      // Don't revert to blob if we already fell back to original
-      if (!blobUrl && prev === originalUrl) return prev;
-      return nextSrc;
-    });
+    setCurrentSrc(nextSrc);
   }, [blobUrl, originalUrl]);
 
   // Cleanup gesture listeners on unmount
@@ -110,12 +109,9 @@ export function useVideoAutoplay({
   const videoRef = useCallback(
     (node: HTMLVideoElement | null) => {
       elementRef.current = node;
-      if (node && enabled) {
-        attemptPlay(node);
-      }
     },
-    [enabled, attemptPlay],
+    [],
   );
 
-  return { videoRef, currentSrc, isPlaying };
+  return { videoRef, currentSrc, isPlaying, handleLoadedData };
 }

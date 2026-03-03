@@ -32,7 +32,7 @@ export default function VideoThumbnail({
     return () => observer.disconnect();
   }, []);
 
-  const { videoRef, currentSrc } = useVideoAutoplay({
+  const { videoRef, currentSrc, handleLoadedData } = useVideoAutoplay({
     blobUrl,
     originalUrl,
     enabled: isVisible,
@@ -44,10 +44,12 @@ export default function VideoThumbnail({
         <video
           ref={videoRef}
           src={currentSrc}
+          autoPlay
           muted
           loop
           playsInline
           preload="metadata"
+          onLoadedData={handleLoadedData}
           className="h-full w-full object-cover"
         />
       )}
