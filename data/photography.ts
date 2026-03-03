@@ -27,10 +27,10 @@ const createPhotographyItem = (
 
 // Sorted by date descending (newest first)
 export const PHOTOGRAPHY: ReadonlyArray<PhotographyItem> = [
-  createPhotographyItem("lookbook-cau-fashion", "LookBook", "CAU Fashion", "2026-02-23", 7),
-  createPhotographyItem("lookbook-kimaeyoung", "Profile", "KimAeYoung", "2026-02-23", 5),
-  createPhotographyItem("lookbook-lark", "Profile", "LARK", "2026-02-23", 3),
-  createPhotographyItem("lookbook-youth", "Concept", "YOUTH", "2026-02-23", 6),
-  createPhotographyItem("lookbook-bready", "Product", "B.Ready", "2026-02-23", 4),
-  createPhotographyItem("lookbook-not4nerd", "LookBook", "NOT4NERD", "2026-02-23", 9),
+  createPhotographyItem("lookbook-cau-fashion", "LookBook", "CAU Fashion", "2025-02-10", 7),
+  createPhotographyItem("lookbook-bready", "Product", "B.Ready", "2024-11-17", 4),
+  createPhotographyItem("lookbook-kimaeyoung", "Profile", "KimAeYoung", "2024-11-10", 5),
+  createPhotographyItem("lookbook-not4nerd", "LookBook", "NOT4NERD", "2024-06-10", 9),
+  createPhotographyItem("lookbook-youth", "Concept", "YOUTH", "2024-05-10", 6),
+  createPhotographyItem("lookbook-lark", "Profile", "LARK", "2024-04-10", 3),
 ] as const;

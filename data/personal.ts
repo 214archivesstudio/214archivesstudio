@@ -12,7 +12,7 @@ export const PERSONAL_WORKS: ReadonlyArray<PersonalWorkItem> = [
   {
     id: "pony-project",
     title: "PONY Project",
-    date: "2026-02-23",
+    date: "2024-05-10",
     thumbnail: {
       publicId: "214archives/personal/pony-project/thumbnail",
       alt: "PONY Project",
@@ -34,7 +34,7 @@ export const PERSONAL_WORKS: ReadonlyArray<PersonalWorkItem> = [
   {
     id: "about-me",
     title: "About Me Project",
-    date: "2026-02-23",
+    date: "2023-11-25",
     thumbnail: {
       publicId: "214archives/personal/about-me/thumbnail",
       alt: "About Me Project",
