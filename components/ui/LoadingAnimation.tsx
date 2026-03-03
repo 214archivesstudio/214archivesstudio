@@ -25,29 +25,31 @@ export default function LoadingAnimation({
   progress,
   isLoaded,
 }: LoadingAnimationProps) {
-  const [displayProgress, setDisplayProgress] = useState(0);
   const [animationDone, setAnimationDone] = useState(false);
   const [fadingOut, setFadingOut] = useState(false);
   const [removed, setRemoved] = useState(false);
   const startTimeRef = useRef(Date.now());
   const rafRef = useRef<number>(0);
   const revealCompleteTimeRef = useRef<number | null>(null);
+  const coverRef = useRef<HTMLDivElement>(null);
+  const progressRef = useRef(progress);
 
-  // Animate displayProgress: lerp toward real progress, but enforce min duration
+  progressRef.current = progress;
+
+  // Animate cover via direct DOM manipulation — no React re-renders per frame
   useEffect(() => {
     const tick = () => {
       const elapsed = Date.now() - startTimeRef.current;
       const timeFraction = Math.min(elapsed / MIN_ANIMATION_MS, 1);
+      const target = Math.min(progressRef.current, timeFraction);
 
-      // displayProgress can't exceed either the time fraction or real progress
-      // This ensures: (1) at least 3s to reach 1.0, (2) never ahead of real download
-      const target = Math.min(progress, timeFraction);
-      setDisplayProgress(target);
+      if (coverRef.current) {
+        coverRef.current.style.transform = `translateY(${-target * 100}%)`;
+      }
 
       if (target < 1) {
         rafRef.current = requestAnimationFrame(tick);
       } else {
-        // Logo is fully revealed — hold for 0.5s before ending animation
         if (revealCompleteTimeRef.current === null) {
           revealCompleteTimeRef.current = Date.now();
         }
@@ -62,7 +64,7 @@ export default function LoadingAnimation({
 
     rafRef.current = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafRef.current);
-  }, [progress]);
+  }, []);
 
   // Safety timeout — force dismiss after 15s
   useEffect(() => {
@@ -88,8 +90,6 @@ export default function LoadingAnimation({
 
   if (removed) return null;
 
-  const coverTranslateY = -displayProgress * 100;
-
   return (
     <div
       className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center bg-black"
@@ -105,11 +105,9 @@ export default function LoadingAnimation({
           className="h-48 w-auto brightness-0 invert md:h-72"
         />
         <div
-          className="absolute inset-0 bg-black"
-          style={{
-            transform: `translateY(${coverTranslateY}%)`,
-            transition: "transform 100ms linear",
-          }}
+          ref={coverRef}
+          className="absolute inset-0 bg-black will-change-transform"
+          style={{ transform: "translateY(0%)" }}
         />
       </div>
     </div>
