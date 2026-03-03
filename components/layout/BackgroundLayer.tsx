@@ -35,6 +35,7 @@ export default function BackgroundLayer({ media }: BackgroundLayerProps) {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.4 }}
             src={activeMedia.src}
+            autoPlay
             muted
             loop
             playsInline
