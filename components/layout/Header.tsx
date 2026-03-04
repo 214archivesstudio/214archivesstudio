@@ -60,7 +60,7 @@ export default function Header() {
           <img
             src={textLogoUrl}
             alt="214Archives Studio – Every moment happens once. We archive it!"
-            className="h-10 w-auto brightness-0 invert md:h-12"
+            className="h-[27px] w-auto brightness-0 invert md:h-8"
           />
         </Link>
 
