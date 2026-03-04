@@ -47,11 +47,11 @@ export default function Header() {
         )}
       >
         {/* Studio Name */}
-        <Link href="/" className="flex flex-col">
-          <span className="text-xl font-bold tracking-tight text-foreground md:text-2xl">
+        <Link href="/" className="flex flex-col items-center">
+          <span className="text-2xl font-bold tracking-tight text-foreground md:text-3xl">
             214Archives Studio
           </span>
-          <span className="text-[10px] font-light tracking-wide text-foreground/80 md:text-xs">
+          <span className="text-[9px] font-light tracking-[0.15em] text-foreground/80 md:text-[11px] md:tracking-[0.18em]">
             Every moment happens once. We archive it!
           </span>
         </Link>
