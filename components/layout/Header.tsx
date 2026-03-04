@@ -21,6 +21,7 @@ const textLogoUrl = getCldImageUrl({
   height: 350,
   quality: "auto",
   format: "auto",
+  rawTransformations: ["e_trim"],
 });
 
 const SCROLL_THRESHOLD = 10;
@@ -59,7 +60,7 @@ export default function Header() {
           <img
             src={textLogoUrl}
             alt="214Archives Studio – Every moment happens once. We archive it!"
-            className="h-20 w-auto brightness-0 invert md:h-24"
+            className="h-10 w-auto brightness-0 invert md:h-12"
           />
         </Link>
 
