@@ -15,6 +15,14 @@ const logoUrl = getCldImageUrl({
   format: "auto",
 });
 
+const textLogoUrl = getCldImageUrl({
+  src: "214archives/background/text-logo",
+  width: 800,
+  height: 350,
+  quality: "auto",
+  format: "auto",
+});
+
 const SCROLL_THRESHOLD = 10;
 
 export default function Header() {
@@ -47,13 +55,12 @@ export default function Header() {
         )}
       >
         {/* Studio Name */}
-        <Link href="/" className="flex flex-col items-center">
-          <span className="text-2xl font-bold tracking-tight text-foreground md:text-3xl">
-            214Archives Studio
-          </span>
-          <span className="text-[8px] font-light tracking-[0.08em] text-foreground/80 md:text-[10px] md:tracking-[0.1em]">
-            Every moment happens once. We archive it!
-          </span>
+        <Link href="/">
+          <img
+            src={textLogoUrl}
+            alt="214Archives Studio – Every moment happens once. We archive it!"
+            className="h-10 w-auto brightness-0 invert md:h-12"
+          />
         </Link>
 
         {/* Desktop Navigation */}
