@@ -29,7 +29,6 @@ export const PERSONAL_WORKS: ReadonlyArray<PersonalWorkItem> = [
         title: "PONY Project Video",
       },
     ],
-    description: "A personal creative exploration.",
   },
   {
     id: "about-me",
@@ -42,6 +41,5 @@ export const PERSONAL_WORKS: ReadonlyArray<PersonalWorkItem> = [
       height: 800,
     },
     media: [createPhoto("about-me", 1, "About Me")],
-    description: "A self-portrait and introspective series.",
   },
 ] as const;
