@@ -16,6 +16,16 @@ const LOGO_REVEAL_HOLD_MS = 500;
 const SAFETY_TIMEOUT_MS = 15000;
 const FADE_DURATION_MS = 500;
 
+// Smoothing factor per frame — lower = smoother but slower to catch up
+const LERP_SPEED = 0.08;
+// Snap to target when difference is negligible (avoids infinite trailing)
+const SNAP_THRESHOLD = 0.001;
+
+/** Ease-out cubic: fast start, gentle deceleration */
+function easeOutCubic(t: number): number {
+  return 1 - (1 - t) ** 3;
+}
+
 interface LoadingAnimationProps {
   readonly progress: number;
   readonly isLoaded: boolean;
@@ -35,6 +45,7 @@ export default function LoadingAnimation({
   const revealCompleteTimeRef = useRef<number | null>(null);
   const coverRef = useRef<HTMLDivElement>(null);
   const progressRef = useRef(progress);
+  const currentPosRef = useRef(0);
 
   progressRef.current = progress;
 
@@ -43,15 +54,29 @@ export default function LoadingAnimation({
     const tick = () => {
       const elapsed = Date.now() - startTimeRef.current;
       const timeFraction = Math.min(elapsed / MIN_ANIMATION_MS, 1);
-      const target = Math.min(progressRef.current, timeFraction);
+      const easedTime = easeOutCubic(timeFraction);
+      const target = Math.min(progressRef.current, easedTime);
+
+      // Lerp: smoothly interpolate toward the target to absorb progress jumps
+      const prev = currentPosRef.current;
+      const next =
+        Math.abs(target - prev) < SNAP_THRESHOLD
+          ? target
+          : prev + (target - prev) * LERP_SPEED;
+      currentPosRef.current = next;
 
       if (coverRef.current) {
-        coverRef.current.style.transform = `translateY(${-target * 100}%)`;
+        coverRef.current.style.transform = `translateY(${-next * 100}%)`;
       }
 
-      if (target < 1) {
+      if (next < 1 - SNAP_THRESHOLD) {
         rafRef.current = requestAnimationFrame(tick);
       } else {
+        // Ensure cover is fully off-screen
+        currentPosRef.current = 1;
+        if (coverRef.current) {
+          coverRef.current.style.transform = "translateY(-100%)";
+        }
         if (revealCompleteTimeRef.current === null) {
           revealCompleteTimeRef.current = Date.now();
         }
