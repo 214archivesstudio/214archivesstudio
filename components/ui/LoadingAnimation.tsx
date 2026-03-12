@@ -146,8 +146,12 @@ export default function LoadingAnimation({
         />
         <div
           ref={coverRef}
-          className="absolute inset-0 bg-black will-change-transform"
-          style={{ transform: "translateY(0%)" }}
+          className="absolute bg-black will-change-transform"
+          style={{
+            /* 1px extra on each edge prevents sub-pixel gap between cover and logo */
+            inset: "-1px",
+            transform: "translateY(0%)",
+          }}
         />
       </div>
     </div>
