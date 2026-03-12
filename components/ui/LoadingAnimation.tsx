@@ -19,11 +19,13 @@ const FADE_DURATION_MS = 500;
 interface LoadingAnimationProps {
   readonly progress: number;
   readonly isLoaded: boolean;
+  readonly onComplete?: () => void;
 }
 
 export default function LoadingAnimation({
   progress,
   isLoaded,
+  onComplete,
 }: LoadingAnimationProps) {
   const [animationDone, setAnimationDone] = useState(false);
   const [fadingOut, setFadingOut] = useState(false);
@@ -81,18 +83,31 @@ export default function LoadingAnimation({
     }
   }, [isLoaded, animationDone, fadingOut]);
 
+  // Lock body scroll while loading overlay is visible
+  useEffect(() => {
+    if (removed) return;
+    const original = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = original;
+    };
+  }, [removed]);
+
   // Remove from DOM after fade-out completes
   useEffect(() => {
     if (!fadingOut) return;
-    const timer = setTimeout(() => setRemoved(true), FADE_DURATION_MS);
+    const timer = setTimeout(() => {
+      setRemoved(true);
+      onComplete?.();
+    }, FADE_DURATION_MS);
     return () => clearTimeout(timer);
-  }, [fadingOut]);
+  }, [fadingOut, onComplete]);
 
   if (removed) return null;
 
   return (
     <div
-      className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center bg-black"
+      className="loading-overlay pointer-events-none fixed inset-0 z-50 flex items-center justify-center bg-black"
       style={{
         opacity: fadingOut ? 0 : 1,
         transition: `opacity ${FADE_DURATION_MS}ms ease-out`,
