@@ -24,6 +24,12 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Loading overlay — use dvh to cover iOS Safari dynamic viewport, vh as fallback */
+.loading-overlay {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
 /* Overlay utilities */
 .overlay-dark {
   background: linear-gradient(
