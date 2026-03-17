@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { SHOWREELS } from "@/data/showreels";
 import { formatDate } from "@/lib/utils";
@@ -6,6 +7,17 @@ import FadeIn from "@/components/common/FadeIn";
 
 interface ShowreelDetailPageProps {
   readonly params: Promise<{ id: string }>;
+}
+
+export async function generateMetadata({
+  params,
+}: ShowreelDetailPageProps): Promise<Metadata> {
+  const { id } = await params;
+  const showreel = SHOWREELS.find((s) => s.id === id);
+
+  return {
+    title: showreel?.title ?? "Showreel",
+  };
 }
 
 export function generateStaticParams() {
