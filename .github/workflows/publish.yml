@@ -1,0 +1,96 @@
+name: Publish Content
+
+# Triggered by the admin "사이트에 반영" button via repository_dispatch with
+# client_payload.job_id (publish_jobs.id in Supabase). workflow_dispatch is a
+# manual fallback for ops/recovery; job_id is optional there.
+on:
+  repository_dispatch:
+    types: [publish-content]
+  workflow_dispatch:
+    inputs:
+      job_id:
+        description: "publish_jobs.id (optional for manual runs)"
+        required: false
+
+# Serialize publishes so concurrent admin clicks don't race on git push.
+# cancel-in-progress=false: an in-flight publish completes before the next starts.
+concurrency:
+  group: publish-builds
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      JOB_ID: ${{ github.event.client_payload.job_id || github.event.inputs.job_id }}
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Mark job running
+        if: env.JOB_ID != ''
+        run: |
+          curl -sS -X PATCH \
+            "$SUPABASE_URL/rest/v1/publish_jobs?id=eq.$JOB_ID" \
+            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Content-Type: application/json" \
+            -H "Prefer: return=minimal" \
+            -d "{\"status\":\"running\",\"github_run_url\":\"$RUN_URL\"}" || true
+
+      - name: Sync from Supabase
+        run: npx tsx scripts/sync-from-supabase.ts
+
+      - name: Commit and push if changed
+        id: commit
+        run: |
+          if git diff --quiet data/; then
+            echo "diff_empty=true" >> "$GITHUB_OUTPUT"
+            echo "No content changes — skipping commit."
+            exit 0
+          fi
+          git config user.name "214 publish bot"
+          git config user.email "214-publish-bot@users.noreply.github.com"
+          git add data/
+          git commit -m "publish: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          git push origin HEAD:main
+          echo "diff_empty=false" >> "$GITHUB_OUTPUT"
+
+      - name: Mark job result
+        if: always() && env.JOB_ID != ''
+        run: |
+          if [ "${{ job.status }}" = "success" ]; then
+            STATUS="success"
+            if [ "${{ steps.commit.outputs.diff_empty }}" = "true" ]; then
+              MSG="변경 사항 없음 (이미 사이트와 동기화됨)"
+            else
+              MSG="사이트에 반영됨"
+            fi
+            ERR=""
+          else
+            STATUS="failed"
+            MSG=""
+            ERR="GitHub Actions run에서 실패했습니다. 자세한 사항은 run 로그 참조."
+          fi
+          curl -sS -X PATCH \
+            "$SUPABASE_URL/rest/v1/publish_jobs?id=eq.$JOB_ID" \
+            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Content-Type: application/json" \
+            -H "Prefer: return=minimal" \
+            -d "{\"status\":\"$STATUS\",\"message\":\"$MSG\",\"error\":\"$ERR\",\"completed_at\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}"

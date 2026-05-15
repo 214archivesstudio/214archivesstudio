@@ -59,23 +59,24 @@ supabase db push
 
 > ⚠️ `SUPABASE_SERVICE_ROLE_KEY`와 `GITHUB_DISPATCH_TOKEN`은 server-only. `NEXT_PUBLIC_` prefix가 없는 변수는 브라우저에 노출되지 않습니다.
 
-## 6. CSV → Supabase Seed
+## 6. data/*.ts → Supabase Seed
 
 기존 30개 작품을 Supabase에 import:
 
 ```bash
-npm run seed
+npm run seed                  # all drafts (published=false)
+npm run seed -- --publish-all # Step 0 gate / test: 모두 published=true
 ```
 
-> 내부적으로 `tsx --env-file=.env.local scripts/seed-from-csv.ts`를 실행합니다. `tsx`는 `.env.local`을 자동 로드하지 않으므로 `--env-file` 플래그가 필요합니다 (Node 20.6+ 내장 기능).
+> 내부적으로 `tsx --env-file=.env.local scripts/seed-from-data.ts`를 실행합니다. 이 스크립트는 라이브 `data/*.ts` 콘텐츠를 직접 읽어 DB에 upsert합니다 (Step 0 게이트의 round-trip source). 이전의 `scripts/seed-from-csv.ts`는 보존되지만 더 이상 호출되지 않습니다.
 
-모든 게시물이 `published=false` (draft)로 들어옵니다. 어드민 UI 구축 후 검토하고 publish하면 됩니다.
+모든 게시물이 기본 `published=false` (draft)로 들어옵니다. 어드민 UI에서 검토하고 publish하면 됩니다.
 
 성공 출력 예:
 ```
-Parsed 30 rows from CSV.
-  ✓ archives/22-london (10 photos)
-  ✓ archives/22-paris (7 photos)
+Seeding from data/*.ts → Supabase (published=false (drafts)).
+  ✓ archives/24-taipei (26 media)
+  ✓ archives/25-tokyo (15 media)
   ...
 Seed complete: 30/30 posts upserted.
 ```
@@ -102,7 +103,46 @@ Seed complete: 30/30 posts upserted.
 
 > **왜 unsigned?** signed upload는 서버 시그니처가 필요해 어드민에서 매번 Server Action을 거쳐야 합니다. unsigned로 두되 RLS와 admin 라우트 보호로 권한을 통제합니다. preset에 size·format·folder 제약이 걸려 있어 악용 위험은 낮음.
 
-## 8. 검증
+## 8. GitHub Actions Publish Trigger (Phase 4)
+
+어드민의 "사이트에 반영" 버튼은 `repository_dispatch`로 [.github/workflows/publish.yml](../.github/workflows/publish.yml)을 트리거합니다. 두 가지 셋업이 필요:
+
+### 8.1 Fine-grained Personal Access Token
+
+1. <https://github.com/settings/personal-access-tokens> → **Generate new token (fine-grained)**
+2. 다음으로 설정:
+   - **Token name**: `214archives publish dispatch`
+   - **Resource owner**: 이 repo가 속한 owner (예: `214archivesstudio`)
+   - **Repository access**: **Only select repositories** → `214archivesstudio/214archivesstudio` 만
+   - **Repository permissions**:
+     - **Actions**: `Read and write` (workflow를 dispatch하려면 write 필요)
+     - **Metadata**: `Read` (자동 활성화)
+   - 만료 기한: 사용 정책에 맞게 (예: 90일)
+3. 발급된 토큰을 `.env.local`의 `GITHUB_DISPATCH_TOKEN`에 붙여넣기
+4. `.env.local`의 `GITHUB_DISPATCH_REPO`를 `owner/repo` 형식으로 (예: `214archivesstudio/214archivesstudio`)
+
+> PAT은 server-only. 어드민 server action(`triggerPublish`)만 사용. 절대 NEXT_PUBLIC_ prefix 붙이지 말 것.
+
+### 8.2 GitHub Actions secrets
+
+워크플로 안에서 Supabase에 publish_jobs 상태를 PATCH하려면 두 시크릿이 필요:
+
+1. <https://github.com/214archivesstudio/214archivesstudio/settings/secrets/actions> → **New repository secret**
+2. 다음 두 시크릿 추가:
+   - `SUPABASE_URL` ← `.env.local`의 같은 값
+   - `SUPABASE_SERVICE_ROLE_KEY` ← `.env.local`의 같은 값
+
+### 8.3 검증
+
+1. 어드민 대시보드 (`/admin`) → "사이트에 반영" 클릭
+2. publish_jobs 테이블에 새 row 생성 (status=pending → running → success)
+3. GitHub Actions tab에서 workflow run 확인
+4. workflow가 성공하면 `data/*.ts`가 commit + push (sync diff가 있을 때만)
+5. Vercel이 main push 감지하고 자동 빌드
+
+> 첫 번째 publish 클릭 전에는 drift 카운트가 모든 published 게시물을 표시합니다 (last_success=null이라 모든 row가 "변경됨"으로 카운트). 한 번 성공 publish 후에는 정상 동작.
+
+## 9. 검증
 
 Supabase Dashboard → **Table Editor**에서 확인:
 - `posts` 30 rows (모두 `published=false`)
@@ -113,9 +153,9 @@ Supabase Dashboard → **Table Editor**에서 확인:
 
 - **Phase 2** ✅ — Supabase Auth + `app/admin/*` 라우트 보호 미들웨어
 - **Phase 3a** ✅ — 게시물 목록 + 필터/검색/삭제
-- **Phase 3b** — 게시물 등록·수정 + 썸네일 업로드 + publish 토글
-- **Phase 3c** — 미디어 매니저 (다중 업로드 + reorder + 삭제)
-- **Phase 4** — `scripts/sync-from-supabase.ts` + GitHub Actions + 어드민 Publish 빌드 트리거
+- **Phase 3b** ✅ — 게시물 등록·수정 + 썸네일 업로드 + publish 토글
+- **Phase 3c** ✅ — 미디어 매니저 (다중 업로드 + reorder + 삭제)
+- **Phase 4** ✅ — `scripts/sync-from-supabase.ts` + GitHub Actions + 어드민 Publish 빌드 트리거
 
 각 phase는 별도 ADR 또는 task로 진행. 진행 중 발견되는 이슈는 [ADR-0001 § Open questions](../wiki/decisions/0001-admin-architecture.md#open-questions-실행-중-결정)에 추가합니다.
 
@@ -126,4 +166,6 @@ Supabase Dashboard → **Table Editor**에서 확인:
 | `supabase db push`에서 "First admin user not found" | 3단계 누락. Auth에서 사용자 생성 후 재시도. |
 | Seed 스크립트가 RLS 에러를 냄 | service role key 대신 anon key를 썼을 가능성. `SUPABASE_SERVICE_ROLE_KEY` 확인. |
 | 마이그레이션 롤백 필요 | `supabase db reset` (⚠️ 모든 데이터 삭제) — dev 환경에서만. |
-| CSV 컬럼이 다름 | `scripts/seed-from-csv.ts`의 `parseCsv()` 컬럼 매핑 확인. CSV 첫 행 헤더가 `page,slug,title,date,thumbnail_id,image_ids,video_url`이어야 함. |
+| Seed가 "Only admin can create already-published posts" 에러 | 마이그레이션 `00003_is_admin_service_role.sql` 미적용. `supabase db push` 다시 실행. |
+| Publish가 트리거 안 됨 / 401 | `GITHUB_DISPATCH_TOKEN` 권한·만료 확인. fine-grained PAT의 **Actions: write** 가 있어야 함. |
+| Publish run은 끝났는데 어드민 status 가 그대로 | GH Action secrets (`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`)이 누락됐을 가능성. PATCH 콜이 실패해도 workflow 자체는 성공 표시되니 GH Actions log 의 "Mark job result" 단계 확인. |
