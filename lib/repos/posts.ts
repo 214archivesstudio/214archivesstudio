@@ -1,6 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
-import type { PostRow, PostSection } from "@/types/database";
+import type { PostMediaRow, PostRow, PostSection } from "@/types/database";
 
 export interface PostsListFilter {
   readonly section?: PostSection;
@@ -67,6 +67,22 @@ export async function findPostById(id: string): Promise<PostRow | null> {
     throw new Error(`findPostById failed: ${error.message}`);
   }
   return (data as PostRow | null) ?? null;
+}
+
+export async function findPostMedia(
+  postId: string,
+): Promise<ReadonlyArray<PostMediaRow>> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("post_media")
+    .select("*")
+    .eq("post_id", postId)
+    .order("display_order", { ascending: true });
+
+  if (error) {
+    throw new Error(`findPostMedia failed: ${error.message}`);
+  }
+  return (data ?? []) as ReadonlyArray<PostMediaRow>;
 }
 
 export async function countPostsBySection(): Promise<Record<PostSection, number>> {

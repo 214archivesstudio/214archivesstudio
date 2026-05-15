@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireAuthenticatedAdmin } from "@/lib/auth";
-import { findPostById } from "@/lib/repos/posts";
+import { findPostById, findPostMedia } from "@/lib/repos/posts";
 import { PostForm } from "../_components/post-form";
 import { PublishToggle } from "../_components/publish-toggle";
+import { MediaManager } from "../_components/media/MediaManager";
 
 interface PageProps {
   readonly params: Promise<{ id: string }>;
@@ -17,6 +18,8 @@ export default async function EditPostPage({ params, searchParams }: PageProps) 
 
   const post = await findPostById(id);
   if (!post) notFound();
+
+  const media = await findPostMedia(post.id);
 
   return (
     <div className="space-y-6">
@@ -35,12 +38,19 @@ export default async function EditPostPage({ params, searchParams }: PageProps) 
 
       {created === "1" && (
         <div className="text-sm border border-green-500/40 bg-green-500/10 text-green-300 rounded px-3 py-2">
-          게시물이 생성됐습니다. 사진 갤러리는 미디어 매니저에서 추가하세요.
+          썸네일·기본 정보가 저장됐습니다. 이제 아래에서 갤러리를 추가하세요.
         </div>
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 items-start">
-        <PostForm mode="edit" initial={post} />
+        <div className="space-y-6">
+          <PostForm mode="edit" initial={post} />
+          <MediaManager
+            postId={post.id}
+            section={post.section}
+            initialMedia={media}
+          />
+        </div>
 
         <aside className="space-y-4 lg:sticky lg:top-6">
           <PublishToggle
@@ -48,16 +58,6 @@ export default async function EditPostPage({ params, searchParams }: PageProps) 
             initialPublished={post.published}
             canToggle={user.role === "admin"}
           />
-
-          <Link
-            href={`/admin/posts/${post.id}/media`}
-            className="block border border-accent/15 rounded p-4 text-sm hover:border-foreground transition-colors"
-          >
-            <div className="font-medium">미디어 관리</div>
-            <div className="text-xs text-muted mt-1">
-              사진 갤러리 추가/순서/삭제 (Phase 3c에서 활성화)
-            </div>
-          </Link>
         </aside>
       </div>
     </div>
