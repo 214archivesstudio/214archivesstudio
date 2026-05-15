@@ -87,6 +87,46 @@ DB는 [Supabase](https://supabase.com/)로 결정 (auth + Postgres + RLS의 결�
 ### 별도 어드민 SaaS (Forestadmin / Retool / Refine)
 **거부 이유**: 외부 의존성 추가, 비용, 자체 Next.js 코드베이스에 어드민을 두는 것이 일관성·유지보수에 유리.
 
+## Amendments
+
+### 2026-05-03 — 인증 방식: 매직링크 → 이메일·비밀번호
+
+원안에서 매직링크 단독 인증을 채택했으나 실사용 시점에 다음 이슈가 드러남:
+
+- Supabase 무료 티어 SMTP의 시간당 2건 rate limit으로 어드민 셋업·테스트 흐름이 자주 막힘
+- 어드민 1-2명 환경에서 매번 메일을 거치는 UX 비용이 비밀번호 관리 비용보다 큼
+
+**변경**: `signInWithPassword`로 전환. 첫 admin은 Supabase Dashboard에서 비밀번호를 직접 설정 (`Authentication → Users → Set password`). 자동가입은 차단된 채 유지.
+
+**유지된 것**:
+- `/auth/callback` route는 보존 (향후 OAuth 추가 시 재사용)
+- RLS·역할 모델·route 보호 흐름 동일
+- 비밀번호 reset 흐름은 별도 구현 안 함 — 어드민 1-2명 환경에서 dashboard에서 직접 재설정
+
+**거부된 대안**:
+- 매직링크 + 비밀번호 병행 — UI 복잡도 증가, 매직링크의 rate limit 문제 여전. 단순화 우선
+- OAuth (Google) — Google Cloud Console 셋업 비용. 추후 필요 시 추가
+
+### 2026-05-03 — Phase split revision (Phase 4 흡수)
+
+원안에서 Phase 3은 텍스트 메타 CRUD만, Cloudinary 업로드는 별도 Phase 4로 분리했습니다. Phase 3a 완료 후 검토 결과:
+
+> 작가가 publicId 같은 기술 식별자를 직접 다루지 않을 때만 "어드민 등록"이 의미가 있음. Phase 3 종료 후에도 새 게시물에 이미지를 못 넣는 상태는 사용자 요구사항과 맞지 않음.
+
+**변경**:
+- Phase 3b에 **단일 썸네일 업로드** (Cloudinary Upload Widget) 통합
+- Phase 3c에 **다중 미디어 업로드** 통합
+- 기존 Phase 4(Cloudinary Upload Widget) 제거 — 위 3b/3c에 흡수
+- 기존 Phase 5(sync 스크립트 + Publish 빌드 트리거)가 새 Phase 4가 됨
+
+추정 영향:
+- 3b: 2일 → 3일
+- 3c: 1.5일 → 2일
+- 전체 Phase 3 일정: ~4.5일 → ~6일 (변경 0.5일)
+- Phase 4 별도 → 사라짐
+
+근거: Phase 3 종료 시점에 작가가 진짜로 게시물을 등록·관리할 수 있어야 ship 가치가 있음. 분할이 더 작게 됐다고 사용자 가치가 더 큰 게 아님.
+
 ## Open questions (실행 중 결정)
 
 - **Publish 큐 락**: 단순 단일 publish-at-a-time 락이면 충분한가, 아니면 GitHub Actions의 concurrency 그룹으로 처리?

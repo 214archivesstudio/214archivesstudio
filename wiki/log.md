@@ -5,6 +5,80 @@
 
 ---
 
+## [2026-05-03] auth-change | 매직링크 → 이메일·비밀번호 로그인
+
+Phase 2의 매직링크 인증을 비밀번호 로그인으로 전환.
+
+**사유**
+- Supabase 무료 SMTP rate limit (시간당 2건)에 자주 막힘. 어드민 셋업·테스트 흐름이 비효율적.
+- 어드민 1-2명 환경에서 매번 메일을 거치는 비용이 비밀번호 관리 비용보다 큼.
+
+**구현 변경**
+- `app/admin/login/page.tsx` — 폼이 매직링크 단일 input → 이메일+비밀번호 2-input. `signInWithPassword` 호출. 잘못된 자격증명/이메일 미인증/rate limit을 한국어 메시지로 매핑. 같은 메시지 ("이메일 또는 비밀번호가 올바르지 않습니다")로 enumeration 공격 방지.
+- `/auth/callback` 보존 — 향후 OAuth 추가 시 재사용.
+- 미들웨어·RLS·역할 모델 변경 없음.
+
+**사용자 사이드**
+- Supabase Dashboard → Authentication → Users → 사용자 → Set password로 비밀번호 1회 설정 후 로그인.
+
+**ADR amendment**: [[decisions/0001-admin-architecture#2026-05-03-인증-방식-매직링크--이메일·비밀번호]]
+
+---
+
+## [2026-05-03] decision-amend | Phase 4 흡수 — 업로드를 3b/3c에 통합
+
+원안에서 Cloudinary 업로드를 별도 Phase 4로 두었으나, "어드민 등록"의 사용자 가치는 publicId 같은 식별자를 작가가 직접 다루지 않을 때만 성립함. 결정:
+- Phase 3b에 **단일 썸네일 업로드** 통합
+- Phase 3c에 **다중 미디어 업로드** 통합
+- 기존 Phase 4 제거. 기존 Phase 5(sync 스크립트)가 새 Phase 4가 됨.
+
+자세한 사유와 영향: [[decisions/0001-admin-architecture#amendments]] / `docs/admin-setup.md` §7 (Cloudinary unsigned preset 가이드 추가).
+
+---
+
+## [2026-05-03] phase-3b | Create/edit form + 썸네일 업로드 + publish 토글
+
+작가가 어드민에서 게시물을 처음부터 끝까지 등록·수정할 수 있게 됨. (사진 갤러리는 Phase 3c)
+
+**의존성 추가**
+- `zod` ^4.4.3 — server action input validation. `next-cloudinary`의 `<CldUploadWidget>`은 이미 설치돼 있어 그대로 사용.
+
+**구현 산출물**
+- `lib/validation/post-schema.ts` — zod discriminatedUnion (섹션별: archives는 city/year_label 필수, photography는 client 필수, 그 외 video_url 권장). FormData 변환 헬퍼, YouTube/Vimeo URL 파서.
+- `app/admin/posts/_actions/posts.ts` — `createPost`, `updatePost`, `togglePublished` 추가 (`deletePost`는 3a 그대로). Postgres 23505/42501 → 친화적 메시지 매핑. stale-write 가드 (`updated_at` `.eq()` 매칭).
+- `app/admin/posts/_components/thumbnail-uploader.tsx` — Cloudinary unsigned upload widget 통합. publicId/width/height를 hidden input으로 노출.
+- `app/admin/posts/_components/section-fields.tsx` — 섹션별 동적 필드. 공통 Field 컴포넌트.
+- `app/admin/posts/_components/publish-toggle.tsx` — admin only. role check 위반 시 토글 비활성화 + 서버 42501 surfacing.
+- `app/admin/posts/_components/post-form.tsx` — `useActionState` + `useFormStatus` 기반. 생성/편집 공유. 편집 모드에서 섹션 select disabled.
+- `app/admin/posts/new/page.tsx` — 생성 페이지.
+- `app/admin/posts/[id]/page.tsx` — 편집 페이지. 사이드바에 publish 토글 + 미디어 매니저 링크 (3c에서 활성화).
+
+**검증**
+- `npx tsc --noEmit` clean
+- `npx eslint` clean (lib/validation, _actions, _components, pages 모두)
+- Supabase v2 타입 추론 회피 캐스트 4곳 (`as never`) — Database 제네릭이 cookies 옵션과 함께 추론 깨지는 알려진 케이스. CLI generated types로 가면 해소 가능.
+
+**사용자 사이드 사전 작업**
+- Cloudinary unsigned upload preset 생성 (5분) — `docs/admin-setup.md` §7
+- `.env.local`에 `NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET` 추가
+
+**검증 시나리오 (브라우저)**
+1. `/admin/posts/new` → 섹션 archives → city, year_label 노출
+2. city 비우고 저장 → "도시는 필수입니다"
+3. 기존 slug로 저장 → "이미 사용 중인 슬러그입니다"
+4. 썸네일 업로드 → 미리보기 + publicId 표시 → 저장 성공 → 편집 페이지로 redirect
+5. 편집 모드: 섹션 select disabled 확인
+6. (editor) publish 토글 → 비활성 (admin만 토글 가능)
+7. (admin) publish 토글 → 성공 + 목록의 배지 변경
+8. 두 탭에서 같은 게시물 수정 → 두 번째 저장 시 stale-write 에러
+9. 영상 URL 잘못된 형식 입력 → 친화적 에러
+
+**다음 단계 (3c)**
+- `/admin/posts/[id]/media` — 다중 업로드 + reorder + alt 편집 + 삭제
+- `@dnd-kit/core` 추가
+
+---
+
 ## [2026-05-02] phase-3a | Posts list + filter + delete
 
 ADR-0001 Phase 3의 첫 sub-phase. 어드민이 시드된 30개 게시물을 브라우저에서 검토하고 draft를 삭제할 수 있게 됨.

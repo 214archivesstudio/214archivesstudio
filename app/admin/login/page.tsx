@@ -1,46 +1,43 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 type Status =
   | { kind: "idle" }
-  | { kind: "sending" }
-  | { kind: "sent"; email: string }
+  | { kind: "submitting" }
   | { kind: "error"; message: string };
 
 export default function LoginPage() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [status, setStatus] = useState<Status>({ kind: "idle" });
 
   const queryError = searchParams.get("error");
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setStatus({ kind: "sending" });
+    setStatus({ kind: "submitting" });
 
     const supabase = createClient();
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? window.location.origin;
-
-    const next = searchParams.get("next") ?? "/admin";
-    const redirectTo = `${siteUrl}/auth/callback?next=${encodeURIComponent(next)}`;
-
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: redirectTo,
-        shouldCreateUser: false, // 어드민은 미리 등록된 사용자만. 자동 가입 차단.
-      },
+    const { error } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password,
     });
 
     if (error) {
-      setStatus({ kind: "error", message: error.message });
+      const message = mapAuthError(error.message);
+      setStatus({ kind: "error", message });
       return;
     }
 
-    setStatus({ kind: "sent", email });
+    const next = searchParams.get("next") ?? "/admin";
+    const safeNext = next.startsWith("/") ? next : "/admin";
+    router.replace(safeNext);
+    router.refresh();
   }
 
   return (
@@ -48,8 +45,8 @@ export default function LoginPage() {
       <div className="w-full max-w-sm space-y-6">
         <div className="space-y-2">
           <h1 className="text-2xl font-bold">214 Archives — Admin</h1>
-          <p className="text-sm text-[#888888]">
-            매직 링크로 로그인합니다. 등록된 어드민 이메일만 허용됩니다.
+          <p className="text-sm text-muted">
+            등록된 어드민 계정으로 로그인합니다.
           </p>
         </div>
 
@@ -59,45 +56,71 @@ export default function LoginPage() {
           </div>
         )}
 
-        {status.kind === "sent" ? (
-          <div className="border border-[#CCCCCC]/30 bg-[#CCCCCC]/5 text-sm px-4 py-4 rounded space-y-2">
-            <p>
-              <strong>{status.email}</strong>로 로그인 링크를 보냈습니다.
-            </p>
-            <p className="text-[#888888]">
-              메일함을 확인하고 링크를 클릭하세요. 링크는 1시간 동안 유효합니다.
-            </p>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="space-y-3">
-            <label className="block">
-              <span className="text-sm text-[#CCCCCC]">이메일</span>
-              <input
-                type="email"
-                required
-                autoFocus
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                className="mt-1 w-full bg-transparent border border-[#CCCCCC]/30 rounded px-3 py-2 text-sm outline-none focus:border-foreground"
-                disabled={status.kind === "sending"}
-              />
-            </label>
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <label className="block">
+            <span className="text-sm text-accent">이메일</span>
+            <input
+              type="email"
+              required
+              autoFocus
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              autoComplete="username"
+              className="mt-1 w-full bg-transparent border border-accent/30 rounded px-3 py-2 text-sm outline-none focus:border-foreground"
+              disabled={status.kind === "submitting"}
+            />
+          </label>
 
-            {status.kind === "error" && (
-              <p className="text-sm text-red-400">{status.message}</p>
-            )}
+          <label className="block">
+            <span className="text-sm text-accent">비밀번호</span>
+            <input
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password"
+              className="mt-1 w-full bg-transparent border border-accent/30 rounded px-3 py-2 text-sm outline-none focus:border-foreground"
+              disabled={status.kind === "submitting"}
+            />
+          </label>
 
-            <button
-              type="submit"
-              disabled={status.kind === "sending" || email.length === 0}
-              className="w-full bg-foreground text-background font-medium py-2 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
-            >
-              {status.kind === "sending" ? "전송 중…" : "매직 링크 받기"}
-            </button>
-          </form>
-        )}
+          {status.kind === "error" && (
+            <p className="text-sm text-red-400">{status.message}</p>
+          )}
+
+          <button
+            type="submit"
+            disabled={
+              status.kind === "submitting" ||
+              email.length === 0 ||
+              password.length === 0
+            }
+            className="w-full bg-foreground text-background font-medium py-2 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
+          >
+            {status.kind === "submitting" ? "로그인 중…" : "로그인"}
+          </button>
+
+          <p className="text-xs text-muted text-center pt-2">
+            비밀번호를 잊으셨다면 관리자에게 재설정을 요청하세요.
+          </p>
+        </form>
       </div>
     </div>
   );
+}
+
+function mapAuthError(message: string): string {
+  // Supabase returns "Invalid login credentials" for both wrong email and wrong password.
+  // Don't reveal which is wrong — same message either way.
+  if (/invalid login credentials/i.test(message)) {
+    return "이메일 또는 비밀번호가 올바르지 않습니다.";
+  }
+  if (/email not confirmed/i.test(message)) {
+    return "이메일 인증이 완료되지 않았습니다. 관리자에게 문의하세요.";
+  }
+  if (/rate.limit/i.test(message)) {
+    return "잠시 후 다시 시도해 주세요. 너무 많은 요청이 있었습니다.";
+  }
+  return message;
 }

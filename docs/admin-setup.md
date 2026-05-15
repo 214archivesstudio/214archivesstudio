@@ -34,11 +34,12 @@ supabase link --project-ref <your-project-ref>
 
 마이그레이션 `00002_seed_first_admin.sql`은 이미 존재하는 `auth.users` 행을 `user_roles`로 승격합니다. 따라서 **마이그레이션 실행 전에 사용자가 먼저 존재**해야 합니다.
 
-1. Supabase Dashboard → **Authentication → Users → Invite user**
+1. Supabase Dashboard → **Authentication → Users → Add user → Create new user**
 2. 이메일: `214archivesstudio@gmail.com`
-3. 초대 메일에서 매직 링크 클릭 → 1회 로그인 (auth.users에 행 생성)
+3. **Auto Confirm User** ON으로 즉시 활성화
+4. 비밀번호 입력 (첫 로그인부터 사용)
 
-> 다른 admin 사용자는 마이그레이션 후 어드민 UI에서 초대합니다 (Phase 3).
+> 어드민은 [ADR-0001 amendment](../wiki/decisions/0001-admin-architecture.md#amendments)에 따라 **이메일·비밀번호 로그인**을 사용합니다 (매직링크는 rate limit 이슈로 폐기). 비밀번호를 잊으면 dashboard의 같은 화면에서 직접 재설정.
 
 ## 4. 마이그레이션 적용
 
@@ -79,7 +80,29 @@ Parsed 30 rows from CSV.
 Seed complete: 30/30 posts upserted.
 ```
 
-## 7. 검증
+## 7. Cloudinary Upload Preset (Phase 3b 진입 전)
+
+어드민에서 이미지를 업로드하려면 Cloudinary에 **unsigned upload preset**이 하나 필요합니다.
+
+1. <https://console.cloudinary.com> → **Settings → Upload → Upload presets → Add upload preset**
+2. 다음 값으로 생성:
+   - **Preset name**: `214archives_admin` (자유)
+   - **Signing Mode**: **Unsigned**
+   - **Asset folder**: `214archives` (이미지가 항상 이 prefix 아래로 들어감 — slug 별 폴더는 widget 콜백에서 동적으로 지정)
+   - **Use filename or externally defined Public ID**: ON
+   - **Unique filename**: ON (덮어쓰기 방지)
+   - **Overwrite**: OFF
+   - **Allowed formats**: `jpg, png, webp, avif, gif`
+   - **Max file size**: 20MB 정도 권장
+3. 저장 후 preset name을 `.env.local`의 `NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET`에 입력:
+   ```
+   NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET=214archives_admin
+   ```
+4. 어드민 페이지 새로고침 → 업로드 위젯 작동.
+
+> **왜 unsigned?** signed upload는 서버 시그니처가 필요해 어드민에서 매번 Server Action을 거쳐야 합니다. unsigned로 두되 RLS와 admin 라우트 보호로 권한을 통제합니다. preset에 size·format·folder 제약이 걸려 있어 악용 위험은 낮음.
+
+## 8. 검증
 
 Supabase Dashboard → **Table Editor**에서 확인:
 - `posts` 30 rows (모두 `published=false`)
@@ -88,10 +111,11 @@ Supabase Dashboard → **Table Editor**에서 확인:
 
 ## 다음 단계
 
-- **Phase 2** — Supabase Auth 클라이언트 셋업 + `app/admin/*` 라우트 보호 미들웨어
-- **Phase 3** — 어드민 CRUD UI (shadcn/ui + react-hook-form + zod)
-- **Phase 4** — Cloudinary Upload Widget 통합
-- **Phase 5** — `scripts/sync-from-supabase.ts` + GitHub Actions workflow
+- **Phase 2** ✅ — Supabase Auth + `app/admin/*` 라우트 보호 미들웨어
+- **Phase 3a** ✅ — 게시물 목록 + 필터/검색/삭제
+- **Phase 3b** — 게시물 등록·수정 + 썸네일 업로드 + publish 토글
+- **Phase 3c** — 미디어 매니저 (다중 업로드 + reorder + 삭제)
+- **Phase 4** — `scripts/sync-from-supabase.ts` + GitHub Actions + 어드민 Publish 빌드 트리거
 
 각 phase는 별도 ADR 또는 task로 진행. 진행 중 발견되는 이슈는 [ADR-0001 § Open questions](../wiki/decisions/0001-admin-architecture.md#open-questions-실행-중-결정)에 추가합니다.
 

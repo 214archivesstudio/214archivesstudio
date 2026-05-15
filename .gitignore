@@ -33,6 +33,9 @@ yarn-error.log*
 # supabase CLI cache (linked project ref, version pins)
 supabase/.temp/
 
+# Playwright MCP cache
+.playwright-mcp/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

@@ -1,67 +1,73 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.
 
-## Project Overview
+**Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.
 
-214 Archives Studio — a photographer/videographer portfolio website built with Next.js (App Router), TypeScript, and Tailwind CSS. All content is served via Cloudinary CDN. Deployed on Vercel.
+## 0. Wiki Context (Before & After)
 
-## Commands
+이 프로젝트는 [`wiki/`](./wiki/) 에 영구 지식 베이스를 유지합니다. 운영 규칙은 [`wiki/CLAUDE.md`](./wiki/CLAUDE.md)를 따릅니다.
 
-- `npm run dev` — start dev server
-- `npm run build` — production build
-- `npm run lint` — ESLint (next/core-web-vitals)
+**작업 전:** [`wiki/index.md`](./wiki/index.md)를 먼저 훑어 관련 페이지(2–10개)를 읽고 컨텍스트를 파악합니다. 코드 작업이면 [`wiki/codebase/`](./wiki/codebase/) · [`wiki/decisions/`](./wiki/decisions/), 콘텐츠 작업이면 [`wiki/works/`](./wiki/works/) · [`wiki/clients/`](./wiki/clients/)를 우선 확인합니다.
 
-No test framework is configured.
+**작업 후:** 변경된 사실·새로 알게 된 지식·결정이 있으면 wiki를 업데이트합니다 — 영향받는 페이지 갱신, 필요 시 신규 페이지 생성, [`wiki/index.md`](./wiki/index.md) · [`wiki/log.md`](./wiki/log.md)에 기록. trivial fix는 생략 가능. 세부 워크플로(ingest/query/lint)와 템플릿은 [`wiki/CLAUDE.md`](./wiki/CLAUDE.md) 참조.
 
-## Environment
+## 1. Think Before Coding
 
-Copy `.env.example` to `.env.local` and set `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME`.
+**Don't assume. Don't hide confusion. Surface tradeoffs.**
 
-## Architecture
+Before implementing:
+- State your assumptions explicitly. If uncertain, ask.
+- If multiple interpretations exist, present them - don't pick silently.
+- If a simpler approach exists, say so. Push back when warranted.
+- If something is unclear, stop. Name what's confusing. Ask.
 
-### Routing (App Router)
+## 2. Simplicity First
 
-Every content section follows the same pattern:
-- `app/{section}/page.tsx` — list view (thumbnail grid or horizontal slider)
-- `app/{section}/[id]/page.tsx` — detail view (lightbox, video player, or photo grid)
+**Minimum code that solves the problem. Nothing speculative.**
 
-Sections: `showreel`, `archives`, `film`, `photography`, `personal`, `contact`.
+- No features beyond what was asked.
+- No abstractions for single-use code.
+- No "flexibility" or "configurability" that wasn't requested.
+- No error handling for impossible scenarios.
+- If you write 200 lines and it could be 50, rewrite it.
 
-All page components are client components (`"use client"`). Server components are used only at the layout level.
+Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
 
-### Data Layer
+## 3. Surgical Changes
 
-Content is static — defined as typed arrays in `data/*.ts` files (no database, no CMS). Each data file exports a readonly array matching the corresponding type from `types/index.ts`. To add content, add entries to the appropriate data file with Cloudinary `publicId` references.
+**Touch only what you must. Clean up only your own mess.**
 
-### Type System
+When editing existing code:
+- Don't "improve" adjacent code, comments, or formatting.
+- Don't refactor things that aren't broken.
+- Match existing style, even if you'd do it differently.
+- If you notice unrelated dead code, mention it - don't delete it.
 
-All interfaces are in `types/index.ts` with `readonly` properties throughout. Content types: `ShowreelItem`, `ArchiveItem`, `FilmItem`, `PhotographyItem`, `PersonalWorkItem`. All use `CloudinaryImage` (publicId + dimensions) for images and `VideoEmbed` (platform + videoId) for video.
+When your changes create orphans:
+- Remove imports/variables/functions that YOUR changes made unused.
+- Don't remove pre-existing dead code unless asked.
 
-### Background System
+The test: Every changed line should trace directly to the user's request.
 
-`BackgroundContext` + `useHoverBackground` hook manages a global crossfading background layer (`BackgroundLayer` component). Thumbnails trigger background changes on hover via the context. The background supports both images and videos with configurable overlay opacity.
+## 4. Goal-Driven Execution
 
-### Key Components
+**Define success criteria. Loop until verified.**
 
-- **ThumbnailGrid** — responsive grid (2/3/4 columns) with Framer Motion stagger animations and hover scale effects
-- **HorizontalSlider** — horizontal scroll with wheel capture, drag/pointer support, arrow navigation, and scroll snap
-- **Lightbox** — fullscreen image viewer with keyboard nav and adjacent image preloading
-- **LoadingAnimation** — theater curtain reveal effect using CSS clipPath animation
-- **FadeIn / ScrollReveal** — Framer Motion animation wrappers
+Transform tasks into verifiable goals:
+- "Add validation" → "Write tests for invalid inputs, then make them pass"
+- "Fix the bug" → "Write a test that reproduces it, then make it pass"
+- "Refactor X" → "Ensure tests pass before and after"
 
-### Styling
+For multi-step tasks, state a brief plan:
+```
+1. [Step] → verify: [check]
+2. [Step] → verify: [check]
+3. [Step] → verify: [check]
+```
 
-Tailwind CSS v4 (CSS-first config). Custom theme in `tailwind.config.ts`:
-- Dark theme: background `#1A1A1A`, foreground `#FFFFFF`
-- Font: Pretendard Variable (loaded via CDN in `globals.css`)
-- Breakpoints: sm(480), md(768), lg(1280), xl(1440)
-- Custom animations defined for fade, slide, and logo-rise effects
+Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
-### Image Handling
+---
 
-All images go through `next-cloudinary`. Use `CldImage` component for rendered images and `getCldImageUrl()` for background/preload URLs. The `next.config.ts` allows remote patterns for Cloudinary, YouTube, and Vimeo domains. Output formats: AVIF with WebP fallback.
-
-### Path Alias
-
-`@/*` maps to project root (configured in `tsconfig.json`).
+**These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
