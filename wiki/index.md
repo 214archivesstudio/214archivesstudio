@@ -18,7 +18,7 @@
 
 ## Decisions (ADR)
 
-- [decisions/0001-admin-architecture](./decisions/0001-admin-architecture.md) — Supabase + build-time sync 어드민 아키텍처 (Accepted, 2026-05-02)
+- [decisions/0001-admin-architecture](./decisions/0001-admin-architecture.md) — Supabase + build-time sync 어드민 아키텍처 (Accepted, 2026-05-02; amended 2026-05-03, 2026-05-15)
 
 ## Codebase
 

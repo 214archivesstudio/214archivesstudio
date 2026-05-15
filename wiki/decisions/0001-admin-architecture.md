@@ -127,11 +127,45 @@ DB는 [Supabase](https://supabase.com/)로 결정 (auth + Postgres + RLS의 결�
 
 근거: Phase 3 종료 시점에 작가가 진짜로 게시물을 등록·관리할 수 있어야 ship 가치가 있음. 분할이 더 작게 됐다고 사용자 가치가 더 큰 게 아님.
 
+### 2026-05-15 — Phase 3c + 4 ship: publish semantics, route groups, service_role guard
+
+Phase 3c (media manager) + Phase 4 (publish trigger) 한 ship으로 통합. 본래 ADR의 Open Questions 일부 해소 + 운영 시 드러난 schema 결함 1건 수정. 자세한 계획은 [docs/admin-phase-3c-4-plan.md](../../docs/admin-phase-3c-4-plan.md), 시간순 활동은 [[../log#2026-05-15]] 참조.
+
+**Publish 의미론 분리** — 원안의 "Publish 토글이 빌드 트리거" 는 빌드 비용을 작가가 통제하지 못하는 모델. 분리:
+- `posts.published` (boolean) = 공개 의도 플래그. admin 이 토글. 즉시 효과 없음.
+- "사이트에 반영" 액션 (`triggerPublish`) = 현재 `published=true` 스냅샷을 `data/*.ts` 로 emit + commit + 빌드 트리거. 작가가 명시적으로 발동.
+- Drift 카운트: 마지막 성공 publish 이후 변경된 published 게시물 수. 어드민 대시보드에서 가시화.
+
+이 분리로 작가는 여러 변경을 모아 한 번의 빌드로 묶을 수 있고, ADR §Consequences 의 dual-storage 모델이 명확해짐.
+
+**Build trigger → `repository_dispatch` + concurrency 그룹** — Open Q §1 ("publish 큐 락") 해소.
+- GitHub Actions workflow ([.github/workflows/publish.yml](../../.github/workflows/publish.yml))
+- 트리거: `repository_dispatch` types=[publish-content], client_payload={ job_id }
+- `concurrency: { group: publish-builds, cancel-in-progress: false }` 가 큐 락을 자연 해결 — 동시 클릭이 있어도 한 번에 하나씩 직렬화.
+- 워크플로 단계: checkout → npm ci → sync → diff 검사 (빈 diff = skip) → commit + push → publish_jobs PATCH (success/failed)
+
+**Preview 모드 v1 미포함** — Open Q §2 해소 ("publish 후 확인 흐름 (2분) 으로 충분").
+- ADR 의 정적 모델 보존. 추후 운영하면서 필요성이 명확해지면 별도 amendment 로 재검토.
+
+**Admin Header 오염 fix** — 원안에 명시되지 않은 운영 이슈. root `app/layout.tsx` 가 모든 라우트에 공개 `Header` 를 박아 `/admin/*` 진입 시 어색. Route group `(public)` 분리로 해결:
+- public 라우트들 모두 `app/(public)/` 아래로 이동
+- `app/(public)/layout.tsx` 가 Header/Background/Provider 책임
+- root `app/layout.tsx` 는 html/body + 글로벌 메타데이터만
+
+**Schema 결함 수정 (migration 00003)** — Phase 4 의 sync/seed 스크립트가 service role 로 published 토글을 수행해야 함. 기존 `is_admin()` 헬퍼는 `auth.uid()` 기반이라 service role 호출 시 false 반환 → `guard_publish_toggle()` 트리거가 정당한 백엔드 동작을 차단. `is_admin()` 이 `auth.role() = 'service_role'` 도 admin 으로 인정하도록 패치 (RLS 는 영향 없음 — service role 은 이미 BYPASSRLS).
+
+**미디어 매니저 의존성** — Open Q §3 ("drag-and-drop 라이브러리") 해소. `@dnd-kit/core` + `@dnd-kit/sortable` + `@dnd-kit/utilities` 채택. PointerSensor + KeyboardSensor 로 a11y 확보.
+
+**Sync 의 1회성 마이그레이션** — `data/*.ts` 가 helper-free 리터럴 canonical form 으로 전환됨. `data/films.ts` 의 `buildVideoThumbnailUrl` + `VIDEO_THUMBNAIL_VERSIONS` 헬퍼 제거 → DB `posts.video_thumbnail_url` 컬럼이 source of truth. 마찬가지로 archives `createArchive`, photography `createPhotographyItem`, personal `createPhoto` 헬퍼 사라짐. 라운드트립 idempotency 는 두 번 연속 `npm run sync` 의 md5 일치로 검증.
+
 ## Open questions (실행 중 결정)
 
-- **Publish 큐 락**: 단순 단일 publish-at-a-time 락이면 충분한가, 아니면 GitHub Actions의 concurrency 그룹으로 처리?
-- **Preview 모드**: 어드민이 unpublished draft를 사이트에서 미리 보는 기능 (`?preview=token` + ISR bypass) — 1차 출시 포함 여부.
-- **이미지 정렬 UI**: drag-and-drop 라이브러리 선택 (`@dnd-kit/core` 권장).
+- ~~**Publish 큐 락**~~ → 2026-05-15 amendment 에서 GH Actions concurrency group 으로 해결.
+- ~~**Preview 모드**~~ → 2026-05-15 amendment 에서 v1 미포함으로 결정. 추후 재검토 가능.
+- ~~**이미지 정렬 UI**~~ → `@dnd-kit` 채택 (2026-05-15 ship).
+- **(신규)** `as never` 캐스트 정리 → `supabase gen types typescript` 도입은 별도 phase 후보.
+- **(신규)** 영상 항목 자동 썸네일 fetch (oembed) — 현재는 admin 이 platform/videoId 만 입력하고 카드에 텍스트로 표시. 시각적 thumb 가 필요해지면 별도 phase.
+- **(신규)** `next lint` Next.js 16 호환 — ESLint flat config migration 필요. Phase 3 종료 후 검토.
 
 ## See also
 

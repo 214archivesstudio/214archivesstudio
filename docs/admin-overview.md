@@ -49,6 +49,11 @@
 | 2026-05-02 | ADR-0001 채택: Supabase + build-time sync, admin/editor 2단계, 매직링크 인증 | 초안 |
 | 2026-05-03 | **Phase 4 흡수**: Cloudinary 업로드를 Phase 3b(썸네일)/3c(다중)에 통합. 기존 Phase 5(sync)가 새 Phase 4로 | 작가가 publicId 같은 식별자를 직접 다루면 "관리자 페이지에서 등록"의 가치가 사라짐 |
 | 2026-05-03 | **인증 방식 변경**: 매직링크 → 이메일·비밀번호 | Supabase 무료 SMTP의 시간당 2건 rate limit에 자주 막힘 |
+| 2026-05-15 | **Publish 의미론 분리**: `published` 토글 ↔ "사이트에 반영" 액션 | 빌드 비용을 작가가 통제. drift 가시화. |
+| 2026-05-15 | **Build trigger 채택**: GitHub Actions `repository_dispatch` + `publish-builds` concurrency group | ADR Open Q §1 해소. 단일 publish-at-a-time 락이 자연스럽게 달성됨 |
+| 2026-05-15 | **Preview 모드 v1 미포함** | publish 후 확인 흐름(~2분)으로 충분. ADR 정적 모델 보존. Open Q §2 해소 |
+| 2026-05-15 | **Admin Header 오염 fix**: `app/(public)/` route group 분리 | 어드민이 공개 사이트 Header를 상속받던 운영 이슈. ADR 에는 미명시였던 자투리. |
+| 2026-05-15 | **`is_admin()` service_role 인정 (migration 00003)** | sync/seed 가 service role 로 published 토글하려면 트리거가 통과시켜야 함. RLS 는 영향 없음 |
 
 자세한 amendment 사유: [ADR-0001 § Amendments](../wiki/decisions/0001-admin-architecture.md#amendments)
 
@@ -93,8 +98,9 @@ RLS 정책 + Postgres 트리거(`guard_publish_toggle`)로 이중 방어. 첫 ad
 | **Phase 2 — 인증 + 라우트 보호** | ✅ 완료 | 이메일·비밀번호 로그인, `/admin/*` 미들웨어, role 헬퍼, 어드민 셸 + placeholder 대시보드 |
 | **Phase 3a — 게시물 목록·삭제** | ✅ 완료 | `/admin/posts` 목록 (섹션 필터 + 검색 + 페이지네이션 + 삭제) |
 | **Phase 3b — 게시물 등록·수정** | ✅ 완료 | `/admin/posts/new`, `/admin/posts/[id]` 폼 (섹션별 동적 필드, 썸네일 업로드, publish 토글, stale-write 가드) |
-| **Phase 3c — 미디어 매니저** | 다음 차례 | 다중 이미지 업로드, reorder (`@dnd-kit`), alt 편집, 삭제 |
-| **Phase 4 — Publish 빌드 트리거** | 대기 | `scripts/sync-from-supabase.ts` + GitHub Actions + 어드민 "Publish" 버튼 |
+| **Phase 3c — 미디어 매니저** | ✅ 완료 | 다중 이미지 업로드, reorder (`@dnd-kit`), alt onBlur 저장, 삭제. personal 섹션에 영상 항목 추가 |
+| **Phase 4 — Publish 빌드 트리거** | ✅ 완료 | `scripts/sync-from-supabase.ts`, `.github/workflows/publish.yml` (`repository_dispatch`), 어드민 "사이트에 반영" 버튼 + drift 지표 + 폴링 |
+| **사이드 트랙 — Admin Header fix** | ✅ 완료 | `app/(public)/` route group 분리 (Step 1) |
 | **(옵션) Phase 3d — Team 관리** | 보류 | 두 번째 사용자 초대 + 역할 부여 UI |
 
 ---
@@ -212,22 +218,27 @@ npm run seed
 
 | 항목 | 영향 | 조치 |
 |---|---|---|
-| **어드민 로그인 페이지에 frontend Header 노출** | root `app/layout.tsx`가 모든 라우트에 Header 박음 → 어드민 진입 시 어색 | 다음 fix 작업 후보. root layout이 `/admin/*` 진입 시 Header 제외하도록 변경 |
-| **Supabase v2 타입 추론 회피 cast 5곳 (`as never`)** | `_actions/posts.ts`, `lib/auth.ts`에서 strict + cookies 옵션 충돌 | `supabase gen types typescript`로 CLI generated types로 가면 해소 가능. 우선순위 낮음 |
-| **`next lint`가 Next.js 16에서 작동 안 함** | `npm run lint` 실패. `npx eslint <paths>`로 우회 중 | Next.js 가이드 따라 ESLint migration 필요. Phase 3 종료 후 |
+| ~~**어드민 로그인 페이지에 frontend Header 노출**~~ | ✅ 2026-05-15 해결 | `app/(public)/` route group 분리 |
+| ~~**Publish 빌드 큐 동시성**~~ | ✅ 2026-05-15 해결 | GH Actions `concurrency: { group: publish-builds }` |
+| **Supabase v2 타입 추론 회피 cast (`as never`)** | `_actions/posts.ts`, `_actions/media.ts`, `_actions/publish.ts`, `lib/auth.ts` 등 다수 | `supabase gen types typescript`로 CLI generated types 도입 후 정리. 우선순위 낮음 |
+| **`next lint`가 Next.js 16에서 작동 안 함** | `npm run lint` 실패. `npx eslint <paths>`로 우회 중 | Next.js 가이드 따라 ESLint flat config migration 필요 |
 | **비밀번호 reset UI 없음** | 어드민이 비밀번호 잊으면 dashboard에서 직접 reset | 1–2명 환경이라 OK. 사용자 늘면 reset flow 추가 |
-| **Publish 빌드 큐 동시성** | 두 admin이 동시 publish 시 git push 충돌 가능 | Phase 4에서 GitHub Actions concurrency group으로 처리 예정 |
+| **publish_jobs `triggered_by_email` 미연결** | UI에는 UUID만 표시되고 이메일 enrichment 없음 | auth.users 조회는 admin API 필요 — 추후 phase 후보 |
+| **영상 미디어 카드의 시각 thumbnail 없음** | personal 섹션의 영상 항목이 platform + videoId 텍스트만 노출 | oembed fetch 도입 후보 (Phase 4.5) |
+| **Publish 첫 실행 시 drift 가 모든 published 게시물** | `last_success = null` 이라 모든 row 가 "변경됨" 으로 카운트 | 첫 성공 publish 이후 정상화. 셋업 가이드에 명시 |
 
 ---
 
-## 12. 다음 작업 (Phase 3c 진입 직전 결정 필요)
+## 12. 다음 작업 (Phase 3c + 4 ship 이후)
 
-- `/admin/posts/[id]/media` 페이지 설계
-- 다중 업로드 UX: drag-and-drop area + Cloudinary widget multi-mode
-- reorder: `@dnd-kit/core` + `@dnd-kit/sortable` 추가 의존성
-- alt 편집: 인라인 (blur 시 저장)
-- 삭제: 확인 dialog 재사용
-- Phase 3c 검증 후 Phase 4(sync 스크립트 + 빌드 트리거) 진입
+Phase 3c + 4 까지 ship 됨. 다음 후보:
+
+- **첫 운영**: 실제 작가가 어드민에서 게시물 등록 → 갤러리 업로드 → "사이트에 반영" 까지의 full 흐름을 사용자 테스트
+- **이메일 enrichment**: publish_jobs UI 의 `triggered_by` UUID → 이메일 표시
+- **as never 정리**: `supabase gen types typescript` 도입 후 모든 admin server actions 의 캐스트 제거
+- **ESLint flat config migration**: `next lint` 다시 활성화
+- **영상 oembed**: 영상 미디어 카드에 platform thumbnail 자동 fetch
+- **Phase 3d Team 관리** (보류): 두 번째 admin/editor 초대 UI
 
 ---
 

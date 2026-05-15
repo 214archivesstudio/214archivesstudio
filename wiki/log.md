@@ -5,6 +5,73 @@
 
 ---
 
+## [2026-05-15] phase-3c+4 | 미디어 매니저 + Publish 빌드 트리거 한 ship
+
+ADR-0001 의 본래 목적("작가가 직접 운영")이 실현되는 마지막 ship. Phase 3c (다중 미디어) + Phase 4 (publish trigger) 한 commit 묶음으로 통합. 계획서: [docs/admin-phase-3c-4-plan.md](../docs/admin-phase-3c-4-plan.md).
+
+**Step 0 — Sync gate (data ↔ DB round-trip)**
+- `scripts/seed-from-data.ts` (data/*.ts → DB, idempotent upsert), `scripts/sync-from-supabase.ts` (DB published=true → data/*.ts in canonical literal form)
+- `supabase/migrations/00003_is_admin_service_role.sql` — `is_admin()` 가 service_role 도 admin 으로 인정. 트리거 가드가 sync/seed 의 published 토글을 차단하던 실제 schema 결함 수정 (RLS 영향 없음).
+- `data/*.ts` 전면 helper-free 리터럴 canonical form 마이그레이션 (`createArchive`, `buildVideoThumbnailUrl`, `VIDEO_THUMBNAIL_VERSIONS`, `createPhotographyItem`, `createPhoto` 헬퍼 제거). `data/films.ts` 의 video thumbnail URL 이 DB `posts.video_thumbnail_url` 컬럼으로 이동.
+- `data/showreels.ts` date `2026-02-23` → `2025-12-31` (year 파생과 일치).
+- `data/personal.ts` PONY 의 placeholder video item 제거 (decision C).
+- 검증: 두 번 연속 `npm run sync` 결과의 md5 일치로 idempotency 확인.
+
+**Step 1 — Admin Header 오염 fix**
+- `app/(public)/` route group 신설. 공개 라우트 (archives, film, personal, photography, showreel, contact, page.tsx) 전부 이동.
+- `app/(public)/layout.tsx` 가 BackgroundProvider + Header + main 책임. root `app/layout.tsx` 는 html/body + 메타데이터만.
+- 브라우저 검증: `/admin/login` 에 공개 Header 없음, `/`/`/archives` 는 그대로.
+
+**Phase 3b pre-existing commit**
+- 본 ship 전에 working tree 에 남아있던 미커밋 Phase 3b 작업 (게시물 create/edit 폼, 썸네일 업로더, publish 토글, zod validation) 을 별도 commit (`40313a6`) 으로 격리.
+
+**Step 2 — Phase 3c 미디어 매니저**
+- `app/admin/posts/_actions/media.ts` — `addImageMedia` (display_order = max+1), `addVideoMedia` (personal-only 서버측 section 검사 + parseVideoUrl 재사용), `updateMediaAlt`, `deleteMedia`, `reorderMedia` (parallel per-row update).
+- `app/admin/posts/_components/media/` 5 컴포넌트: MediaManager (top-level), MediaGrid (DndContext + SortableContext, Pointer + KeyboardSensor), MediaCard (image: CldImage + alt onBlur 저장 / video: platform + videoId 텍스트), AddImageButton (Cloudinary widget multi-mode), AddVideoModal (URL 입력 → parseVideoUrl → action).
+- `lib/repos/posts.ts`: `findPostMedia` 추가.
+- `/admin/posts/[id]` 편집 페이지에 인라인 통합. showreel 섹션은 "쇼릴은 갤러리가 없습니다" 메시지만.
+- 의존성: `@dnd-kit/core` + `@dnd-kit/sortable` + `@dnd-kit/utilities`.
+
+**Step 3 — Phase 4 publish workflow**
+- `.github/workflows/publish.yml` — `repository_dispatch: [publish-content]` + `workflow_dispatch` (수동 fallback). `concurrency: { group: publish-builds, cancel-in-progress: false }` 으로 큐 락 (ADR Open Q §1 해소). checkout → npm ci → Mark running (PATCH publish_jobs) → sync → diff 검사 (빈 diff = skip) → commit + push → Mark result (PATCH publish_jobs).
+- `lib/repos/publish-jobs.ts`: `getDriftCount`, `listRecentPublishJobs`, `getLastSuccessAt`, `findActiveJobId`, `getJob`.
+- `app/admin/_actions/publish.ts`: `triggerPublish` (admin-only) — publish_jobs insert + GitHub dispatches API POST. 실패 시 job 을 failed 로 업데이트. `getJobStatus` 는 polling용.
+- `app/admin/_components/publish-panel.tsx`: drift 지표 + "사이트에 반영" 버튼 (admin only) + 최근 10건 jobs 테이블 + 5초 polling (active job 있을 때만).
+- 어드민 대시보드에 패널 통합.
+- `docs/admin-setup.md` §8: fine-grained PAT 발급 + GH Action secrets 설정 + 검증 흐름. 트러블슈팅 항목 추가.
+
+**Step 4 — Docs (이 commit)**
+- ADR-0001 amendments 섹션에 2026-05-15 추가 (publish 의미론 분리 + repository_dispatch + preview 보류 + route group fix + migration 00003 + dnd-kit 채택 + canonical literal migration). Open Questions §1/§2/§3 해소 표시 + 신규 Q 등록.
+- [docs/admin-overview.md](../docs/admin-overview.md) §3 변화이력 + §6 진척도 + §11 알려진이슈 + §12 다음작업 갱신.
+- 이 log 엔트리.
+
+**의사결정 사항** (계획서 §1 표 참고)
+1. 스코프: 3c + 4 한 ship + Header fix
+2. 정보 구조: `/admin/posts/[id]` 한 페이지에 갤러리 인라인
+3. 혼합 미디어: personal = 이미지+영상 / archives·photo·film = 이미지만
+4. 업로드 UI: Cloudinary Widget multi-mode 재사용
+5. 빌드 트리거: GitHub Actions `repository_dispatch` + concurrency
+6. Publish 의미론: `published` (의도) ↔ "사이트에 반영" (배포 액션) 분리
+7. Preview 모드: v1 미포함
+8. 작업 순서: Sync-first (Step 0 게이트 먼저)
+
+**검증**
+- `npx tsc --noEmit` clean
+- `npm run build` 성공, 모든 라우트 (admin + public) 컴파일
+- `/admin/login` 브라우저 확인: 공개 Header 없음
+- sync idempotency: md5 일치 (2회 연속 sync)
+- 깊은 어드민 UX (드래그·alt·업로드·publish 트리거) 는 인증된 세션 필요로 사용자 manual 검증 권장
+
+**커밋 시퀀스** (`b10bf72` 이후)
+- `0ed51f3` Step 0 — sync gate
+- `a558b8e` Step 1 — route group split
+- `40313a6` Phase 3b — admin post create/edit forms (pre-existing 격리)
+- `2a8bcac` Step 2 — Phase 3c media manager
+- `0e6a703` Step 3 — Phase 4 publish workflow
+- (이 commit) Step 4 — docs
+
+---
+
 ## [2026-05-03] auth-change | 매직링크 → 이메일·비밀번호 로그인
 
 Phase 2의 매직링크 인증을 비밀번호 로그인으로 전환.
