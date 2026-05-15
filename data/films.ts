@@ -1,65 +1,467 @@
 import type { FilmItem } from "@/types";
 
-const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ?? "";
-
-const VIDEO_THUMBNAIL_VERSIONS: Record<string, string> = {
-  "01-unveil": "v1772596602",
-  "02-set-it-off": "v1772596604",
-  "03-not4nerd": "v1772596606",
-  "04-ewha": "v1772596609",
-  "05-all-at-once": "v1772596611",
-  "06-never-forget": "v1772596613",
-  "07-shanghai": "v1772596616",
-  "08-about": "v1772596618",
-};
-
-function buildVideoThumbnailUrl(id: string): string {
-  const version = VIDEO_THUMBNAIL_VERSIONS[id] ?? "";
-  const versionSegment = version ? `${version}/` : "";
-  return `https://res.cloudinary.com/${CLOUD_NAME}/video/upload/${versionSegment}214archives/film/${id}/thumbnail.mp4`;
-}
-
-const createFilmPhotos = (id: string, count: number) =>
-  Array.from({ length: count }, (_, i) => ({
-    publicId: `214archives/film/${id}/${String(i + 1).padStart(2, "0")}`,
-    alt: `${id} photo ${i + 1}`,
-    width: 1920,
-    height: 1280,
-  }));
-
-const createFilm = (
-  id: string,
-  title: string,
-  date: string,
-  videoId: string,
-  photoCount: number,
-): FilmItem => ({
-  id,
-  title,
-  date,
-  thumbnail: {
-    publicId: `214archives/film/${id}/thumbnail`,
-    alt: title,
-    width: 1200,
-    height: 800,
-  },
-  videoThumbnailUrl: buildVideoThumbnailUrl(id),
-  video: {
-    platform: "youtube",
-    videoId,
-    title,
-  },
-  photos: createFilmPhotos(id, photoCount),
-});
-
-// Sorted by date descending (newest first)
 export const FILMS: ReadonlyArray<FilmItem> = [
-  createFilm("01-unveil", "Unveil", "2025-11-21", "zCXXsKi0ucI", 8),
-  createFilm("04-ewha", "Devil", "2025-08-10", "o3hzeGvh9NQ", 6),
-  createFilm("07-shanghai", "We Run The World", "2025-05-11", "cVQu7kwtWGE", 8),
-  createFilm("02-set-it-off", "Set It Off", "2025-02-10", "ZYsdtTsAw3o", 8),
-  createFilm("06-never-forget", "Never Forget", "2024-11-20", "KpYlOKPSSJ4", 8),
-  createFilm("08-about", "About", "2024-06-28", "uif5b0nd8QE", 6),
-  createFilm("05-all-at-once", "All At Once", "2024-06-22", "eilzomDSK5w", 0),
-  createFilm("03-not4nerd", "Not4Nerd", "2024-06-20", "MLWohM_5e6Q", 8),
+  {
+    id: "01-unveil",
+    title: "Unveil",
+    date: "2025-11-21",
+    thumbnail: {
+      publicId: "214archives/film/01-unveil/thumbnail",
+      alt: "Unveil",
+      width: 1200,
+      height: 800,
+    },
+    videoThumbnailUrl: "https://res.cloudinary.com/dmsvmpsp5/video/upload/v1772596602/214archives/film/01-unveil/thumbnail.mp4",
+    video: {
+      platform: "youtube",
+      videoId: "zCXXsKi0ucI",
+      title: "Unveil",
+    },
+    photos: [
+      {
+        publicId: "214archives/film/01-unveil/01",
+        alt: "01-unveil photo 1",
+        width: 1920,
+        height: 1280,
+      },
+      {
+        publicId: "214archives/film/01-unveil/02",
+        alt: "01-unveil photo 2",
+        width: 1920,
+        height: 1280,
+      },
+      {
+        publicId: "214archives/film/01-unveil/03",
+        alt: "01-unveil photo 3",
+        width: 1920,
+        height: 1280,
+      },
+      {
+        publicId: "214archives/film/01-unveil/04",
+        alt: "01-unveil photo 4",
+        width: 1920,
+        height: 1280,
+      },
+      {
+        publicId: "214archives/film/01-unveil/05",
+        alt: "01-unveil photo 5",
+        width: 1920,
+        height: 1280,
+      },
+      {
+        publicId: "214archives/film/01-unveil/06",
+        alt: "01-unveil photo 6",
+        width: 1920,
+        height: 1280,
+      },
+      {
+        publicId: "214archives/film/01-unveil/07",
+        alt: "01-unveil photo 7",
+        width: 1920,
+        height: 1280,
+      },
+      {
+        publicId: "214archives/film/01-unveil/08",
+        alt: "01-unveil photo 8",
+        width: 1920,
+        height: 1280,
+      },
+    ],
+  },
+  {
+    id: "04-ewha",
+    title: "Devil",
+    date: "2025-08-10",
+    thumbnail: {
+      publicId: "214archives/film/04-ewha/thumbnail",
+      alt: "Devil",
+      width: 1200,
+      height: 800,
+    },
+    videoThumbnailUrl: "https://res.cloudinary.com/dmsvmpsp5/video/upload/v1772596609/214archives/film/04-ewha/thumbnail.mp4",
+    video: {
+      platform: "youtube",
+      videoId: "o3hzeGvh9NQ",
+      title: "Devil",
+    },
+    photos: [
+      {
+        publicId: "214archives/film/04-ewha/01",
+        alt: "04-ewha photo 1",
+        width: 1920,
+        height: 1280,
+      },
+      {
+        publicId: "214archives/film/04-ewha/02",
+        alt: "04-ewha photo 2",
+        width: 1920,
+        height: 1280,
+      },
+      {
+        publicId: "214archives/film/04-ewha/03",
+        alt: "04-ewha photo 3",
+        width: 1920,
+        height: 1280,
+      },
+      {
+        publicId: "214archives/film/04-ewha/04",
+        alt: "04-ewha photo 4",
+        width: 1920,
+        height: 1280,
+      },
+      {
+        publicId: "214archives/film/04-ewha/05",
+        alt: "04-ewha photo 5",
+        width: 1920,
+        height: 1280,
+      },
+      {
+        publicId: "214archives/film/04-ewha/06",
+        alt: "04-ewha photo 6",
+        width: 1920,
+        height: 1280,
+      },
+    ],
+  },
+  {
+    id: "07-shanghai",
+    title: "We Run The World",
+    date: "2025-05-11",
+    thumbnail: {
+      publicId: "214archives/film/07-shanghai/thumbnail",
+      alt: "We Run The World",
+      width: 1200,
+      height: 800,
+    },
+    videoThumbnailUrl: "https://res.cloudinary.com/dmsvmpsp5/video/upload/v1772596616/214archives/film/07-shanghai/thumbnail.mp4",
+    video: {
+      platform: "youtube",
+      videoId: "cVQu7kwtWGE",
+      title: "We Run The World",
+    },
+    photos: [
+      {
+        publicId: "214archives/film/07-shanghai/01",
+        alt: "07-shanghai photo 1",
+        width: 1920,
+        height: 1280,
+      },
+      {
+        publicId: "214archives/film/07-shanghai/02",
+        alt: "07-shanghai photo 2",
+        width: 1920,
+        height: 1280,
+      },
+      {
+        publicId: "214archives/film/07-shanghai/03",
+        alt: "07-shanghai photo 3",
+        width: 1920,
+        height: 1280,
+      },
+      {
+        publicId: "214archives/film/07-shanghai/04",
+        alt: "07-shanghai photo 4",
+        width: 1920,
+        height: 1280,
+      },
+      {
+        publicId: "214archives/film/07-shanghai/05",
+        alt: "07-shanghai photo 5",
+        width: 1920,
+        height: 1280,
+      },
+      {
+        publicId: "214archives/film/07-shanghai/06",
+        alt: "07-shanghai photo 6",
+        width: 1920,
+        height: 1280,
+      },
+      {
+        publicId: "214archives/film/07-shanghai/07",
+        alt: "07-shanghai photo 7",
+        width: 1920,
+        height: 1280,
+      },
+      {
+        publicId: "214archives/film/07-shanghai/08",
+        alt: "07-shanghai photo 8",
+        width: 1920,
+        height: 1280,
+      },
+    ],
+  },
+  {
+    id: "02-set-it-off",
+    title: "Set It Off",
+    date: "2025-02-10",
+    thumbnail: {
+      publicId: "214archives/film/02-set-it-off/thumbnail",
+      alt: "Set It Off",
+      width: 1200,
+      height: 800,
+    },
+    videoThumbnailUrl: "https://res.cloudinary.com/dmsvmpsp5/video/upload/v1772596604/214archives/film/02-set-it-off/thumbnail.mp4",
+    video: {
+      platform: "youtube",
+      videoId: "ZYsdtTsAw3o",
+      title: "Set It Off",
+    },
+    photos: [
+      {
+        publicId: "214archives/film/02-set-it-off/01",
+        alt: "02-set-it-off photo 1",
+        width: 1920,
+        height: 1280,
+      },
+      {
+        publicId: "214archives/film/02-set-it-off/02",
+        alt: "02-set-it-off photo 2",
+        width: 1920,
+        height: 1280,
+      },
+      {
+        publicId: "214archives/film/02-set-it-off/03",
+        alt: "02-set-it-off photo 3",
+        width: 1920,
+        height: 1280,
+      },
+      {
+        publicId: "214archives/film/02-set-it-off/04",
+        alt: "02-set-it-off photo 4",
+        width: 1920,
+        height: 1280,
+      },
+      {
+        publicId: "214archives/film/02-set-it-off/05",
+        alt: "02-set-it-off photo 5",
+        width: 1920,
+        height: 1280,
+      },
+      {
+        publicId: "214archives/film/02-set-it-off/06",
+        alt: "02-set-it-off photo 6",
+        width: 1920,
+        height: 1280,
+      },
+      {
+        publicId: "214archives/film/02-set-it-off/07",
+        alt: "02-set-it-off photo 7",
+        width: 1920,
+        height: 1280,
+      },
+      {
+        publicId: "214archives/film/02-set-it-off/08",
+        alt: "02-set-it-off photo 8",
+        width: 1920,
+        height: 1280,
+      },
+    ],
+  },
+  {
+    id: "06-never-forget",
+    title: "Never Forget",
+    date: "2024-11-20",
+    thumbnail: {
+      publicId: "214archives/film/06-never-forget/thumbnail",
+      alt: "Never Forget",
+      width: 1200,
+      height: 800,
+    },
+    videoThumbnailUrl: "https://res.cloudinary.com/dmsvmpsp5/video/upload/v1772596613/214archives/film/06-never-forget/thumbnail.mp4",
+    video: {
+      platform: "youtube",
+      videoId: "KpYlOKPSSJ4",
+      title: "Never Forget",
+    },
+    photos: [
+      {
+        publicId: "214archives/film/06-never-forget/01",
+        alt: "06-never-forget photo 1",
+        width: 1920,
+        height: 1280,
+      },
+      {
+        publicId: "214archives/film/06-never-forget/02",
+        alt: "06-never-forget photo 2",
+        width: 1920,
+        height: 1280,
+      },
+      {
+        publicId: "214archives/film/06-never-forget/03",
+        alt: "06-never-forget photo 3",
+        width: 1920,
+        height: 1280,
+      },
+      {
+        publicId: "214archives/film/06-never-forget/04",
+        alt: "06-never-forget photo 4",
+        width: 1920,
+        height: 1280,
+      },
+      {
+        publicId: "214archives/film/06-never-forget/05",
+        alt: "06-never-forget photo 5",
+        width: 1920,
+        height: 1280,
+      },
+      {
+        publicId: "214archives/film/06-never-forget/06",
+        alt: "06-never-forget photo 6",
+        width: 1920,
+        height: 1280,
+      },
+      {
+        publicId: "214archives/film/06-never-forget/07",
+        alt: "06-never-forget photo 7",
+        width: 1920,
+        height: 1280,
+      },
+      {
+        publicId: "214archives/film/06-never-forget/08",
+        alt: "06-never-forget photo 8",
+        width: 1920,
+        height: 1280,
+      },
+    ],
+  },
+  {
+    id: "08-about",
+    title: "About",
+    date: "2024-06-28",
+    thumbnail: {
+      publicId: "214archives/film/08-about/thumbnail",
+      alt: "About",
+      width: 1200,
+      height: 800,
+    },
+    videoThumbnailUrl: "https://res.cloudinary.com/dmsvmpsp5/video/upload/v1772596618/214archives/film/08-about/thumbnail.mp4",
+    video: {
+      platform: "youtube",
+      videoId: "uif5b0nd8QE",
+      title: "About",
+    },
+    photos: [
+      {
+        publicId: "214archives/film/08-about/01",
+        alt: "08-about photo 1",
+        width: 1920,
+        height: 1280,
+      },
+      {
+        publicId: "214archives/film/08-about/02",
+        alt: "08-about photo 2",
+        width: 1920,
+        height: 1280,
+      },
+      {
+        publicId: "214archives/film/08-about/03",
+        alt: "08-about photo 3",
+        width: 1920,
+        height: 1280,
+      },
+      {
+        publicId: "214archives/film/08-about/04",
+        alt: "08-about photo 4",
+        width: 1920,
+        height: 1280,
+      },
+      {
+        publicId: "214archives/film/08-about/05",
+        alt: "08-about photo 5",
+        width: 1920,
+        height: 1280,
+      },
+      {
+        publicId: "214archives/film/08-about/06",
+        alt: "08-about photo 6",
+        width: 1920,
+        height: 1280,
+      },
+    ],
+  },
+  {
+    id: "05-all-at-once",
+    title: "All At Once",
+    date: "2024-06-22",
+    thumbnail: {
+      publicId: "214archives/film/05-all-at-once/thumbnail",
+      alt: "All At Once",
+      width: 1200,
+      height: 800,
+    },
+    videoThumbnailUrl: "https://res.cloudinary.com/dmsvmpsp5/video/upload/v1772596611/214archives/film/05-all-at-once/thumbnail.mp4",
+    video: {
+      platform: "youtube",
+      videoId: "eilzomDSK5w",
+      title: "All At Once",
+    },
+    photos: [],
+  },
+  {
+    id: "03-not4nerd",
+    title: "Not4Nerd",
+    date: "2024-06-20",
+    thumbnail: {
+      publicId: "214archives/film/03-not4nerd/thumbnail",
+      alt: "Not4Nerd",
+      width: 1200,
+      height: 800,
+    },
+    videoThumbnailUrl: "https://res.cloudinary.com/dmsvmpsp5/video/upload/v1772596606/214archives/film/03-not4nerd/thumbnail.mp4",
+    video: {
+      platform: "youtube",
+      videoId: "MLWohM_5e6Q",
+      title: "Not4Nerd",
+    },
+    photos: [
+      {
+        publicId: "214archives/film/03-not4nerd/01",
+        alt: "03-not4nerd photo 1",
+        width: 1920,
+        height: 1280,
+      },
+      {
+        publicId: "214archives/film/03-not4nerd/02",
+        alt: "03-not4nerd photo 2",
+        width: 1920,
+        height: 1280,
+      },
+      {
+        publicId: "214archives/film/03-not4nerd/03",
+        alt: "03-not4nerd photo 3",
+        width: 1920,
+        height: 1280,
+      },
+      {
+        publicId: "214archives/film/03-not4nerd/04",
+        alt: "03-not4nerd photo 4",
+        width: 1920,
+        height: 1280,
+      },
+      {
+        publicId: "214archives/film/03-not4nerd/05",
+        alt: "03-not4nerd photo 5",
+        width: 1920,
+        height: 1280,
+      },
+      {
+        publicId: "214archives/film/03-not4nerd/06",
+        alt: "03-not4nerd photo 6",
+        width: 1920,
+        height: 1280,
+      },
+      {
+        publicId: "214archives/film/03-not4nerd/07",
+        alt: "03-not4nerd photo 7",
+        width: 1920,
+        height: 1280,
+      },
+      {
+        publicId: "214archives/film/03-not4nerd/08",
+        alt: "03-not4nerd photo 8",
+        width: 1920,
+        height: 1280,
+      },
+    ],
+  },
 ] as const;
