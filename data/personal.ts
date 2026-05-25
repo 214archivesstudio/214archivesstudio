@@ -55,7 +55,6 @@ export const PERSONAL_WORKS: ReadonlyArray<PersonalWorkItem> = [
         height: 1280,
       },
     ],
-    description: " (test-c7)",
   },
   {
     id: "about-me",
