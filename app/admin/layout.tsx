@@ -1,7 +1,9 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { headers } from "next/headers";
+import { Toaster } from "sonner";
 import { getCurrentAdminUser } from "@/lib/auth";
+import { DriftBadge } from "./_components/drift-badge";
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
   const headerList = await headers();
@@ -38,6 +40,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
           </nav>
         </div>
         <div className="flex items-center gap-4 text-[#888888]">
+          <DriftBadge />
           <span>
             {user.email} <span className="text-[#555555]">·</span> {user.role}
           </span>
@@ -52,6 +55,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
         </div>
       </header>
       <main className="flex-1 px-6 py-8">{children}</main>
+      <Toaster position="bottom-right" theme="dark" />
     </div>
   );
 }

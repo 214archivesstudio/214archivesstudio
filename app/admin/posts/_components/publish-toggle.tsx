@@ -2,6 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { toast } from "sonner";
 import { togglePublished } from "../_actions/posts";
 import { cn } from "@/lib/utils";
 
@@ -32,6 +34,26 @@ export function PublishToggle({
       }
       setPublished(next);
       router.refresh();
+      toast.success(
+        next
+          ? "'공개'로 표시했어요"
+          : "'Draft'로 표시했어요",
+        {
+          description: (
+            <span>
+              사이트에 반영하려면{" "}
+              <Link
+                href="/admin"
+                className="underline text-foreground hover:opacity-80"
+              >
+                대시보드 → '사이트에 반영'
+              </Link>
+              을 눌러주세요.
+            </span>
+          ),
+          duration: 8_000,
+        },
+      );
     });
   }
 
