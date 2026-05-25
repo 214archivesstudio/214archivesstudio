@@ -15,7 +15,8 @@ const optionalString = z
   .string()
   .trim()
   .transform((v) => (v.length === 0 ? null : v))
-  .nullable();
+  .nullish()
+  .transform((v) => v ?? null);
 
 const baseFields = {
   slug: z
