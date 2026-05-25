@@ -2,6 +2,33 @@ import type { ArchiveItem } from "@/types";
 
 export const ARCHIVES: ReadonlyArray<ArchiveItem> = [
   {
+    id: "26-test",
+    city: "test",
+    year: "26",
+    date: "2026-05-20",
+    thumbnail: {
+      publicId: "214archives/admin/KakaoTalk_Photo_2026-05-16-09-58-21_bxuuz0",
+      alt: "tset",
+      width: 1080,
+      height: 1080,
+    },
+    photos: [
+      {
+        publicId: "214archives/admin/288f7bc4381496d8a6734de370f33ea0_ewbax8",
+        alt: "",
+        width: 900,
+        height: 1183,
+      },
+      {
+        publicId: "214archives/admin/다운로드_srz4nn",
+        alt: "",
+        width: 350,
+        height: 280,
+      },
+    ],
+    description: "test",
+  },
+  {
     id: "24-taipei",
     city: "TAIPEI",
     year: "2024",
