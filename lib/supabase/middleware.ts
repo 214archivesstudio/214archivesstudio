@@ -54,9 +54,12 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
 
   if (!isAdminRoute) return response;
 
-  // Logged-in users hitting /admin/login go straight to dashboard.
+  // Logged-in users hitting /admin/login go straight to dashboard,
+  // unless an error query param is present (e.g. ?error=no_role) — in that
+  // case render the login page so the user can see why access was denied.
   if (isLoginRoute) {
-    if (user) {
+    const hasError = request.nextUrl.searchParams.has("error");
+    if (user && !hasError) {
       return NextResponse.redirect(new URL("/admin", request.url));
     }
     return response;
