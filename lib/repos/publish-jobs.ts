@@ -72,6 +72,40 @@ export async function getDriftCount(): Promise<number> {
   return count ?? 0;
 }
 
+export interface DriftItem {
+  readonly id: string;
+  readonly title: string;
+  readonly section: string;
+  readonly slug: string;
+  readonly updated_at: string;
+}
+
+/**
+ * Most-recently-modified published posts that have changed since the last
+ * successful publish — i.e. the items contributing to drift. Used for the
+ * dashboard publish panel to give operators a glanceable change list.
+ */
+export async function listDriftPosts(
+  limit = 5,
+): Promise<ReadonlyArray<DriftItem>> {
+  const supabase = await createClient();
+  const lastSuccess = await getLastSuccessAt();
+
+  let query = supabase
+    .from("posts")
+    .select("id, title, section, slug, updated_at")
+    .eq("published", true)
+    .order("updated_at", { ascending: false })
+    .limit(limit);
+  if (lastSuccess) {
+    query = query.gt("updated_at", lastSuccess);
+  }
+
+  const { data, error } = await query;
+  if (error) throw new Error(`listDriftPosts failed: ${error.message}`);
+  return (data ?? []) as ReadonlyArray<DriftItem>;
+}
+
 /**
  * Whether any publish job is currently pending or running. Drives client polling.
  */

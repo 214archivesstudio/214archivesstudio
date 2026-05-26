@@ -2,22 +2,45 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import type { PublishJobRow } from "@/types/database";
 import { getJobStatus, triggerPublish } from "../_actions/publish";
+import { Btn } from "./ui/Btn";
+import { Card, CardLabel } from "./ui/Card";
+import { Pill } from "./ui/Pill";
+import type { DriftItem } from "@/lib/repos/publish-jobs";
 
 interface PublishPanelProps {
   readonly canPublish: boolean;
   readonly drift: number;
-  readonly initialJobs: ReadonlyArray<PublishJobRow>;
+  readonly driftItems: ReadonlyArray<DriftItem>;
+  readonly lastSuccessAt: string | null;
   readonly initialActiveJobId: string | null;
 }
 
 const POLL_INTERVAL_MS = 5_000;
+const SECTION_LABEL: Record<string, string> = {
+  showreel: "Showreel",
+  archives: "Archives",
+  film: "Film",
+  photography: "Photography",
+  personal: "Personal",
+};
+
+function relativeTime(iso: string): string {
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const minutes = Math.round(diffMs / 60_000);
+  if (minutes < 1) return "방금";
+  if (minutes < 60) return `${minutes}분 전`;
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return `${hours}시간 전`;
+  const days = Math.round(hours / 24);
+  return `${days}일 전`;
+}
 
 export function PublishPanel({
   canPublish,
   drift,
-  initialJobs,
+  driftItems,
+  lastSuccessAt,
   initialActiveJobId,
 }: PublishPanelProps) {
   const router = useRouter();
@@ -25,8 +48,6 @@ export function PublishPanel({
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  // Poll the active job until it completes, then refresh the server-rendered
-  // data so drift/jobs reflect the new reality.
   useEffect(() => {
     if (!activeJobId) return;
     let cancelled = false;
@@ -59,108 +80,93 @@ export function PublishPanel({
     });
   }
 
-  const driftLabel =
-    drift === 0
-      ? "사이트와 동기화됨"
-      : `미반영 변경 ${drift}건`;
-
   const isPublishing = activeJobId !== null;
+  const inSync = drift === 0 && !isPublishing;
+  const isFirstPublish = lastSuccessAt === null;
+
+  const pillLabel = isPublishing
+    ? "PUBLISHING"
+    : inSync
+      ? "IN SYNC"
+      : isFirstPublish
+        ? `INITIAL · ${drift}`
+        : `DRIFT · ${drift}`;
+  const pillTone = isPublishing || inSync ? "default" : "warn";
+
+  const description = isPublishing
+    ? "Vercel 빌드가 진행 중입니다. 완료되면 자동으로 새로고침됩니다."
+    : inSync
+      ? "Supabase의 모든 변경사항이 사이트에 반영되어 있습니다."
+      : `${drift}건의 변경사항이 아직 사이트에 반영되지 않았습니다. 게시를 누르면 Vercel 빌드가 시작됩니다.`;
 
   return (
-    <section className="border border-[#CCCCCC]/15 rounded p-4 space-y-3">
-      <div className="flex items-start justify-between gap-3 flex-wrap">
-        <div>
-          <h2 className="text-sm font-semibold text-foreground">사이트 반영</h2>
-          <p className="text-xs text-muted mt-0.5">
-            {driftLabel}
-            {isPublishing && (
-              <span className="ml-2 text-yellow-300">· 빌드 진행 중…</span>
-            )}
-          </p>
+    <Card className="flex flex-col gap-5">
+      <CardLabel>게시 패널</CardLabel>
+
+      <div>
+        <div className="mb-2 flex items-center gap-2.5">
+          <Pill tone={pillTone}>{pillLabel}</Pill>
+          <span className="text-[11px] text-muted">스테이지 → 프로덕션</span>
+        </div>
+        <p className="m-0 text-[13px] leading-relaxed text-accent">{description}</p>
+      </div>
+
+      {driftItems.length > 0 && (
+        <div className="flex flex-col gap-2.5">
+          {driftItems.map((d) => (
+            <div
+              key={d.id}
+              className="flex justify-between gap-3 rounded-[2px] border border-[#2a2a2a] bg-white/[0.03] px-3 py-2.5"
+            >
+              <div className="min-w-0">
+                <div className="text-[11px] uppercase tracking-[0.1em] text-muted">
+                  {SECTION_LABEL[d.section] ?? d.section}
+                </div>
+                <div className="mt-1 truncate text-[13px] text-foreground">
+                  {d.title}
+                </div>
+              </div>
+              <div className="shrink-0 whitespace-nowrap text-[11px] text-[#666]">
+                {relativeTime(d.updated_at)}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {error && (
+        <p className="rounded-[2px] border border-[#5a3322] bg-[#e2a98c]/5 px-3 py-2 text-[12px] text-[#e2a98c]">
+          {error}
+        </p>
+      )}
+
+      <div className="mt-1 flex flex-col gap-3 border-t border-[#2a2a2a] pt-4">
+        <div className="flex justify-between text-[12px] text-muted">
+          <span>마지막 게시</span>
+          <span className="text-accent">
+            {lastSuccessAt ? relativeTime(lastSuccessAt) : "기록 없음"}
+          </span>
         </div>
         {canPublish && (
-          <button
-            type="button"
+          <Btn
+            variant="primary"
+            size="lg"
             onClick={handleClick}
             disabled={isPending || isPublishing}
-            className="px-3 py-1.5 text-sm bg-foreground text-background rounded hover:opacity-90 transition-opacity disabled:opacity-50"
           >
             {isPending
               ? "트리거 중…"
               : isPublishing
                 ? "빌드 진행 중"
-                : "사이트에 반영"}
-          </button>
+                : "변경사항 게시"}
+          </Btn>
+        )}
+        {!canPublish && (
+          <p className="text-[12px] text-muted">
+            관리자만 게시할 수 있습니다.
+          </p>
         )}
       </div>
-
-      {error && (
-        <p className="text-sm text-red-300 border border-red-500/40 bg-red-500/10 rounded px-3 py-2">
-          {error}
-        </p>
-      )}
-
-      <JobsTable jobs={initialJobs} />
-    </section>
+    </Card>
   );
-}
-
-function JobsTable({ jobs }: { jobs: ReadonlyArray<PublishJobRow> }) {
-  if (jobs.length === 0) {
-    return <p className="text-xs text-muted">아직 발행 기록이 없습니다.</p>;
-  }
-
-  return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-xs">
-        <thead className="text-muted">
-          <tr className="text-left border-b border-[#CCCCCC]/10">
-            <th className="py-1.5 pr-3 font-normal">시각</th>
-            <th className="py-1.5 pr-3 font-normal">상태</th>
-            <th className="py-1.5 pr-3 font-normal">메시지</th>
-            <th className="py-1.5 pr-3 font-normal">run</th>
-          </tr>
-        </thead>
-        <tbody>
-          {jobs.map((j) => (
-            <tr key={j.id} className="border-b border-[#CCCCCC]/5">
-              <td className="py-1.5 pr-3 text-[#CCCCCC]">
-                {new Date(j.created_at).toLocaleString("ko-KR")}
-              </td>
-              <td className="py-1.5 pr-3">
-                <StatusBadge status={j.status} />
-              </td>
-              <td className="py-1.5 pr-3 text-[#CCCCCC]">
-                {j.message ?? j.error ?? "—"}
-              </td>
-              <td className="py-1.5 pr-3">
-                {j.github_run_url ? (
-                  <a
-                    href={j.github_run_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="underline hover:text-foreground"
-                  >
-                    GH ↗
-                  </a>
-                ) : (
-                  "—"
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-function StatusBadge({ status }: { status: PublishJobRow["status"] }) {
-  const colors: Record<PublishJobRow["status"], string> = {
-    pending: "text-yellow-300",
-    running: "text-yellow-300",
-    success: "text-green-300",
-    failed: "text-red-300",
-  };
-  return <span className={colors[status]}>{status}</span>;
 }
