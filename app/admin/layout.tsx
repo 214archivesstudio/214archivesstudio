@@ -3,6 +3,8 @@ import Link from "next/link";
 import { headers } from "next/headers";
 import { Toaster } from "sonner";
 import { getCurrentAdminUser } from "@/lib/auth";
+import { AdminHeader } from "./_components/ui/AdminHeader";
+import { UserPill } from "./_components/ui/UserPill";
 import { DriftBadge } from "./_components/drift-badge";
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
@@ -19,42 +21,33 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   if (!user) return <>{children}</>;
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col">
-      <header className="border-b border-[#CCCCCC]/15 px-6 py-3 flex items-center justify-between text-sm">
-        <div className="flex items-center gap-6">
-          <Link href="/admin" className="font-semibold tracking-tight">
-            214 Admin
-          </Link>
-          <nav className="flex gap-4 text-[#CCCCCC]">
-            <Link href="/admin" className="hover:text-foreground transition-colors">
-              Dashboard
-            </Link>
-            <Link href="/admin/posts" className="hover:text-foreground transition-colors">
-              Posts
-            </Link>
-            {user.role === "admin" && (
-              <Link href="/admin/team" className="hover:text-foreground transition-colors">
-                Team
-              </Link>
-            )}
-          </nav>
-        </div>
-        <div className="flex items-center gap-4 text-[#888888]">
-          <DriftBadge />
-          <span>
-            {user.email} <span className="text-[#555555]">·</span> {user.role}
-          </span>
-          <form action="/admin/logout" method="post">
-            <button
-              type="submit"
-              className="hover:text-foreground transition-colors"
+    <div className="min-h-screen bg-background text-foreground font-sans">
+      <AdminHeader
+        showTeam={user.role === "admin"}
+        rightSlot={
+          <>
+            <DriftBadge />
+            <Link
+              href="/"
+              className="text-[12px] tracking-[0.05em] text-muted transition-colors duration-200 hover:text-foreground"
             >
-              Logout
-            </button>
-          </form>
-        </div>
-      </header>
-      <main className="flex-1 px-6 py-8">{children}</main>
+              사이트 보기 ↗
+            </Link>
+            <UserPill email={user.email ?? "unknown"} role={user.role} />
+            <form action="/admin/logout" method="post">
+              <button
+                type="submit"
+                className="text-[12px] tracking-[0.05em] text-muted transition-colors duration-200 hover:text-foreground"
+              >
+                Logout
+              </button>
+            </form>
+          </>
+        }
+      />
+      <main className="mx-auto max-w-[1440px] px-12 pb-24 pt-8">
+        {children}
+      </main>
       <Toaster position="bottom-right" theme="dark" />
     </div>
   );
