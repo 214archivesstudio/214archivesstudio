@@ -4,71 +4,113 @@ import { useState, useTransition } from "react";
 import { CldImage } from "next-cloudinary";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { cn } from "@/lib/utils";
 import type { PostMediaRow } from "@/types/database";
 
 interface MediaCardProps {
   readonly media: PostMediaRow;
+  readonly index: number;
   readonly onAltChange: (mediaId: string, alt: string) => Promise<void>;
   readonly onDeleteClick: (media: PostMediaRow) => void;
 }
 
-export function MediaCard({ media, onAltChange, onDeleteClick }: MediaCardProps) {
+export function MediaCard({
+  media,
+  index,
+  onAltChange,
+  onDeleteClick,
+}: MediaCardProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: media.id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.4 : 1,
+    opacity: isDragging ? 0.85 : 1,
   };
 
-  if (media.type === "video") {
-    return (
-      <div ref={setNodeRef} style={style} className="relative">
-        <VideoCardInner
-          media={media}
-          dragHandle={{ ...attributes, ...listeners }}
-          onDeleteClick={onDeleteClick}
-        />
-      </div>
-    );
-  }
+  const isPrimary = index === 0;
+  const isImage = media.type === "image";
 
   return (
-    <div ref={setNodeRef} style={style} className="relative">
-      <ImageCardInner
-        media={media}
-        dragHandle={{ ...attributes, ...listeners }}
-        onAltChange={onAltChange}
-        onDeleteClick={onDeleteClick}
-      />
+    <div ref={setNodeRef} style={style} className="flex flex-col gap-1.5">
+      <div
+        className={cn(
+          "relative aspect-[3/2] overflow-hidden rounded-[2px] bg-[#1A1A1A] transition-transform duration-200 ease-out",
+          isDragging && "rotate-[-1deg] scale-[1.02] outline outline-1 outline-foreground outline-offset-2",
+          isPrimary && !isDragging && "outline outline-1 outline-white/40",
+        )}
+      >
+        <div
+          {...attributes}
+          {...listeners}
+          className="absolute inset-0 cursor-grab select-none active:cursor-grabbing"
+        >
+          {isImage && media.public_id ? (
+            <CldImage
+              src={media.public_id}
+              alt={media.alt ?? "untitled"}
+              width={400}
+              height={266}
+              crop="fill"
+              className="pointer-events-none h-full w-full object-cover"
+            />
+          ) : (
+            <div className="flex h-full w-full flex-col items-center justify-center gap-1 bg-black/60 text-[11px] text-muted">
+              <span className="uppercase tracking-[0.1em] text-accent">
+                {media.video_platform}
+              </span>
+              <span className="font-mono text-[10px]">{media.video_id}</span>
+            </div>
+          )}
+        </div>
+
+        <div className="pointer-events-none absolute left-2 top-1.5 rounded-[2px] bg-black/55 px-1.5 py-0.5 text-[10px] tracking-[0.05em] text-foreground backdrop-blur-sm">
+          {String(index + 1).padStart(2, "0")}
+        </div>
+
+        {isPrimary && (
+          <div className="pointer-events-none absolute right-1.5 top-1.5 rounded-[2px] bg-foreground px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-[0.1em] text-[#0d0d0d]">
+            썸네일
+          </div>
+        )}
+
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-center justify-between bg-gradient-to-b from-transparent to-black/70 px-2 py-1.5">
+          <span className="text-[10px] tracking-[0.1em] text-white/60">⠿</span>
+          <button
+            type="button"
+            onClick={() => onDeleteClick(media)}
+            aria-label="이 미디어 삭제"
+            className="pointer-events-auto text-[12px] leading-none text-white/70 transition-colors hover:text-[#e2a98c]"
+          >
+            ✕
+          </button>
+        </div>
+      </div>
+
+      {isImage ? (
+        <AltInput media={media} onAltChange={onAltChange} />
+      ) : (
+        <span className="text-[10px] uppercase tracking-[0.1em] text-muted">
+          embedded video
+        </span>
+      )}
     </div>
   );
 }
 
-interface DragHandle {
-  readonly [key: string]: unknown;
-}
-
-interface ImageCardInnerProps {
+interface AltInputProps {
   readonly media: PostMediaRow;
-  readonly dragHandle: DragHandle;
   readonly onAltChange: (mediaId: string, alt: string) => Promise<void>;
-  readonly onDeleteClick: (media: PostMediaRow) => void;
 }
 
-function ImageCardInner({
-  media,
-  dragHandle,
-  onAltChange,
-  onDeleteClick,
-}: ImageCardInnerProps) {
+function AltInput({ media, onAltChange }: AltInputProps) {
   const [alt, setAlt] = useState(media.alt ?? "");
   const [savedAlt, setSavedAlt] = useState(media.alt ?? "");
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
-  function handleAltBlur() {
+  function handleBlur() {
     if (alt === savedAlt) return;
     setError(null);
     startTransition(async () => {
@@ -83,75 +125,17 @@ function ImageCardInner({
   }
 
   return (
-    <div className="group border border-accent/15 rounded overflow-hidden bg-white/[0.02]">
-      <div
-        {...dragHandle}
-        className="relative aspect-[3/2] cursor-grab active:cursor-grabbing select-none"
-      >
-        {media.public_id && (
-          <CldImage
-            src={media.public_id}
-            alt={alt || "untitled"}
-            width={320}
-            height={213}
-            crop="fill"
-            className="w-full h-full object-cover pointer-events-none"
-          />
-        )}
-        <button
-          type="button"
-          onClick={() => onDeleteClick(media)}
-          className="absolute top-1.5 right-1.5 px-2 py-0.5 text-xs bg-black/70 hover:bg-red-500 text-white rounded opacity-0 group-hover:opacity-100 transition-opacity"
-          aria-label="이 사진 삭제"
-        >
-          삭제
-        </button>
-      </div>
-      <div className="p-2 space-y-1">
-        <input
-          type="text"
-          value={alt}
-          onChange={(e) => setAlt(e.target.value)}
-          onBlur={handleAltBlur}
-          disabled={isPending}
-          placeholder="alt 텍스트"
-          className="w-full bg-transparent border border-accent/20 rounded px-2 py-1 text-xs focus:outline-none focus:border-foreground disabled:opacity-60"
-        />
-        {error && <p className="text-[10px] text-red-400">{error}</p>}
-      </div>
-    </div>
-  );
-}
-
-interface VideoCardInnerProps {
-  readonly media: PostMediaRow;
-  readonly dragHandle: DragHandle;
-  readonly onDeleteClick: (media: PostMediaRow) => void;
-}
-
-function VideoCardInner({ media, dragHandle, onDeleteClick }: VideoCardInnerProps) {
-  return (
-    <div className="group border border-accent/15 rounded overflow-hidden bg-white/[0.02]">
-      <div
-        {...dragHandle}
-        className="relative aspect-[3/2] cursor-grab active:cursor-grabbing select-none flex flex-col items-center justify-center text-xs text-muted gap-1 bg-black/40"
-      >
-        <span className="text-[10px] uppercase tracking-wider text-accent">
-          {media.video_platform}
-        </span>
-        <span className="font-mono text-[10px]">{media.video_id}</span>
-        <button
-          type="button"
-          onClick={() => onDeleteClick(media)}
-          className="absolute top-1.5 right-1.5 px-2 py-0.5 text-xs bg-black/70 hover:bg-red-500 text-white rounded opacity-0 group-hover:opacity-100 transition-opacity"
-          aria-label="이 영상 삭제"
-        >
-          삭제
-        </button>
-      </div>
-      <div className="p-2">
-        <span className="text-[10px] text-muted">embedded video</span>
-      </div>
-    </div>
+    <>
+      <input
+        type="text"
+        value={alt}
+        onChange={(e) => setAlt(e.target.value)}
+        onBlur={handleBlur}
+        disabled={isPending}
+        placeholder="alt 텍스트"
+        className="w-full border-0 border-b border-[#2a2a2a] bg-transparent px-0 py-1 text-[11px] text-accent placeholder:text-[#555] outline-none transition-colors focus:border-foreground disabled:opacity-60"
+      />
+      {error && <p className="text-[10px] text-[#e2a98c]">{error}</p>}
+    </>
   );
 }

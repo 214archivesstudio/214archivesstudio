@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { CldImage, CldUploadWidget } from "next-cloudinary";
+import { Btn } from "../../_components/ui/Btn";
 
 interface ThumbnailUploaderProps {
   readonly initialPublicId?: string;
@@ -33,9 +34,8 @@ export function ThumbnailUploader({
 
   if (!preset) {
     return (
-      <div className="text-sm text-red-400 border border-red-500/40 bg-red-500/10 rounded px-3 py-2">
-        업로드를 사용하려면 <code>NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET</code> 환경 변수를
-        설정하세요. (docs/admin-setup.md §7 참고)
+      <div className="rounded-[2px] border border-[#5a3322] bg-[#e2a98c]/5 px-3 py-2 text-[12px] text-[#e2a98c]">
+        업로드를 사용하려면 <code className="font-mono">NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET</code> 환경 변수를 설정하세요. (docs/admin-setup.md §7)
       </div>
     );
   }
@@ -46,65 +46,95 @@ export function ThumbnailUploader({
       <input type="hidden" name="thumbnail_width" value={width} />
       <input type="hidden" name="thumbnail_height" value={height} />
 
-      <div className="flex items-start gap-4">
-        <div className="w-40 h-28 border border-accent/20 rounded overflow-hidden bg-white/5 shrink-0 flex items-center justify-center">
-          {publicId ? (
+      {publicId ? (
+        <div className="flex items-start gap-4">
+          <div className="aspect-[3/2] w-40 shrink-0 overflow-hidden rounded-[2px] border border-[#2a2a2a] bg-white/5">
             <CldImage
               src={publicId}
               alt={initialAlt ?? "썸네일 미리보기"}
               width={320}
-              height={224}
+              height={213}
               crop="fill"
-              className="w-full h-full object-cover"
+              className="h-full w-full object-cover"
             />
-          ) : (
-            <span className="text-xs text-muted">미리보기 없음</span>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <CldUploadWidget
-            uploadPreset={preset}
-            options={{
-              maxFiles: 1,
-              multiple: false,
-              sources: ["local", "url"],
-              clientAllowedFormats: ["jpg", "jpeg", "png", "webp", "avif"],
-              maxFileSize: 20_000_000,
-            }}
-            onSuccess={(result) => {
-              if (result.event !== "success") return;
-              const info = result.info as CloudinaryUploadInfo | string | undefined;
-              if (!info || typeof info !== "object") return;
-              setPublicId(info.public_id);
-              setWidth(info.width);
-              setHeight(info.height);
-            }}
-          >
-            {({ open }) => (
-              <button
-                type="button"
-                onClick={() => open()}
-                className="px-3 py-1.5 text-sm border border-accent/30 rounded hover:border-foreground transition-colors"
-              >
-                {publicId ? "썸네일 변경" : "썸네일 업로드"}
-              </button>
-            )}
-          </CldUploadWidget>
-
-          {publicId && (
-            <div className="text-xs text-muted font-mono break-all max-w-xs">
+          </div>
+          <div className="flex flex-col gap-2">
+            <CldUploadWidget
+              uploadPreset={preset}
+              options={{
+                maxFiles: 1,
+                multiple: false,
+                sources: ["local", "url"],
+                clientAllowedFormats: ["jpg", "jpeg", "png", "webp", "avif"],
+                maxFileSize: 20_000_000,
+              }}
+              onSuccess={(result) => {
+                if (result.event !== "success") return;
+                const info = result.info as CloudinaryUploadInfo | string | undefined;
+                if (!info || typeof info !== "object") return;
+                setPublicId(info.public_id);
+                setWidth(info.width);
+                setHeight(info.height);
+              }}
+            >
+              {({ open }) => (
+                <Btn
+                  variant="ghost"
+                  size="sm"
+                  type="button"
+                  onClick={() => open()}
+                >
+                  썸네일 변경
+                </Btn>
+              )}
+            </CldUploadWidget>
+            <div className="max-w-xs break-all font-mono text-[11px] text-muted">
               {publicId}
-              <div className="text-[#666666]">
+              <div className="text-[#666]">
                 {width} × {height}
               </div>
             </div>
-          )}
+          </div>
         </div>
-      </div>
+      ) : (
+        <CldUploadWidget
+          uploadPreset={preset}
+          options={{
+            maxFiles: 1,
+            multiple: false,
+            sources: ["local", "url"],
+            clientAllowedFormats: ["jpg", "jpeg", "png", "webp", "avif"],
+            maxFileSize: 20_000_000,
+          }}
+          onSuccess={(result) => {
+            if (result.event !== "success") return;
+            const info = result.info as CloudinaryUploadInfo | string | undefined;
+            if (!info || typeof info !== "object") return;
+            setPublicId(info.public_id);
+            setWidth(info.width);
+            setHeight(info.height);
+          }}
+        >
+          {({ open }) => (
+            <button
+              type="button"
+              onClick={() => open()}
+              className="block w-full rounded-[2px] border border-dashed border-[#3a3a3a] bg-white/[0.02] px-5 py-8 text-center transition-colors hover:border-foreground hover:bg-white/[0.04]"
+            >
+              <div className="text-[13px] text-accent">
+                이미지를 끌어다 놓거나{" "}
+                <span className="text-foreground underline">파일 선택</span>
+              </div>
+              <div className="mt-1.5 text-[11px] text-muted">
+                3:2 비율 권장 · Cloudinary로 업로드됩니다
+              </div>
+            </button>
+          )}
+        </CldUploadWidget>
+      )}
 
       {fieldError && (
-        <p className="text-sm text-red-400">{fieldError}</p>
+        <p className="text-[12px] text-[#e2a98c]">{fieldError}</p>
       )}
     </div>
   );

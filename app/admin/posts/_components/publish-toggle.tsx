@@ -5,7 +5,9 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
 import { togglePublished } from "../_actions/posts";
-import { cn } from "@/lib/utils";
+import { Btn } from "../../_components/ui/Btn";
+import { Card, CardLabel } from "../../_components/ui/Card";
+import { StatusDot } from "../../_components/ui/StatusDot";
 
 interface PublishToggleProps {
   readonly postId: string;
@@ -23,8 +25,8 @@ export function PublishToggle({
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  function handleToggle() {
-    const next = !published;
+  function handleToggle(next: boolean) {
+    if (next === published) return;
     setError(null);
     startTransition(async () => {
       const result = await togglePublished(postId, next);
@@ -35,9 +37,7 @@ export function PublishToggle({
       setPublished(next);
       router.refresh();
       toast.success(
-        next
-          ? "'공개'로 표시했어요"
-          : "'Draft'로 표시했어요",
+        next ? "'공개'로 표시했어요" : "'Draft'로 표시했어요",
         {
           description: (
             <span>
@@ -46,9 +46,9 @@ export function PublishToggle({
                 href="/admin"
                 className="underline text-foreground hover:opacity-80"
               >
-                대시보드 → '사이트에 반영'
+                대시보드 → '변경사항 게시'
               </Link>
-              을 눌러주세요.
+              를 눌러주세요.
             </span>
           ),
           duration: 8_000,
@@ -58,44 +58,44 @@ export function PublishToggle({
   }
 
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between border border-accent/15 rounded p-4">
-        <div className="space-y-0.5">
-          <div className="text-sm font-medium">
-            {published ? "공개됨" : "Draft"}
-          </div>
-          <div className="text-xs text-muted">
-            {canToggle
-              ? "토글로 공개 상태를 변경합니다."
-              : "관리자만 공개 상태를 변경할 수 있습니다."}
-          </div>
-        </div>
-        <button
-          type="button"
-          role="switch"
-          aria-checked={published}
-          aria-label={published ? "비공개로 변경" : "공개로 변경"}
-          onClick={canToggle ? handleToggle : undefined}
-          disabled={!canToggle || isPending}
-          className={cn(
-            "relative inline-flex h-6 w-11 items-center rounded-full transition-colors",
-            published ? "bg-green-500/70" : "bg-accent/20",
-            (!canToggle || isPending) && "opacity-50 cursor-not-allowed",
-          )}
-        >
-          <span
-            className={cn(
-              "inline-block h-5 w-5 rounded-full bg-foreground transition-transform",
-              published ? "translate-x-5" : "translate-x-0.5",
-            )}
-          />
-        </button>
+    <Card>
+      <CardLabel>공개 상태</CardLabel>
+      <div className="mb-3 flex items-center gap-2 text-[13px] text-foreground">
+        <StatusDot status={published ? "published" : "draft"} />
+        {published ? "공개됨" : "Draft"}
       </div>
+      <p className="mb-4 text-[11px] tracking-[0.05em] text-muted">
+        {canToggle
+          ? "공개 상태를 변경하면 다음 게시에 반영됩니다."
+          : "관리자만 공개 상태를 변경할 수 있습니다."}
+      </p>
+      {canToggle && (
+        <div className="flex gap-2">
+          <Btn
+            variant={published ? "primary" : "ghost"}
+            size="sm"
+            type="button"
+            disabled={isPending}
+            onClick={() => handleToggle(true)}
+          >
+            공개
+          </Btn>
+          <Btn
+            variant={!published ? "primary" : "ghost"}
+            size="sm"
+            type="button"
+            disabled={isPending}
+            onClick={() => handleToggle(false)}
+          >
+            Draft
+          </Btn>
+        </div>
+      )}
       {error && (
-        <p className="text-sm text-red-400 border border-red-500/40 bg-red-500/10 rounded px-3 py-2">
+        <p className="mt-3 rounded-[2px] border border-[#5a3322] bg-[#e2a98c]/5 px-3 py-2 text-[12px] text-[#e2a98c]">
           {error}
         </p>
       )}
-    </div>
+    </Card>
   );
 }

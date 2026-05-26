@@ -2,9 +2,22 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireAuthenticatedAdmin } from "@/lib/auth";
 import { findPostById, findPostMedia } from "@/lib/repos/posts";
+import { CardLabel } from "../../_components/ui/Card";
+import { PageHead } from "../../_components/ui/PageHead";
+import { Pill } from "../../_components/ui/Pill";
 import { PostForm } from "../_components/post-form";
 import { PublishToggle } from "../_components/publish-toggle";
+import { DeletePostButton } from "../_components/delete-post-button";
 import { MediaManager } from "../_components/media/MediaManager";
+import type { PostSection } from "@/types/database";
+
+const SECTION_LABEL: Record<PostSection, string> = {
+  showreel: "Showreel",
+  archives: "Archives",
+  film: "Film",
+  photography: "Photography",
+  personal: "Personal",
+};
 
 interface PageProps {
   readonly params: Promise<{ id: string }>;
@@ -22,44 +35,70 @@ export default async function EditPostPage({ params, searchParams }: PageProps) 
   const media = await findPostMedia(post.id);
 
   return (
-    <div className="space-y-6">
-      <header className="space-y-1">
-        <Link
-          href="/admin/posts"
-          className="text-xs text-muted hover:text-foreground transition-colors"
-        >
-          ← 목록으로
-        </Link>
-        <h1 className="text-2xl font-bold">{post.title}</h1>
-        <div className="text-xs text-muted">
-          {post.section} · {post.slug} · 마지막 수정 {new Date(post.updated_at).toLocaleString("ko-KR")}
-        </div>
-      </header>
+    <>
+      <PageHead
+        eyebrow={
+          <span>
+            <Link
+              href="/admin/posts"
+              className="text-muted transition-colors hover:text-foreground"
+            >
+              포스트
+            </Link>
+            <span className="mx-2 text-[#444]">/</span>
+            <span>{SECTION_LABEL[post.section]}</span>
+          </span>
+        }
+        title={post.title}
+        subtitle={`${post.date} · ${media.length}개 미디어 · 마지막 편집 ${new Date(
+          post.updated_at,
+        ).toLocaleString("ko-KR")}`}
+        right={
+          <div className="flex items-center gap-2.5">
+            <Pill tone={post.published ? "default" : "warn"}>
+              {post.published ? "공개됨" : "Draft"}
+            </Pill>
+          </div>
+        }
+      />
 
       {created === "1" && (
-        <div className="text-sm border border-green-500/40 bg-green-500/10 text-green-300 rounded px-3 py-2">
+        <div className="mb-6 rounded-[2px] border border-[#2a2a2a] bg-white/[0.03] px-4 py-3 text-[13px] text-accent">
           썸네일·기본 정보가 저장됐습니다. 이제 아래에서 갤러리를 추가하세요.
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 items-start">
-        <div className="space-y-6">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+        <div className="space-y-10">
           <PostForm mode="edit" initial={post} />
-          <MediaManager
-            postId={post.id}
-            section={post.section}
-            initialMedia={media}
-          />
+
+          <div className="border-t border-[#2a2a2a] pt-6">
+            <CardLabel>위험 영역</CardLabel>
+            <div className="flex items-center justify-between gap-4 py-3.5">
+              <div className="min-w-0">
+                <div className="text-[13px] text-foreground">이 포스트 삭제</div>
+                <div className="mt-1 text-[11px] text-muted">
+                  Supabase에서 즉시 제거됩니다. 사이트 반영은 다음 게시까지.
+                </div>
+              </div>
+              <DeletePostButton postId={post.id} title={post.title} />
+            </div>
+          </div>
         </div>
 
-        <aside className="space-y-4 lg:sticky lg:top-6">
+        <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
           <PublishToggle
             postId={post.id}
             initialPublished={post.published}
             canToggle={user.role === "admin"}
           />
+          <MediaManager
+            postId={post.id}
+            section={post.section}
+            initialMedia={media}
+          />
         </aside>
       </div>
-    </div>
+    </>
   );
 }

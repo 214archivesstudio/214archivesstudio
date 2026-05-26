@@ -1,6 +1,7 @@
 "use client";
 
 import { CldUploadWidget } from "next-cloudinary";
+import { Btn } from "../../../_components/ui/Btn";
 
 interface UploadedImage {
   readonly publicId: string;
@@ -23,9 +24,8 @@ export function AddImageButton({ onUploaded }: AddImageButtonProps) {
 
   if (!preset) {
     return (
-      <p className="text-xs text-red-400 border border-red-500/40 bg-red-500/10 rounded px-3 py-2">
-        업로드를 사용하려면 <code>NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET</code> 환경 변수를
-        설정하세요.
+      <p className="rounded-[2px] border border-[#5a3322] bg-[#e2a98c]/5 px-3 py-2 text-[11px] text-[#e2a98c]">
+        업로드를 사용하려면 <code className="font-mono">NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET</code> 환경 변수가 필요합니다.
       </p>
     );
   }
@@ -51,13 +51,9 @@ export function AddImageButton({ onUploaded }: AddImageButtonProps) {
       }}
     >
       {({ open }) => (
-        <button
-          type="button"
-          onClick={() => open()}
-          className="px-3 py-1.5 text-sm border border-accent/30 rounded hover:border-foreground transition-colors"
-        >
-          이미지 업로드
-        </button>
+        <Btn variant="ghost" size="sm" type="button" onClick={() => open()}>
+          + 이미지
+        </Btn>
       )}
     </CldUploadWidget>
   );

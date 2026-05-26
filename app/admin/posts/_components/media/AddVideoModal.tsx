@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
+import { Btn } from "../../../_components/ui/Btn";
+import { Field } from "../../../_components/ui/Field";
+import { Input } from "../../../_components/ui/Input";
 
 interface AddVideoModalProps {
   readonly onSubmit: (url: string) => Promise<{ ok: boolean; error?: string }>;
@@ -45,43 +48,39 @@ export function AddVideoModal({ onSubmit, onClose }: AddVideoModalProps) {
     >
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-md bg-background border border-accent/30 rounded p-5 space-y-4"
+        className="w-full max-w-md rounded-[2px] border border-[#2a2a2a] bg-background p-6 space-y-5"
       >
-        <h2 id="add-video-title" className="text-base font-semibold">
+        <h2
+          id="add-video-title"
+          className="text-[15px] font-normal tracking-[0.06em] text-foreground"
+        >
           영상 항목 추가
         </h2>
-        <label className="block space-y-1">
-          <span className="text-sm text-accent">YouTube 또는 Vimeo URL</span>
-          <input
+        <Field label="YouTube 또는 Vimeo URL" required>
+          <Input
             type="url"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
-            placeholder="https://youtu.be/..."
+            placeholder="https://youtu.be/…"
             autoFocus
-            className="w-full bg-transparent border border-accent/30 rounded px-3 py-2 text-sm focus:outline-none focus:border-foreground"
           />
-        </label>
+        </Field>
         {error && (
-          <p className="text-sm text-red-400 border border-red-500/40 bg-red-500/10 rounded px-3 py-2">
+          <p className="rounded-[2px] border border-[#5a3322] bg-[#e2a98c]/5 px-3 py-2 text-[12px] text-[#e2a98c]">
             {error}
           </p>
         )}
         <div className="flex justify-end gap-2 pt-1">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={isPending}
-            className="px-3 py-1.5 text-sm border border-accent/30 rounded hover:border-foreground transition-colors disabled:opacity-50"
-          >
+          <Btn variant="text" type="button" onClick={onClose} disabled={isPending}>
             취소
-          </button>
-          <button
+          </Btn>
+          <Btn
+            variant="primary"
             type="submit"
             disabled={isPending || !url.trim()}
-            className="px-3 py-1.5 text-sm bg-foreground text-background rounded hover:opacity-90 transition-opacity disabled:opacity-50"
           >
             {isPending ? "추가 중…" : "추가"}
-          </button>
+          </Btn>
         </div>
       </form>
     </div>

@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { Btn } from "../../../_components/ui/Btn";
+import { CardLabel } from "../../../_components/ui/Card";
 import type { PostMediaRow, PostSection } from "@/types/database";
 import {
   addImageMedia,
@@ -28,10 +30,12 @@ export function MediaManager({ postId, section, initialMedia }: MediaManagerProp
 
   if (section === "showreel") {
     return (
-      <section className="space-y-2 border border-accent/15 rounded p-5">
-        <h2 className="text-sm font-semibold text-foreground">미디어</h2>
-        <p className="text-sm text-muted">쇼릴은 갤러리가 없습니다.</p>
-      </section>
+      <div>
+        <CardLabel>미디어</CardLabel>
+        <p className="text-[13px] text-muted">
+          쇼릴 섹션은 갤러리가 없습니다 — 영상 URL 한 개만 사용합니다.
+        </p>
+      </div>
     );
   }
 
@@ -45,7 +49,11 @@ export function MediaManager({ postId, section, initialMedia }: MediaManagerProp
     setGlobalError(null);
     const result = await addImageMedia(postId, input);
     if (!result.ok || !result.data) {
-      setGlobalError(result.ok ? "이미지 추가에 실패했습니다" : result.error ?? "이미지 추가에 실패했습니다");
+      setGlobalError(
+        result.ok
+          ? "이미지 추가에 실패했습니다"
+          : result.error ?? "이미지 추가에 실패했습니다",
+      );
       return;
     }
     setMedia((prev) => [...prev, result.data!.media]);
@@ -106,36 +114,36 @@ export function MediaManager({ postId, section, initialMedia }: MediaManagerProp
   }
 
   return (
-    <section className="space-y-4 border border-accent/15 rounded p-5">
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div>
-          <h2 className="text-sm font-semibold text-foreground">미디어</h2>
-          <p className="text-xs text-muted mt-0.5">
-            {media.length}개 항목 · 드래그로 순서 변경, alt 입력 후 포커스 해제 시 저장
-          </p>
-        </div>
+    <div>
+      <div className="mb-3.5 flex items-center justify-between">
+        <CardLabel className="mb-0">미디어 · {media.length}</CardLabel>
         <div className="flex items-center gap-2">
           <AddImageButton onUploaded={handleImageUploaded} />
           {allowVideo && (
-            <button
+            <Btn
+              variant="ghost"
+              size="sm"
               type="button"
               onClick={() => setVideoModalOpen(true)}
-              className="px-3 py-1.5 text-sm border border-accent/30 rounded hover:border-foreground transition-colors"
             >
-              영상 추가
-            </button>
+              + 비디오
+            </Btn>
           )}
         </div>
       </div>
 
+      <p className="mb-3 text-[11px] tracking-[0.05em] text-muted">
+        썸네일을 드래그해 순서를 바꿀 수 있습니다. 1번 항목이 목록 썸네일로 사용됩니다.
+      </p>
+
       {globalError && (
-        <p className="text-sm text-red-300 border border-red-500/40 bg-red-500/10 rounded px-3 py-2">
+        <p className="mb-3 rounded-[2px] border border-[#5a3322] bg-[#e2a98c]/5 px-3 py-2 text-[12px] text-[#e2a98c]">
           {globalError}
         </p>
       )}
 
       {media.length === 0 ? (
-        <p className="text-sm text-muted py-6 text-center border border-dashed border-accent/15 rounded">
+        <p className="rounded-[2px] border border-dashed border-[#3a3a3a] py-6 text-center text-[13px] text-muted">
           아직 미디어가 없습니다. 위의 업로드 버튼으로 추가하세요.
         </p>
       ) : (
@@ -166,6 +174,6 @@ export function MediaManager({ postId, section, initialMedia }: MediaManagerProp
           onClose={() => setDeleteTarget(null)}
         />
       )}
-    </section>
+    </div>
   );
 }
