@@ -132,7 +132,29 @@ Seed complete: 30/30 posts upserted.
    - `SUPABASE_URL` ← `.env.local`의 같은 값
    - `SUPABASE_SERVICE_ROLE_KEY` ← `.env.local`의 같은 값
 
-### 8.3 검증
+### 8.3 Vercel 환경 변수 (프로덕션 어드민 운영 시 필수)
+
+어드민은 [ADR-0001](../wiki/decisions/0001-admin-architecture.md) 에 따라 Vercel 프로덕션 (`/admin/*`) 에서 운영됩니다. `triggerPublish()` 등 server action 이 Vercel 측 env 를 읽으므로, **`.env.local` 만 채우면 로컬은 동작해도 prod 어드민은 동작하지 않습니다.**
+
+**Vercel Dashboard → Project → Settings → Environment Variables** 에서 다음을 **Production** scope 에 등록:
+
+| 변수 | 값 | 비고 |
+|---|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase Project URL | 클라이언트 노출 OK |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key | 클라이언트 노출 OK |
+| `SUPABASE_URL` | 같은 Project URL (server-side 헬퍼용) | server-only |
+| `SUPABASE_SERVICE_ROLE_KEY` | service_role secret | ⚠️ server-only |
+| `GITHUB_DISPATCH_TOKEN` | 8.1 에서 발급한 PAT | ⚠️ server-only |
+| `GITHUB_DISPATCH_REPO` | `214archivesstudio/214archivesstudio` | — |
+| `NEXT_PUBLIC_SITE_URL` | `https://214archives.studio` | dev 의 `localhost:3001` 과 다름 |
+| `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` | 클라우드 네임 | 이미 등록돼 있을 수 있음 |
+| `NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET` | 7번 에서 만든 preset | 어드민 업로드 위젯용 |
+
+등록 후 **Deployments → 최신 Production → Redeploy** (또는 main 에 빈 commit push) 로 env 를 적용합니다. 재배포 없이는 새 env 가 반영 안 됨.
+
+> `NEXT_PUBLIC_SITE_URL` 은 dev (`http://localhost:3001`) 와 prod (`https://214archives.studio`) 가 달라야 합니다. Supabase Dashboard → Authentication → URL Configuration 의 Site URL/Redirect URLs 와도 일치해야 OAuth/이메일 흐름이 깨지지 않습니다.
+
+### 8.4 검증
 
 1. 어드민 대시보드 (`/admin`) → "사이트에 반영" 클릭
 2. publish_jobs 테이블에 새 row 생성 (status=pending → running → success)
