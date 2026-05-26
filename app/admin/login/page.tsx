@@ -3,6 +3,9 @@
 import { useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { Btn } from "../_components/ui/Btn";
+import { Field } from "../_components/ui/Field";
+import { Input } from "../_components/ui/Input";
 
 type Status =
   | { kind: "idle" }
@@ -40,79 +43,82 @@ export default function LoginPage() {
     router.refresh();
   }
 
+  const submitting = status.kind === "submitting";
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background text-foreground px-4">
-      <div className="w-full max-w-sm space-y-6">
-        <div className="space-y-2">
-          <h1 className="text-2xl font-bold">214 Archives — Admin</h1>
-          <p className="text-sm text-muted">
-            등록된 어드민 계정으로 로그인합니다.
-          </p>
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-4 font-sans">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_30%,_rgba(255,255,255,0.04),_transparent_60%)]" />
+      <div className="absolute inset-0 bg-black/30" />
+
+      <div className="relative flex w-[380px] flex-col gap-8">
+        <div className="text-center">
+          <div className="text-[56px] font-light leading-none tracking-[0.1em] text-foreground">
+            214
+          </div>
+          <div className="mt-3.5 text-[11px] uppercase tracking-[0.3em] text-muted">
+            Studio Admin
+          </div>
         </div>
 
         {queryError === "no_role" && (
-          <div className="border border-red-500/40 bg-red-500/10 text-red-300 text-sm px-3 py-2 rounded">
+          <div className="rounded-[2px] border border-[#5a3322] bg-[#e2a98c]/5 px-3 py-2 text-[13px] text-[#e2a98c]">
             이 계정에 어드민 권한이 없습니다. 관리자에게 초대를 요청하세요.
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <label className="block">
-            <span className="text-sm text-accent">이메일</span>
-            <input
+        <form onSubmit={handleSubmit}>
+          <Field label="이메일" required>
+            <Input
               type="email"
               required
               autoFocus
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
+              placeholder="studio@214archives.com"
               autoComplete="username"
-              className="mt-1 w-full bg-transparent border border-accent/30 rounded px-3 py-2 text-sm outline-none focus:border-foreground"
-              disabled={status.kind === "submitting"}
+              disabled={submitting}
             />
-          </label>
+          </Field>
 
-          <label className="block">
-            <span className="text-sm text-accent">비밀번호</span>
-            <input
+          <Field label="비밀번호" required>
+            <Input
               type="password"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               autoComplete="current-password"
-              className="mt-1 w-full bg-transparent border border-accent/30 rounded px-3 py-2 text-sm outline-none focus:border-foreground"
-              disabled={status.kind === "submitting"}
+              disabled={submitting}
             />
-          </label>
+          </Field>
 
           {status.kind === "error" && (
-            <p className="text-sm text-red-400">{status.message}</p>
+            <p className="mb-3 text-[13px] text-[#e2a98c]">{status.message}</p>
           )}
 
-          <button
-            type="submit"
-            disabled={
-              status.kind === "submitting" ||
-              email.length === 0 ||
-              password.length === 0
-            }
-            className="w-full bg-foreground text-background font-medium py-2 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
-          >
-            {status.kind === "submitting" ? "로그인 중…" : "로그인"}
-          </button>
-
-          <p className="text-xs text-muted text-center pt-2">
-            비밀번호를 잊으셨다면 관리자에게 재설정을 요청하세요.
-          </p>
+          <div className="mt-2 flex flex-col gap-3">
+            <Btn
+              type="submit"
+              variant="primary"
+              size="lg"
+              className="w-full"
+              disabled={
+                submitting || email.length === 0 || password.length === 0
+              }
+            >
+              {submitting ? "로그인 중…" : "로그인"}
+            </Btn>
+          </div>
         </form>
+
+        <div className="text-center text-[10px] uppercase tracking-[0.2em] text-[#666]">
+          승인된 운영자만 접근할 수 있습니다
+        </div>
       </div>
     </div>
   );
 }
 
 function mapAuthError(message: string): string {
-  // Supabase returns "Invalid login credentials" for both wrong email and wrong password.
-  // Don't reveal which is wrong — same message either way.
   if (/invalid login credentials/i.test(message)) {
     return "이메일 또는 비밀번호가 올바르지 않습니다.";
   }
