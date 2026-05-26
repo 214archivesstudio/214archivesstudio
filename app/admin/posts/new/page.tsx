@@ -1,25 +1,25 @@
 import Link from "next/link";
 import { requireAuthenticatedAdmin } from "@/lib/auth";
+import { Btn } from "../../_components/ui/Btn";
+import { PageHead } from "../../_components/ui/PageHead";
 import { PostForm } from "../_components/post-form";
 
 export default async function NewPostPage() {
   await requireAuthenticatedAdmin();
 
   return (
-    <div className="space-y-6">
-      <header className="space-y-1">
-        <Link
-          href="/admin/posts"
-          className="text-xs text-muted hover:text-foreground transition-colors"
-        >
-          ← 목록으로
-        </Link>
-        <h1 className="text-2xl font-bold">새 게시물</h1>
-        <p className="text-sm text-muted">
-          섹션을 선택하고 필요한 필드를 입력하세요. 생성 후 사진 갤러리는 미디어 매니저에서 추가할 수 있습니다.
-        </p>
-      </header>
+    <>
+      <PageHead
+        eyebrow="포스트 / 새로 만들기"
+        title="새 포스트"
+        subtitle="섹션을 먼저 선택하면 해당 섹션에 맞는 필드가 표시됩니다"
+        right={
+          <Link href="/admin/posts">
+            <Btn variant="text" size="md">← 포스트 목록</Btn>
+          </Link>
+        }
+      />
       <PostForm mode="create" />
-    </div>
+    </>
   );
 }
