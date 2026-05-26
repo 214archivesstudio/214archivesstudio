@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
+import { Btn } from "../../_components/ui/Btn";
 
 interface DeleteDialogProps {
   readonly title: string;
@@ -52,36 +53,28 @@ export function DeleteDialog({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="w-full max-w-sm bg-background border border-accent/30 rounded p-5 space-y-4">
-        <h2 id="delete-dialog-title" className="text-base font-semibold">
+      <div className="w-full max-w-sm border border-[#2a2a2a] bg-background rounded-[2px] p-6 space-y-5">
+        <h2
+          id="delete-dialog-title"
+          className="text-[15px] font-normal tracking-[0.06em] text-foreground"
+        >
           {title}
         </h2>
         {description && (
-          <p className="text-sm text-accent">{description}</p>
+          <p className="text-[13px] text-accent leading-relaxed">{description}</p>
         )}
         {error && (
-          <p className="text-sm text-red-400 border border-red-500/40 bg-red-500/10 rounded px-3 py-2">
+          <p className="rounded-[2px] border border-[#5a3322] bg-[#e2a98c]/5 px-3 py-2 text-[12px] text-[#e2a98c]">
             {error}
           </p>
         )}
         <div className="flex justify-end gap-2 pt-1">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={isPending}
-            autoFocus
-            className="px-3 py-1.5 text-sm border border-accent/30 rounded hover:border-foreground transition-colors disabled:opacity-50"
-          >
+          <Btn variant="text" onClick={onClose} disabled={isPending}>
             취소
-          </button>
-          <button
-            type="button"
-            onClick={handleConfirm}
-            disabled={isPending}
-            className="px-3 py-1.5 text-sm bg-red-500/90 text-white rounded hover:bg-red-500 transition-colors disabled:opacity-50"
-          >
+          </Btn>
+          <Btn variant="danger" onClick={handleConfirm} disabled={isPending}>
             {isPending ? "삭제 중…" : "삭제"}
-          </button>
+          </Btn>
         </div>
       </div>
     </div>

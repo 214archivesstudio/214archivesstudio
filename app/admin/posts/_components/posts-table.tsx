@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { CldImage } from "next-cloudinary";
-import { cn } from "@/lib/utils";
+import { Btn } from "../../_components/ui/Btn";
+import { StatusDot } from "../../_components/ui/StatusDot";
 import { deletePost } from "../_actions/posts";
 import { DeleteDialog } from "./delete-dialog";
 import type { PostRow, PostSection } from "@/types/database";
@@ -28,94 +29,81 @@ export function PostsTable({ posts, userRole }: PostsTableProps) {
 
   if (posts.length === 0) {
     return (
-      <div className="border border-accent/15 rounded p-8 text-center text-sm text-muted">
-        조건에 맞는 게시물이 없습니다.
+      <div className="border border-[#2a2a2a] rounded-[2px] p-12 text-center">
+        <p className="text-[13px] text-muted">조건에 맞는 게시물이 없습니다.</p>
+        <Link href="/admin/posts/new" className="mt-4 inline-block">
+          <Btn variant="primary" size="md">+ 새 포스트</Btn>
+        </Link>
       </div>
     );
   }
 
   return (
     <>
-      <div className="border border-accent/15 rounded overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="text-left text-muted border-b border-accent/15">
-            <tr>
-              <th className="px-3 py-2 font-medium w-16">미리보기</th>
-              <th className="px-3 py-2 font-medium">제목</th>
-              <th className="px-3 py-2 font-medium w-28">섹션</th>
-              <th className="px-3 py-2 font-medium w-28">날짜</th>
-              <th className="px-3 py-2 font-medium w-24">상태</th>
-              <th className="px-3 py-2 font-medium w-32 text-right">작업</th>
-            </tr>
-          </thead>
-          <tbody>
-            {posts.map((post) => {
-              const canDelete =
-                userRole === "admin" ||
-                (!post.published);
-              return (
-                <tr
-                  key={post.id}
-                  className="border-b border-accent/10 last:border-b-0 hover:bg-white/2"
+      <div>
+        {posts.map((post) => {
+          const canDelete = userRole === "admin" || !post.published;
+          return (
+            <div
+              key={post.id}
+              className="grid grid-cols-[120px_1fr_140px_120px_100px_140px] items-center gap-5 border-b border-[#2a2a2a] py-4 transition-colors duration-200 hover:bg-white/[0.02]"
+            >
+              <Link
+                href={`/admin/posts/${post.id}`}
+                className="block overflow-hidden rounded-[2px] aspect-[3/2] bg-white/5"
+              >
+                <CldImage
+                  src={post.thumbnail_public_id}
+                  alt={post.thumbnail_alt ?? post.title}
+                  width={240}
+                  height={160}
+                  crop="fill"
+                  className="h-full w-full object-cover transition-transform duration-200 ease-out hover:scale-[1.03]"
+                />
+              </Link>
+
+              <div className="min-w-0">
+                <Link
+                  href={`/admin/posts/${post.id}`}
+                  className="block text-[15px] text-foreground transition-colors hover:text-accent"
                 >
-                  <td className="px-3 py-2">
-                    <div className="w-12 h-12 rounded overflow-hidden bg-white/5">
-                      <CldImage
-                        src={post.thumbnail_public_id}
-                        alt={post.thumbnail_alt ?? post.title}
-                        width={96}
-                        height={96}
-                        crop="fill"
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  </td>
-                  <td className="px-3 py-2">
-                    <Link
-                      href={`/admin/posts/${post.id}`}
-                      className="text-foreground hover:underline"
-                    >
-                      {post.title}
-                    </Link>
-                    <div className="text-[#666666] text-xs font-mono mt-0.5">
-                      {post.slug}
-                    </div>
-                  </td>
-                  <td className="px-3 py-2">
-                    <span className="inline-block px-2 py-0.5 rounded border border-accent/20 text-xs text-accent">
-                      {SECTION_LABEL[post.section]}
-                    </span>
-                  </td>
-                  <td className="px-3 py-2 text-accent tabular-nums">
-                    {post.date}
-                  </td>
-                  <td className="px-3 py-2">
-                    <PublishedBadge published={post.published} />
-                  </td>
-                  <td className="px-3 py-2">
-                    <div className="flex gap-2 justify-end">
-                      <Link
-                        href={`/admin/posts/${post.id}`}
-                        className="text-xs px-2 py-1 border border-accent/30 rounded hover:border-foreground transition-colors"
-                      >
-                        편집
-                      </Link>
-                      {canDelete && (
-                        <button
-                          type="button"
-                          onClick={() => setPendingDelete(post)}
-                          className="text-xs px-2 py-1 border border-red-500/40 text-red-300 rounded hover:bg-red-500/10 transition-colors"
-                        >
-                          삭제
-                        </button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                  {post.title}
+                </Link>
+                <div className="mt-1 truncate text-[11px] tracking-[0.05em] text-[#666] font-mono">
+                  /{post.section}/{post.slug}
+                </div>
+              </div>
+
+              <div className="text-[12px] tracking-[0.05em] text-accent">
+                {SECTION_LABEL[post.section]}
+              </div>
+
+              <div className="flex items-center gap-2 text-[12px] text-accent">
+                <StatusDot status={post.published ? "published" : "draft"} />
+                {post.published ? "게시됨" : "초안"}
+              </div>
+
+              <div className="text-right text-[12px] text-muted tabular-nums">
+                {post.date}
+              </div>
+
+              <div className="flex justify-end gap-2">
+                <Link href={`/admin/posts/${post.id}`}>
+                  <Btn variant="ghost" size="sm">편집</Btn>
+                </Link>
+                {canDelete && (
+                  <Btn
+                    variant="danger"
+                    size="sm"
+                    onClick={() => setPendingDelete(post)}
+                  >
+                    삭제
+                  </Btn>
+                )}
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       {pendingDelete && (
@@ -131,20 +119,5 @@ export function PostsTable({ posts, userRole }: PostsTableProps) {
         />
       )}
     </>
-  );
-}
-
-function PublishedBadge({ published }: { published: boolean }) {
-  return (
-    <span
-      className={cn(
-        "inline-block px-2 py-0.5 rounded text-xs",
-        published
-          ? "bg-green-500/15 text-green-300 border border-green-500/30"
-          : "bg-white/5 text-muted border border-accent/20",
-      )}
-    >
-      {published ? "공개" : "Draft"}
-    </span>
   );
 }
