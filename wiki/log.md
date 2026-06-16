@@ -5,6 +5,36 @@
 
 ---
 
+## [2026-06-16] decision | ADR-0002 Supabase keep-alive cron
+
+무료 플랜 Supabase 프로젝트가 7일 미사용으로 일시정지됨 (resume 마감 2026-09-04). 근본 원인은 ADR-0001의 의도된 성질 — 공개 사이트가 정적(`data/*.ts`)이라 방문자 트래픽이 DB를 안 건드림. DB 접근 주체는 어드민·publish job뿐이라, 어드민 미사용 7일이면 요청 0 → 정지.
+
+**결정**: GitHub Actions cron으로 매일 keep-alive. [[decisions/0002-supabase-keepalive]].
+
+**구현 산출물**
+- `.github/workflows/keepalive.yml` (commit `7fdf903`) — 매일 04:23 UTC `curl GET /rest/v1/posts?select=id&limit=1` (service_role). 비-200 시 `exit 1` → GitHub 실패 메일 = 무료 모니터. 주 1회 `.github/keepalive-heartbeat.txt` heartbeat 커밋(ISO 주차 기록 → `git diff --quiet`로 주당 1커밋)으로 GitHub 60일 스케줄 자동비활성 방지. `[skip ci]`.
+- secret은 publish 워크플로용으로 이미 등록됨 (`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`) — `gh secret list`로 존재 확인.
+
+**의사결정 사항**
+1. 방식: GH Actions cron (vs UptimeRobot — 정적 사이트라 DB 치는 공개 엔드포인트 없음)
+2. 빈도: 매일 (vs 원안 7일 1회 — GH 스케줄러 누락 마진 확보)
+3. ping 대상: `posts?select=id&limit=1` + service_role (200 확정, 실제 Postgres 쿼리)
+4. 실패 가시성: 비-200 exit 1 → GitHub 메일
+5. GH 60일 자동비활성: 주 1회 heartbeat 커밋
+6. 업그레이드(Pro $25/mo) 보류 — 현 규모에서 무료 유지 합리적
+
+**사용자 사이드 (실행 순서)**
+1. 대시보드에서 프로젝트 **resume** 먼저 (정지 상태엔 핑 안 닿음).
+2. resume 직후 Actions → "Supabase Keep-Alive" → Run workflow로 HTTP 200 수동 검증.
+3. 이후 매일 자동.
+
+**검증**
+- YAML 구조 검사 통과 (탭 없음, 키 존재).
+- secret 2종 존재 확인 (`gh secret list`).
+- 첫 실제 핑(활동 집계 여부)은 resume 후 사용자 manual 검증 필요.
+
+---
+
 ## [2026-05-15] phase-3c+4 | 미디어 매니저 + Publish 빌드 트리거 한 ship
 
 ADR-0001 의 본래 목적("작가가 직접 운영")이 실현되는 마지막 ship. Phase 3c (다중 미디어) + Phase 4 (publish trigger) 한 commit 묶음으로 통합. 계획서: [docs/admin-phase-3c-4-plan.md](../docs/admin-phase-3c-4-plan.md).
