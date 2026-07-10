@@ -11,6 +11,7 @@ const VIDEO_TRANSFORMATION = "du_10,q_auto,vc_auto,w_1280";
 interface VideoThumbnailUploaderProps {
   readonly initialUrl?: string;
   readonly fieldError?: string;
+  readonly onDirty?: () => void;
 }
 
 interface CloudinaryVideoUploadInfo {
@@ -21,6 +22,7 @@ interface CloudinaryVideoUploadInfo {
 export function VideoThumbnailUploader({
   initialUrl = "",
   fieldError,
+  onDirty,
 }: VideoThumbnailUploaderProps) {
   const [url, setUrl] = useState(initialUrl);
 
@@ -56,30 +58,32 @@ export function VideoThumbnailUploader({
     <div className="space-y-3">
       <input type="hidden" name="video_thumbnail_url" value={url} />
 
-      {url ? (
-        <div className="flex items-start gap-4">
-          <div className="aspect-video w-40 shrink-0 overflow-hidden rounded-[2px] border border-[#2a2a2a] bg-white/5">
-            <video
-              src={url}
-              muted
-              loop
-              autoPlay
-              playsInline
-              className="h-full w-full object-cover"
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <CldUploadWidget
-              uploadPreset={preset}
-              options={widgetOptions}
-              onSuccess={(result) => {
-                if (result.event !== "success") return;
-                const info = result.info as CloudinaryVideoUploadInfo | string | undefined;
-                if (!info || typeof info !== "object") return;
-                handleSuccess(info);
-              }}
-            >
-              {({ open }) => (
+      <CldUploadWidget
+        uploadPreset={preset}
+        options={widgetOptions}
+        onSuccess={(result, { close }) => {
+          if (result.event !== "success") return;
+          const info = result.info as CloudinaryVideoUploadInfo | string | undefined;
+          if (!info || typeof info !== "object") return;
+          handleSuccess(info);
+          onDirty?.();
+          close();
+        }}
+      >
+        {({ open }) =>
+          url ? (
+            <div className="flex items-start gap-4">
+              <div className="aspect-video w-40 shrink-0 overflow-hidden rounded-[2px] border border-[#2a2a2a] bg-white/5">
+                <video
+                  src={url}
+                  muted
+                  loop
+                  autoPlay
+                  playsInline
+                  className="h-full w-full object-cover"
+                />
+              </div>
+              <div className="flex flex-col gap-2">
                 <Btn
                   variant="ghost"
                   size="sm"
@@ -88,25 +92,12 @@ export function VideoThumbnailUploader({
                 >
                   영상 변경
                 </Btn>
-              )}
-            </CldUploadWidget>
-            <div className="max-w-xs break-all font-mono text-[11px] text-muted">
-              {url}
+                <div className="max-w-xs break-all font-mono text-[11px] text-muted">
+                  {url}
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      ) : (
-        <CldUploadWidget
-          uploadPreset={preset}
-          options={widgetOptions}
-          onSuccess={(result) => {
-            if (result.event !== "success") return;
-            const info = result.info as CloudinaryVideoUploadInfo | string | undefined;
-            if (!info || typeof info !== "object") return;
-            handleSuccess(info);
-          }}
-        >
-          {({ open }) => (
+          ) : (
             <button
               type="button"
               onClick={() => open()}
@@ -120,9 +111,9 @@ export function VideoThumbnailUploader({
                 앞 10초만 사용됩니다 · 가로 영상 권장 · Cloudinary로 업로드됩니다
               </div>
             </button>
-          )}
-        </CldUploadWidget>
-      )}
+          )
+        }
+      </CldUploadWidget>
 
       <details className="text-[12px] text-muted">
         <summary className="cursor-pointer select-none">고급: URL 직접 입력</summary>

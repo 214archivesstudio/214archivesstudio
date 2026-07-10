@@ -16,12 +16,14 @@ interface SectionFieldsProps {
     readonly video_thumbnail_url?: string | null;
   };
   readonly fieldErrors?: FieldErrors;
+  readonly onDirty?: () => void;
 }
 
 export function SectionFields({
   section,
   initial,
   fieldErrors,
+  onDirty,
 }: SectionFieldsProps) {
   return (
     <>
@@ -96,6 +98,7 @@ export function SectionFields({
           <VideoThumbnailUploader
             initialUrl={initial.video_thumbnail_url ?? ""}
             fieldError={fieldErrors?.video_thumbnail_url}
+            onDirty={onDirty}
           />
         </Field>
       )}

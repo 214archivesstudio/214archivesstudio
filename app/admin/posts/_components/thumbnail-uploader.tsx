@@ -10,6 +10,7 @@ interface ThumbnailUploaderProps {
   readonly initialHeight?: number;
   readonly initialAlt?: string;
   readonly fieldError?: string;
+  readonly onDirty?: () => void;
 }
 
 interface CloudinaryUploadInfo {
@@ -25,6 +26,7 @@ export function ThumbnailUploader({
   initialHeight = 800,
   initialAlt,
   fieldError,
+  onDirty,
 }: ThumbnailUploaderProps) {
   const [publicId, setPublicId] = useState(initialPublicId);
   const [width, setWidth] = useState(initialWidth);
@@ -46,38 +48,40 @@ export function ThumbnailUploader({
       <input type="hidden" name="thumbnail_width" value={width} />
       <input type="hidden" name="thumbnail_height" value={height} />
 
-      {publicId ? (
-        <div className="flex items-start gap-4">
-          <div className="aspect-[3/2] w-40 shrink-0 overflow-hidden rounded-[2px] border border-[#2a2a2a] bg-white/5">
-            <CldImage
-              src={publicId}
-              alt={initialAlt ?? "썸네일 미리보기"}
-              width={320}
-              height={213}
-              crop="fill"
-              className="h-full w-full object-cover"
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <CldUploadWidget
-              uploadPreset={preset}
-              options={{
-                maxFiles: 1,
-                multiple: false,
-                sources: ["local", "url"],
-                clientAllowedFormats: ["jpg", "jpeg", "png", "webp", "avif"],
-                maxFileSize: 20_000_000,
-              }}
-              onSuccess={(result) => {
-                if (result.event !== "success") return;
-                const info = result.info as CloudinaryUploadInfo | string | undefined;
-                if (!info || typeof info !== "object") return;
-                setPublicId(info.public_id);
-                setWidth(info.width);
-                setHeight(info.height);
-              }}
-            >
-              {({ open }) => (
+      <CldUploadWidget
+        uploadPreset={preset}
+        options={{
+          maxFiles: 1,
+          multiple: false,
+          sources: ["local", "url"],
+          clientAllowedFormats: ["jpg", "jpeg", "png", "webp", "avif"],
+          maxFileSize: 20_000_000,
+        }}
+        onSuccess={(result, { close }) => {
+          if (result.event !== "success") return;
+          const info = result.info as CloudinaryUploadInfo | string | undefined;
+          if (!info || typeof info !== "object") return;
+          setPublicId(info.public_id);
+          setWidth(info.width);
+          setHeight(info.height);
+          onDirty?.();
+          close();
+        }}
+      >
+        {({ open }) =>
+          publicId ? (
+            <div className="flex items-start gap-4">
+              <div className="aspect-[3/2] w-40 shrink-0 overflow-hidden rounded-[2px] border border-[#2a2a2a] bg-white/5">
+                <CldImage
+                  src={publicId}
+                  alt={initialAlt ?? "썸네일 미리보기"}
+                  width={320}
+                  height={213}
+                  crop="fill"
+                  className="h-full w-full object-cover"
+                />
+              </div>
+              <div className="flex flex-col gap-2">
                 <Btn
                   variant="ghost"
                   size="sm"
@@ -86,36 +90,15 @@ export function ThumbnailUploader({
                 >
                   썸네일 변경
                 </Btn>
-              )}
-            </CldUploadWidget>
-            <div className="max-w-xs break-all font-mono text-[11px] text-muted">
-              {publicId}
-              <div className="text-[#666]">
-                {width} × {height}
+                <div className="max-w-xs break-all font-mono text-[11px] text-muted">
+                  {publicId}
+                  <div className="text-[#666]">
+                    {width} × {height}
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-      ) : (
-        <CldUploadWidget
-          uploadPreset={preset}
-          options={{
-            maxFiles: 1,
-            multiple: false,
-            sources: ["local", "url"],
-            clientAllowedFormats: ["jpg", "jpeg", "png", "webp", "avif"],
-            maxFileSize: 20_000_000,
-          }}
-          onSuccess={(result) => {
-            if (result.event !== "success") return;
-            const info = result.info as CloudinaryUploadInfo | string | undefined;
-            if (!info || typeof info !== "object") return;
-            setPublicId(info.public_id);
-            setWidth(info.width);
-            setHeight(info.height);
-          }}
-        >
-          {({ open }) => (
+          ) : (
             <button
               type="button"
               onClick={() => open()}
@@ -129,9 +112,9 @@ export function ThumbnailUploader({
                 3:2 비율 권장 · Cloudinary로 업로드됩니다
               </div>
             </button>
-          )}
-        </CldUploadWidget>
-      )}
+          )
+        }
+      </CldUploadWidget>
 
       {fieldError && (
         <p className="text-[12px] text-[#e2a98c]">{fieldError}</p>

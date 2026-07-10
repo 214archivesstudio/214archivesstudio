@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import Link from "next/link";
 import { Btn } from "../../_components/ui/Btn";
@@ -57,8 +57,37 @@ export function PostForm({ mode, initial }: PostFormProps) {
   const fieldErrors = state && !state.ok ? state.fieldErrors : undefined;
   const errorMessage = state && !state.ok ? state.error : undefined;
 
+  const dirtyRef = useRef(false);
+
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (!dirtyRef.current) return;
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, []);
+
+  // Re-arm dirty guard when the server action returns a validation error —
+  // the user's unsaved data is still in the form.
+  useEffect(() => {
+    if (state && !state.ok) {
+      dirtyRef.current = true;
+    }
+  }, [state]);
+
   return (
-    <form action={formAction} className="space-y-10">
+    <form
+      action={(formData) => {
+        dirtyRef.current = false;
+        formAction(formData);
+      }}
+      onChange={() => {
+        dirtyRef.current = true;
+      }}
+      className="space-y-10"
+    >
       {errorMessage && (
         <div className="rounded-[2px] border border-[#5a3322] bg-[#e2a98c]/5 px-3 py-2 text-[13px] text-[#e2a98c]">
           {errorMessage}
@@ -68,7 +97,10 @@ export function PostForm({ mode, initial }: PostFormProps) {
       {!isEdit && (
         <div>
           <CardLabel>1 · 섹션 선택</CardLabel>
-          <SectionPicker selected={section} onSelect={setSection} />
+          <SectionPicker
+            selected={section}
+            onSelect={(s) => { setSection(s); dirtyRef.current = true; }}
+          />
           <input type="hidden" name="section" value={section} />
         </div>
       )}
@@ -151,6 +183,7 @@ export function PostForm({ mode, initial }: PostFormProps) {
             video_thumbnail_url: initial?.video_thumbnail_url,
           }}
           fieldErrors={fieldErrors}
+          onDirty={() => { dirtyRef.current = true; }}
         />
       </div>
 
@@ -162,6 +195,7 @@ export function PostForm({ mode, initial }: PostFormProps) {
           initialHeight={initial?.thumbnail_height}
           initialAlt={initial?.thumbnail_alt ?? undefined}
           fieldError={fieldErrors?.thumbnail_public_id}
+          onDirty={() => { dirtyRef.current = true; }}
         />
         <div className="mt-4">
           <Field
