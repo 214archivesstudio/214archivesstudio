@@ -2,6 +2,7 @@
 
 import { Field } from "../../_components/ui/Field";
 import { Input } from "../../_components/ui/Input";
+import { VideoThumbnailUploader } from "./video-thumbnail-uploader";
 import type { PostSection } from "@/types/database";
 import type { FieldErrors } from "../_actions/posts";
 
@@ -89,15 +90,12 @@ export function SectionFields({
 
       {section === "film" && (
         <Field
-          label="영상 썸네일 URL"
-          hint="선택 · film 전용"
-          error={fieldErrors?.video_thumbnail_url}
+          label="영상 썸네일"
+          hint="hover 시 재생되는 10초 미리보기 · film 전용"
         >
-          <Input
-            name="video_thumbnail_url"
-            defaultValue={initial.video_thumbnail_url ?? ""}
-            placeholder="https://…"
-            invalid={Boolean(fieldErrors?.video_thumbnail_url)}
+          <VideoThumbnailUploader
+            initialUrl={initial.video_thumbnail_url ?? ""}
+            fieldError={fieldErrors?.video_thumbnail_url}
           />
         </Field>
       )}
