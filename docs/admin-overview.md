@@ -241,7 +241,7 @@ npm run seed
 | ~~**어드민 로그인 페이지에 frontend Header 노출**~~ | ✅ 2026-05-15 해결 | `app/(public)/` route group 분리 |
 | ~~**Publish 빌드 큐 동시성**~~ | ✅ 2026-05-15 해결 | GH Actions `concurrency: { group: publish-builds }` |
 | ~~**Supabase v2 타입 추론 회피 cast (`as never`)**~~ | ✅ 2026-08-30 해결 | `types/supabase.ts` 생성(`npm run gen:types`) + `types/database.ts` 가 alias 파생. 캐스트 0건 |
-| ~~**`next lint`가 Next.js 16에서 작동 안 함**~~ | ✅ 2026-08-30 `lint: eslint .` 로 교체 | `handoff/` ignore. **잔존**: 공개 사이트 코드 3건(`LoadingAnimation` purity, `VideoPreloadContext` set-state-in-effect, `useVideoAutoplay` refs — React Compiler 신규 규칙) 은 어드민 범위 밖이라 미수정 |
+| ~~**`next lint`가 Next.js 16에서 작동 안 함**~~ | ✅ 2026-08-30 `lint: eslint .` 로 교체 | `handoff/` ignore. 공개 사이트 React Compiler 규칙 3건도 같은 날 해소 → **`npm run lint` 에러 0** (경고 3건은 `<img>` no-img-element, 의도된 사용) |
 | **비밀번호 reset UI 없음** | 어드민이 비밀번호 잊으면 dashboard에서 직접 reset | 1–2명 환경이라 OK. 사용자 늘면 reset flow 추가 |
 | ~~**publish_jobs `triggered_by_email` 미연결**~~ | ✅ 2026-08-30 열 제거 | 대시보드가 트리거한 사람을 표시하지 않으므로 항상 null 이던 필드를 삭제. 필요해지면 auth admin API 로 enrichment |
 | ~~**영상 미디어 카드의 시각 thumbnail 없음**~~ | ✅ 2026-08-30 (G3-2) | YouTube 는 `img.youtube.com` 정적 썸네일. Vimeo 는 oembed 필요 + 현재 0건이라 텍스트 폴백 |

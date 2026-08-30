@@ -199,4 +199,4 @@ G1–G4 로드맵을 마친 직후 어드민을 처음으로 **로그인해서 �
 - **어드민 내 이동 시 미저장 경고** (클라이언트 라우팅 가드) — Next 16 에 표준 API 가 없어 링크를 전부 버튼화해야 함. 1인 운영에서 비용 대비 낮음. `beforeunload` 는 유지
 - **Vercel 배포 완료 폴링** — Deploy Hook 연동 필요. H4-2 문구 수정으로 기대치만 맞춤
 - **Vimeo 썸네일** — G3 결정 유지
-- **공개 사이트 lint 3건** — 어드민 범위 밖, 별도 작업
+- ~~**공개 사이트 lint 3건**~~ — 2026-08-30 별도 커밋으로 해소 (`LoadingAnimation` 렌더 중 `Date.now()`·ref 쓰기·파생 가능한 state, `VideoPreloadContext` effect 내 setState → 파생, `useVideoAutoplay` 렌더 중 ref 쓰기·src/isPlaying 파생). `/film` 실주행: 오버레이 종료, blob 8/8, autoplay 정상

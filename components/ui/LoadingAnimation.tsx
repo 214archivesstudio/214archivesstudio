@@ -38,21 +38,27 @@ export default function LoadingAnimation({
   onComplete,
 }: LoadingAnimationProps) {
   const [animationDone, setAnimationDone] = useState(false);
-  const [fadingOut, setFadingOut] = useState(false);
   const [removed, setRemoved] = useState(false);
-  const startTimeRef = useRef(Date.now());
   const rafRef = useRef<number>(0);
   const revealCompleteTimeRef = useRef<number | null>(null);
   const coverRef = useRef<HTMLDivElement>(null);
   const progressRef = useRef(progress);
   const currentPosRef = useRef(0);
 
-  progressRef.current = progress;
+  // Both inputs only ever go false → true, so "fading out" is a pure derivation.
+  const fadingOut = isLoaded && animationDone;
+
+  // Keep the latest progress readable from the rAF loop without re-subscribing.
+  // (Written in an effect, not during render — React Compiler rule `refs`.)
+  useEffect(() => {
+    progressRef.current = progress;
+  }, [progress]);
 
   // Animate cover via direct DOM manipulation — no React re-renders per frame
   useEffect(() => {
+    const startTime = Date.now();
     const tick = () => {
-      const elapsed = Date.now() - startTimeRef.current;
+      const elapsed = Date.now() - startTime;
       const timeFraction = Math.min(elapsed / MIN_ANIMATION_MS, 1);
       const easedTime = easeOutCubic(timeFraction);
       const target = Math.min(progressRef.current, easedTime);
@@ -100,13 +106,6 @@ export default function LoadingAnimation({
     }, SAFETY_TIMEOUT_MS);
     return () => clearTimeout(timer);
   }, []);
-
-  // Trigger fade-out when both loaded and animation complete
-  useEffect(() => {
-    if (isLoaded && animationDone && !fadingOut) {
-      setFadingOut(true);
-    }
-  }, [isLoaded, animationDone, fadingOut]);
 
   // Lock body scroll while loading overlay is visible
   useEffect(() => {

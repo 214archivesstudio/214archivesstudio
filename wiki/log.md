@@ -5,6 +5,10 @@
 
 ---
 
+## [2026-08-30] fix | 공개 사이트 React Compiler lint 3건 해소 — `npm run lint` 에러 0
+
+`LoadingAnimation`: `useRef(Date.now())` → effect 내 지역 시작 시각, `progressRef` 렌더 쓰기 → effect, `fadingOut` state+effect → `isLoaded && animationDone` 파생. `VideoPreloadContext`: entries `useMemo`, `isLoaded = finished || entries.length === 0` 파생(effect 내 setState 제거). `useVideoAutoplay`: `enabledRef` 동기화 effect, `currentSrc`/`isPlaying` 을 `fellBack`·`playing` state 에서 파생(src 동기화 effect·pause 시 setState 제거). 동작 검증: `/film` 오버레이 종료·스크롤 복원·blob 8/8·autoplay·콘솔 에러 0. 남은 경고 3건은 `<img>`(의도).
+
 ## [2026-08-30] ship | Phase H5 — 잠재 부채 9건 (RPC 정렬·sync 페이지네이션·env 가드 등)
 
 migration 00004 `reorder_post_media` (SECURITY INVOKER) 프로덕션 적용 + 타입 재생성, `reorderMedia` 단일 RPC. sync `.range()` 페이지네이션(diff 0 확인). 두 업로더 env 누락 시 hidden input 유지 + `lib/env.ts` 배너. 미들웨어 요청 헤더 `x-pathname`(로그인 페이지 셸 이중 렌더 해소). 스키마에서 showreel/film/personal 의 city·year_label·client 제거, `video_thumbnail_url` https .mp4 검증. `lib/sections.ts` 단일 출처 + `ui/index.ts`·SaveBar·Select·tokens 삭제. MediaManager 서버 파생 key 재동기화. MouseSensor+TouchSensor. 부수: created 토스트를 sessionStorage 1회 가드로(라우터가 `?created=1` 복원하던 문제). 실주행: x-pathname·키보드 정렬 RPC·새로고침 유지 확인. 임시 계정·게시물 삭제.

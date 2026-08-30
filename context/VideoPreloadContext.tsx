@@ -3,6 +3,7 @@
 import {
   createContext,
   useContext,
+  useMemo,
   useState,
   useEffect,
   useRef,
@@ -25,21 +26,21 @@ export function VideoPreloadProvider({
     () => new Map(),
   );
   const [progress, setProgress] = useState(0);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [preloadFinished, setPreloadFinished] = useState(false);
   const cleanupRef = useRef<(() => void) | null>(null);
 
-  useEffect(() => {
-    const entries = films
-      .filter((film) => film.videoThumbnailUrl)
-      .map((film) => ({
-        id: film.id,
-        url: film.videoThumbnailUrl,
-      }));
+  const entries = useMemo(
+    () =>
+      films
+        .filter((film) => film.videoThumbnailUrl)
+        .map((film) => ({ id: film.id, url: film.videoThumbnailUrl })),
+    [films],
+  );
+  // Nothing to preload → loaded immediately (derived, not set in an effect).
+  const isLoaded = preloadFinished || entries.length === 0;
 
-    if (entries.length === 0) {
-      setIsLoaded(true);
-      return;
-    }
+  useEffect(() => {
+    if (entries.length === 0) return;
 
     const { promise, abort } = preloadVideos(entries, (p) => {
       setProgress(p);
@@ -49,10 +50,10 @@ export function VideoPreloadProvider({
       .then((result) => {
         setBlobUrlMap(result.blobUrlMap);
         cleanupRef.current = result.cleanup;
-        setIsLoaded(true);
+        setPreloadFinished(true);
       })
       .catch(() => {
-        setIsLoaded(true);
+        setPreloadFinished(true);
       });
 
     return () => {
@@ -62,7 +63,7 @@ export function VideoPreloadProvider({
         cleanupRef.current = null;
       }
     };
-  }, [films]);
+  }, [entries]);
 
   return (
     <VideoPreloadContext value={{ blobUrlMap, progress, isLoaded }}>

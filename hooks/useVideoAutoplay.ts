@@ -22,18 +22,28 @@ export function useVideoAutoplay({
 }: UseVideoAutoplayParams): UseVideoAutoplayReturn {
   const elementRef = useRef<HTMLVideoElement | null>(null);
   const enabledRef = useRef(enabled);
-  const [currentSrc, setCurrentSrc] = useState(blobUrl || originalUrl);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const gestureCleanupRef = useRef<(() => void) | null>(null);
+  // Once the blob URL fails (NotSupportedError) we permanently fall back to the
+  // original URL. State drives the derived `currentSrc`; the ref guards the
+  // async retry path without a stale closure.
+  const [fellBack, setFellBack] = useState(false);
   const fellBackRef = useRef(false);
+  const [playing, setPlaying] = useState(false);
+  const gestureCleanupRef = useRef<(() => void) | null>(null);
 
-  enabledRef.current = enabled;
+  const currentSrc = fellBack ? originalUrl : blobUrl || originalUrl;
+  const isPlaying = playing && enabled;
+
+  // Mirror `enabled` into a ref for async callbacks. Declared before the
+  // play/pause effect below so it is up to date when that effect runs.
+  useEffect(() => {
+    enabledRef.current = enabled;
+  }, [enabled]);
 
   const waitForGesture = useCallback((video: HTMLVideoElement) => {
     gestureCleanupRef.current?.();
 
     const handler = () => {
-      video.play().then(() => setIsPlaying(true)).catch(() => {});
+      video.play().then(() => setPlaying(true)).catch(() => {});
       cleanup();
     };
 
@@ -54,13 +64,13 @@ export function useVideoAutoplay({
 
       try {
         await video.play();
-        setIsPlaying(true);
+        setPlaying(true);
       } catch (error) {
         if (!(error instanceof DOMException)) return;
 
         if (error.name === "NotSupportedError" && blobUrl && !fellBackRef.current) {
           fellBackRef.current = true;
-          setCurrentSrc(originalUrl);
+          setFellBack(true);
         } else if (error.name === "NotAllowedError") {
           waitForGesture(video);
         }
@@ -68,7 +78,7 @@ export function useVideoAutoplay({
         // onLoadedData will retry when the new source is ready
       }
     },
-    [blobUrl, originalUrl, waitForGesture],
+    [blobUrl, waitForGesture],
   );
 
   // Called by <video onLoadedData> — fires every time a new src finishes loading
@@ -87,17 +97,10 @@ export function useVideoAutoplay({
     if (enabled) {
       attemptPlay(video);
     } else {
+      // `isPlaying` is derived as playing && enabled, so no setState needed here.
       video.pause();
-      setIsPlaying(false);
     }
   }, [enabled, attemptPlay]);
-
-  // Sync src when blobUrl arrives after mount
-  useEffect(() => {
-    if (fellBackRef.current) return;
-    const nextSrc = blobUrl || originalUrl;
-    setCurrentSrc(nextSrc);
-  }, [blobUrl, originalUrl]);
 
   // Cleanup gesture listeners on unmount
   useEffect(() => {
