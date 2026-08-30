@@ -5,6 +5,10 @@
 
 ---
 
+## [2026-08-30] ship | Phase G4 — 생성 타입 도입·lint 복구·이메일 열 제거·용어 정리 (로드맵 G1–G4 완료)
+
+G4-1 `npm run gen:types` → `types/supabase.ts`, `types/database.ts` 는 alias 로 축소, `as never` 0건. G4-2 `lint: eslint .` (+`handoff/` ignore) — 어드민·lib·types 0건, 공개 사이트 코드 3건 잔존(React Compiler 규칙, 별도 작업). G4-3 `triggered_by_email` 열 제거. G4-4 어드민 UI 의 GitHub/Vercel/Supabase/RLS 노출 문구 정리. 검증: `tsc`·`eslint app/admin lib types`·`next build` 통과. 이로써 [admin-improvement-roadmap](../docs/admin-improvement-roadmap.md) G1–G4 전부 ship. ADR-0001 Open Q 3건 취소선 처리.
+
 ## [2026-08-30] ship | Phase G3 — 슬러그 실시간 검사·YouTube 썸네일·영상 미리보기·모바일 목록
 
 G3-1 `checkSlugAvailable` 서버 액션 + `SlugInput`(debounce 400ms, advisory). G3-2 MediaCard YouTube 정적 썸네일 (Vimeo 는 폴백 유지). G3-3 영상 URL 입력 즉시 `VideoPlayer` 임베드 미리보기 — `parseVideoUrl` 을 `lib/video.ts` 로 분리(client-safe). G3-4 posts-table `md:contents` 반응형. 검증: `tsc`·`eslint`·`next build` 통과, 브라우저 실검증은 로그인 자격 부재로 미수행. 다음: G4 (`supabase gen types`, ESLint flat config 는 이미 `eslint.config.mjs` 존재 — 상태 재확인 필요, publish_jobs 이메일, 기술 용어 정리).

@@ -148,7 +148,7 @@ DRIFT 배지가 **"최초 반영 N건 대기"** (초록색)로 표시됨. 정상
 | **로그인 직후 redirect 무한 루프** | 계정에 admin 역할 미부여. 관리자에게 user_roles 등록 요청 |
 | **게시 클릭 후 "401 Unauthorized: Bad credentials"** | GitHub PAT 만료. 관리자에게 토큰 갱신 요청 |
 | **게시 했는데 사이트는 옛날 그대로** | Vercel 빌드 진행 중. 보통 1~3분. https://vercel.com/dashboard에서 deployment 상태 확인 |
-| **게시 패널에 TIMEOUT 표시** | 10분 안에 빌드가 끝나지 않아 자동으로 실패 처리됨 (보통 GitHub Actions 쪽 문제). 최근 활동의 GH 링크에서 원인 확인 후 **다시 게시** |
+| **게시 패널에 TIMEOUT 표시** | 10분 안에 빌드가 끝나지 않아 자동으로 실패 처리됨 (보통 GitHub Actions 쪽 문제). 최근 활동의 **실행 로그 ↗** 링크에서 원인 확인 후 **다시 게시** |
 | **이미지가 뿌옇거나 안 뜸** | Cloudinary 전송 지연. 새로고침 후 보통 해결 |
 | **Film 영상 썸네일 업로드 직후 미리보기가 몇 초간 비어 있음** | Cloudinary가 압축본을 처음 생성하는 중. 5~10초 후 자동 재생. 이후 방문부터는 즉시 |
 | **영상 업로더 대신 회색 안내 박스만 보임** | `NEXT_PUBLIC_CLOUDINARY_VIDEO_UPLOAD_PRESET` 환경 변수 미설정. 관리자에게 요청 |

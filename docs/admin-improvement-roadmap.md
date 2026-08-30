@@ -1,6 +1,6 @@
 # 관리자 페이지 — 개선 로드맵 (Phase G1–G4)
 
-> **상태**: G1 ✅ (2026-08-30, [admin-phase-g1-plan](./admin-phase-g1-plan.md)) · G2 ✅ · G3 ✅ (2026-08-30, 각 §1 메모) · G4 착수 전.
+> **상태**: ✅ 전 Phase ship 완료 (G1–G4, 2026-08-30). 각 §1 구현 메모 참조. 잔여: 공개 사이트 코드 lint 3건 (G4-2 메모).
 > **범위**: 기존 어드민(Phase 3c+4 ship 완료본)의 사용성 개선. 신규 기능이 아니라 실사용 마찰 제거가 목적.
 > **참고**: [admin-phase-3c-4-plan](./admin-phase-3c-4-plan.md) · [admin-overview](./admin-overview.md) · [ADR-0001](../wiki/decisions/0001-admin-architecture.md)
 
@@ -66,7 +66,7 @@
 
 *구현 메모 (2026-08-30)*: G3-1 은 `checkSlugAvailable(section, slug, excludeId)` 서버 액션 + `slug-input.tsx` (400ms debounce, 편집 모드에서 자기 slug 제외). **advisory only** — 제출은 막지 않고 `unique(section, slug)` 가 최종 게이트. G3-2 는 YouTube 만 (`img.youtube.com/vi/<id>/mqdefault.jpg`, `next/image` unoptimized); Vimeo 는 oembed 호출이 필요하고 현재 콘텐츠에 0건이라 기존 텍스트 폴백 유지. G3-3 을 위해 `parseVideoUrl` 을 `lib/video.ts` 로 이동 (zod 없는 client-safe 모듈, `post-schema.ts` 는 re-export 로 기존 import 경로 유지) — 미리보기는 공개 사이트의 `VideoPlayer` 재사용. G3-4 는 `md:contents` 로 메타 3칸을 모바일에서 한 줄로 접는 방식 — 별도 카드 컴포넌트 없이 같은 마크업 유지.
 
-### Phase G4 — 기술 부채·표현 정리 (여유 시)
+### Phase G4 — 기술 부채·표현 정리 ✅ (ship 2026-08-30)
 
 | # | 작업 | 비고 |
 |---|---|---|
@@ -76,6 +76,8 @@
 | G4-4 | 기술 용어 정리: "GH ↗", "Supabase RLS", drift 첫 게시 전 문구 | `jobs-card.tsx` · `team/page.tsx:51` · `drift-badge.tsx` |
 
 **검증**: `npm run lint` 통과, `tsc --noEmit` 통과, 어드민 전 화면에서 구현 세부 용어 미노출.
+
+*구현 메모 (2026-08-30)*: G4-1 `supabase gen types typescript --linked` 로 `types/supabase.ts` 생성(`npm run gen:types`), `types/database.ts` 는 `Readonly<Tables<"posts">>` 등 alias 만 유지 → 기존 import 경로 무변경, `as never` 10곳 삭제 후 `tsc` 통과. G4-2 `next lint` 는 Next 16 에서 제거된 명령이라 `lint: eslint .` 로 교체 + `handoff/` ignore. **잔존 3건** (`LoadingAnimation` purity · `VideoPreloadContext` set-state-in-effect · `useVideoAutoplay` refs) 은 공개 사이트 영상 로직이라 어드민 phase 에서 미수정 — 별도 작업. G4-3 은 이메일 enrichment 대신 **열 제거** (대시보드가 트리거 주체를 표시하지 않음, 1–2인 운영). G4-4 문구: `GH ↗`→`실행 로그 ↗`, `Run`→`로그`, 상태 Pill 을 대문자 영문→한글, `Supabase RLS`→`역할별 권한`, `Vercel 빌드`→`사이트 빌드`, `스테이지 → 프로덕션`→`저장됨 → 공개 사이트`, drift 배지 tooltip 의 stale 버튼명 수정. 팀 페이지 하단 초대 안내(Supabase Studio 경로)는 초대 UI 가 없는 상태의 유일한 절차 안내라 유지.
 
 *명시적 보류 유지*: preview mode, 팀 초대 UI, 비밀번호 재설정 — 2인 이상 운영 전까지 착수하지 않음 (ADR-0001 결정 존중).
 

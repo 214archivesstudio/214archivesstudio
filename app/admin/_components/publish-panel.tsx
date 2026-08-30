@@ -117,12 +117,12 @@ export function PublishPanel({
       : "warn";
 
   const description = isPublishing
-    ? "Vercel 빌드가 진행 중입니다. 완료되면 자동으로 새로고침됩니다."
+    ? "사이트 빌드가 진행 중입니다. 완료되면 자동으로 새로고침됩니다."
     : timedOut
-      ? "10분 안에 게시가 끝나지 않아 실패로 기록했습니다. 아래 최근 활동에서 GitHub 실행 상태를 확인한 뒤 다시 시도해 주세요."
+      ? "10분 안에 게시가 끝나지 않아 실패로 기록했습니다. 아래 최근 활동의 실행 로그에서 원인을 확인한 뒤 다시 시도해 주세요."
       : inSync
-        ? "Supabase의 모든 변경사항이 사이트에 반영되어 있습니다."
-        : `${drift}건의 변경사항이 아직 사이트에 반영되지 않았습니다. 게시를 누르면 Vercel 빌드가 시작됩니다.`;
+        ? "모든 변경사항이 사이트에 반영되어 있습니다."
+        : `${drift}건의 변경사항이 아직 사이트에 반영되지 않았습니다. 게시를 누르면 사이트 빌드가 시작됩니다.`;
 
   return (
     <Card className="flex flex-col gap-5">
@@ -131,7 +131,7 @@ export function PublishPanel({
       <div>
         <div className="mb-2 flex items-center gap-2.5">
           <Pill tone={pillTone}>{pillLabel}</Pill>
-          <span className="text-[11px] text-muted">스테이지 → 프로덕션</span>
+          <span className="text-[11px] text-muted">저장됨 → 공개 사이트</span>
         </div>
         <p className="m-0 text-[13px] leading-relaxed text-accent">{description}</p>
       </div>

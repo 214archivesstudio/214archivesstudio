@@ -19,7 +19,7 @@ export async function DriftBadge() {
   return (
     <Link
       href="/admin"
-      title="대시보드의 '사이트에 반영' 버튼으로 공개 사이트에 배포하세요"
+      title="대시보드의 '변경사항 게시' 버튼으로 공개 사이트에 반영하세요"
       className="transition-opacity duration-200 hover:opacity-80"
     >
       <Pill tone="warn">{label}</Pill>

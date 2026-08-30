@@ -78,7 +78,7 @@ export default async function EditPostPage({ params, searchParams }: PageProps) 
               <div className="min-w-0">
                 <div className="text-[13px] text-foreground">이 포스트 삭제</div>
                 <div className="mt-1 text-[11px] text-muted">
-                  Supabase에서 즉시 제거됩니다. 사이트 반영은 다음 게시까지.
+                  저장된 데이터에서 즉시 제거됩니다. 사이트에서는 다음 게시 때 사라집니다.
                 </div>
               </div>
               <DeletePostButton postId={post.id} title={post.title} />

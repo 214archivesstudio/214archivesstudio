@@ -1,11 +1,9 @@
 import { Card, CardLabel } from "./ui/Card";
 import { Pill } from "./ui/Pill";
-import { StatusDot } from "./ui/StatusDot";
-import type { PublishJobWithEmail } from "@/lib/repos/publish-jobs";
 import type { PublishJobRow } from "@/types/database";
 
 interface JobsCardProps {
-  readonly jobs: ReadonlyArray<PublishJobWithEmail>;
+  readonly jobs: ReadonlyArray<PublishJobRow>;
 }
 
 const STATUS_LABEL: Record<PublishJobRow["status"], string> = {
@@ -13,13 +11,6 @@ const STATUS_LABEL: Record<PublishJobRow["status"], string> = {
   failed: "실패",
   pending: "대기",
   running: "진행 중",
-};
-
-const STATUS_DOT: Record<PublishJobRow["status"], "published" | "pending" | "error" | "draft"> = {
-  success: "published",
-  failed: "error",
-  pending: "pending",
-  running: "pending",
 };
 
 function fmtTime(iso: string): string {
@@ -61,7 +52,7 @@ export function JobsCard({ jobs }: JobsCardProps) {
               <th className="px-6 py-2.5 font-normal">시간</th>
               <th className="px-6 py-2.5 font-normal">상태</th>
               <th className="px-6 py-2.5 font-normal">메시지</th>
-              <th className="px-6 py-2.5 text-right font-normal">Run</th>
+              <th className="px-6 py-2.5 text-right font-normal">로그</th>
             </tr>
           </thead>
           <tbody>
@@ -71,23 +62,22 @@ export function JobsCard({ jobs }: JobsCardProps) {
                   {fmtTime(j.created_at)}
                 </td>
                 <td className="whitespace-nowrap px-6 py-4 align-middle">
-                  <Pill tone={j.status === "failed" ? "danger" : "default"}>
-                    {j.status.toUpperCase()}
+                  <Pill
+                    tone={
+                      j.status === "failed"
+                        ? "danger"
+                        : j.status === "success"
+                          ? "default"
+                          : "warn"
+                    }
+                  >
+                    {STATUS_LABEL[j.status]}
                   </Pill>
                 </td>
                 <td className="px-6 py-4 align-middle">
-                  <div className="flex items-center gap-2 text-[12px] text-accent">
-                    <StatusDot
-                      status={STATUS_DOT[j.status]}
-                      label={STATUS_LABEL[j.status]}
-                      className="whitespace-nowrap"
-                    />
-                    {(j.message || j.error) && (
-                      <span className="line-clamp-2 text-[#666]">
-                        · {j.message ?? j.error}
-                      </span>
-                    )}
-                  </div>
+                  <span className="line-clamp-2 text-[12px] text-accent">
+                    {j.message || j.error || "—"}
+                  </span>
                 </td>
                 <td className="px-6 py-4 text-right align-middle">
                   {j.github_run_url ? (
@@ -97,7 +87,7 @@ export function JobsCard({ jobs }: JobsCardProps) {
                       rel="noopener noreferrer"
                       className="text-[12px] text-muted underline-offset-2 hover:text-foreground hover:underline"
                     >
-                      GH ↗
+                      실행 로그 ↗
                     </a>
                   ) : (
                     <span className="text-[12px] text-[#444]">—</span>

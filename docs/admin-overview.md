@@ -149,7 +149,8 @@ supabase/
 
 scripts/seed-from-csv.ts             # CSV → Supabase posts 30개 import
 
-types/database.ts                    # Supabase 스키마 TS 타입
+types/supabase.ts                    # GENERATED (npm run gen:types) — 편집 금지
+types/database.ts                    # 생성 타입 위의 alias (PostRow 등, Readonly)
 ```
 
 ---
@@ -221,10 +222,10 @@ npm run seed
 |---|---|---|
 | ~~**어드민 로그인 페이지에 frontend Header 노출**~~ | ✅ 2026-05-15 해결 | `app/(public)/` route group 분리 |
 | ~~**Publish 빌드 큐 동시성**~~ | ✅ 2026-05-15 해결 | GH Actions `concurrency: { group: publish-builds }` |
-| **Supabase v2 타입 추론 회피 cast (`as never`)** | `_actions/posts.ts`, `_actions/media.ts`, `_actions/publish.ts`, `lib/auth.ts` 등 다수 | `supabase gen types typescript`로 CLI generated types 도입 후 정리. 우선순위 낮음 |
-| **`next lint`가 Next.js 16에서 작동 안 함** | `npm run lint` 실패. `npx eslint <paths>`로 우회 중 | Next.js 가이드 따라 ESLint flat config migration 필요 |
+| ~~**Supabase v2 타입 추론 회피 cast (`as never`)**~~ | ✅ 2026-08-30 해결 | `types/supabase.ts` 생성(`npm run gen:types`) + `types/database.ts` 가 alias 파생. 캐스트 0건 |
+| ~~**`next lint`가 Next.js 16에서 작동 안 함**~~ | ✅ 2026-08-30 `lint: eslint .` 로 교체 | `handoff/` ignore. **잔존**: 공개 사이트 코드 3건(`LoadingAnimation` purity, `VideoPreloadContext` set-state-in-effect, `useVideoAutoplay` refs — React Compiler 신규 규칙) 은 어드민 범위 밖이라 미수정 |
 | **비밀번호 reset UI 없음** | 어드민이 비밀번호 잊으면 dashboard에서 직접 reset | 1–2명 환경이라 OK. 사용자 늘면 reset flow 추가 |
-| **publish_jobs `triggered_by_email` 미연결** | UI에는 UUID만 표시되고 이메일 enrichment 없음 | auth.users 조회는 admin API 필요 — 추후 phase 후보 |
+| ~~**publish_jobs `triggered_by_email` 미연결**~~ | ✅ 2026-08-30 열 제거 | 대시보드가 트리거한 사람을 표시하지 않으므로 항상 null 이던 필드를 삭제. 필요해지면 auth admin API 로 enrichment |
 | **영상 미디어 카드의 시각 thumbnail 없음** | personal 섹션의 영상 항목이 platform + videoId 텍스트만 노출 | oembed fetch 도입 후보 (Phase 4.5) |
 | **Publish 첫 실행 시 drift 가 모든 published 게시물** | `last_success = null` 이라 모든 row 가 "변경됨" 으로 카운트 | 첫 성공 publish 이후 정상화. 셋업 가이드에 명시 |
 
@@ -237,9 +238,7 @@ Phase 3c + 4 까지 ship 됨. 이후 2026-07-10 사용성 감사로 [admin-impro
 다음 후보:
 
 - **첫 운영**: 실제 작가가 어드민에서 게시물 등록 → 갤러리 업로드 → "사이트에 반영" 까지의 full 흐름을 사용자 테스트
-- **이메일 enrichment**: publish_jobs UI 의 `triggered_by` UUID → 이메일 표시
-- **as never 정리**: `supabase gen types typescript` 도입 후 모든 admin server actions 의 캐스트 제거
-- **ESLint flat config migration**: `next lint` 다시 활성화
+- ~~이메일 enrichment~~ · ~~as never 정리~~ · ~~ESLint flat config~~ — G4 로 해소 (2026-08-30)
 - **영상 oembed**: 영상 미디어 카드에 platform thumbnail 자동 fetch
 - **Phase 3d Team 관리** (보류): 두 번째 admin/editor 초대 UI
 

@@ -70,7 +70,7 @@ export async function addImageMedia(
 
   const { data, error } = await supabase
     .from("post_media")
-    .insert(row as never)
+    .insert(row)
     .select("*")
     .single();
 
@@ -139,7 +139,7 @@ export async function addVideoMedia(
 
   const { data, error } = await supabase
     .from("post_media")
-    .insert(row as never)
+    .insert(row)
     .select("*")
     .single();
 
@@ -164,7 +164,7 @@ export async function updateMediaAlt(
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("post_media")
-    .update({ alt: alt && alt.trim().length > 0 ? alt.trim() : null } as never)
+    .update({ alt: alt && alt.trim().length > 0 ? alt.trim() : null })
     .eq("id", mediaId)
     .select("post_id")
     .maybeSingle();
@@ -221,7 +221,7 @@ export async function reorderMedia(
   const updates = orderedIds.map((id, idx) =>
     supabase
       .from("post_media")
-      .update({ display_order: idx } as never)
+      .update({ display_order: idx })
       .eq("id", id)
       .eq("post_id", postId),
   );

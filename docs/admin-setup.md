@@ -53,6 +53,12 @@ supabase db push
 
 `00002`가 "First admin user not found" 에러를 내면 3단계로 돌아가 사용자를 먼저 만드세요.
 
+스키마를 바꿨다면 TS 타입도 재생성합니다 (프로젝트가 `supabase link` 된 상태여야 함):
+
+```bash
+npm run gen:types   # → types/supabase.ts (생성 파일, 직접 편집 금지)
+```
+
 ## 5. 환경 변수 설정
 
 `.env.local`에 [.env.example](../.env.example)을 복사해 채웁니다.

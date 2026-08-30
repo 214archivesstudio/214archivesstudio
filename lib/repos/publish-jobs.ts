@@ -2,16 +2,14 @@ import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import type { PublishJobRow } from "@/types/database";
 
-export interface PublishJobWithEmail extends PublishJobRow {
-  readonly triggered_by_email: string | null;
-}
-
 /**
  * Most recent publish jobs, newest first. Used for the dashboard audit table.
+ * `triggered_by` stays a UUID — enrichment to email needs the auth admin API,
+ * and the dashboard doesn't show the column (1–2 operator setup).
  */
 export async function listRecentPublishJobs(
   limit = 10,
-): Promise<ReadonlyArray<PublishJobWithEmail>> {
+): Promise<ReadonlyArray<PublishJobRow>> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("publish_jobs")
@@ -23,14 +21,7 @@ export async function listRecentPublishJobs(
     throw new Error(`listRecentPublishJobs failed: ${error.message}`);
   }
 
-  const jobs = (data ?? []) as ReadonlyArray<PublishJobRow>;
-  if (jobs.length === 0) return [];
-
-  // Hydrate triggered_by → email via a separate lookup. auth.users isn't
-  // queryable through PostgREST under default policies; we just expose the
-  // email column when admin queries it via admin API. For now we surface the
-  // UUID and leave email enrichment for a later phase if it becomes important.
-  return jobs.map((j) => ({ ...j, triggered_by_email: null }));
+  return (data ?? []) as ReadonlyArray<PublishJobRow>;
 }
 
 /**

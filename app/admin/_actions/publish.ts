@@ -28,7 +28,7 @@ export async function triggerPublish(): Promise<ActionResult<{ jobId: string }>>
 
   const { data: inserted, error: insertErr } = await supabase
     .from("publish_jobs")
-    .insert({ status: "pending", triggered_by: user.id } as never)
+    .insert({ status: "pending", triggered_by: user.id })
     .select("id")
     .single();
   if (insertErr || !inserted) {
@@ -71,7 +71,7 @@ export async function triggerPublish(): Promise<ActionResult<{ jobId: string }>>
         status: "failed",
         error: dispatchErr ?? "dispatch unknown error",
         completed_at: new Date().toISOString(),
-      } as never)
+      })
       .eq("id", jobId);
     return {
       ok: false,
@@ -113,7 +113,7 @@ export async function markJobTimedOut(
       status: "failed",
       error: "타임아웃: 10분 안에 완료되지 않았습니다",
       completed_at: new Date().toISOString(),
-    } as never)
+    })
     .eq("id", jobId)
     .in("status", ["pending", "running"]);
 

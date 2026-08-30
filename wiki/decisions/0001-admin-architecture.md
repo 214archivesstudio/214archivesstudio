@@ -163,9 +163,9 @@ Phase 3c (media manager) + Phase 4 (publish trigger) 한 ship으로 통합. 본�
 - ~~**Publish 큐 락**~~ → 2026-05-15 amendment 에서 GH Actions concurrency group 으로 해결.
 - ~~**Preview 모드**~~ → 2026-05-15 amendment 에서 v1 미포함으로 결정. 추후 재검토 가능.
 - ~~**이미지 정렬 UI**~~ → `@dnd-kit` 채택 (2026-05-15 ship).
-- **(신규)** `as never` 캐스트 정리 → `supabase gen types typescript` 도입은 별도 phase 후보.
-- **(신규)** 영상 항목 자동 썸네일 fetch (oembed) — 현재는 admin 이 platform/videoId 만 입력하고 카드에 텍스트로 표시. 시각적 thumb 가 필요해지면 별도 phase.
-- **(신규)** `next lint` Next.js 16 호환 — ESLint flat config migration 필요. Phase 3 종료 후 검토.
+- ~~**(신규)** `as never` 캐스트 정리~~ → 2026-08-30 G4 에서 `supabase gen types` 도입 (`types/supabase.ts` 생성 + `types/database.ts` alias). 캐스트 0건.
+- ~~**(신규)** 영상 항목 자동 썸네일 fetch (oembed)~~ → 2026-08-30 G3 에서 YouTube 정적 썸네일 적용. Vimeo 는 oembed 필요 + 현재 0건이라 텍스트 폴백 유지.
+- ~~**(신규)** `next lint` Next.js 16 호환~~ → 2026-08-30 G4 에서 `lint: eslint .` 로 교체 (`next lint` 는 Next 16 에서 제거됨). 공개 사이트 코드의 React Compiler 규칙 위반 3건은 잔존.
 
 ## See also
 

@@ -48,7 +48,7 @@ export default async function TeamPage() {
       <PageHead
         eyebrow="설정"
         title="팀"
-        subtitle={`${members.length}명의 멤버 · Supabase RLS로 권한 관리`}
+        subtitle={`${members.length}명의 멤버 · 역할별 권한`}
       />
 
       <div className="overflow-hidden rounded-[2px] border border-[#2a2a2a]">

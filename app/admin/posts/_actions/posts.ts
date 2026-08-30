@@ -128,7 +128,7 @@ export async function createPost(
   const supabase = await createClient();
   const result = await supabase
     .from("posts")
-    .insert(row as never)
+    .insert(row)
     .select("id")
     .single();
 
@@ -176,7 +176,7 @@ export async function updatePost(
   const supabase = await createClient();
   const { count, error } = await supabase
     .from("posts")
-    .update(updatePayload as never, { count: "exact" })
+    .update(updatePayload, { count: "exact" })
     .eq("id", postId)
     .eq("updated_at", expectedUpdatedAt);
 
@@ -233,7 +233,7 @@ export async function togglePublished(
   const supabase = await createClient();
   const { count, error } = await supabase
     .from("posts")
-    .update({ published: next } as never, { count: "exact" })
+    .update({ published: next }, { count: "exact" })
     .eq("id", postId);
 
   if (error) return mapPostgresError(error);
