@@ -5,6 +5,10 @@
 
 ---
 
+## [2026-08-30] docs | admin-guide 를 카테고리별 시나리오 가이드로 재작성
+
+Phase H5 배포본 기준. 구조: 0 두 가지 개념(공개/초안 vs 변경사항 게시) → 1 공통 조작 A~F(생성·갤러리·수정·공개·게시·삭제) → 2 카테고리별(Showreel·Archives·Film·Photography·Personal: 필수/선택/갤러리 표 + 등록·수정·삭제) → 3 운영 시나리오 → 4 막힘 표 → 5 게시 전 체크리스트. 필수 필드·권한·미디어 규칙은 코드(section-fields, MediaManager, posts-table)로 재확인. 열람용 HTML 아티팩트도 발행.
+
 ## [2026-08-30] verify+fix | H3-1 다중 업로드 실검증 → 선택 순서 보정 추가
 
 사용자가 Cloudinary API 키 제공 → 위젯으로 PNG 5장 3회 동시 업로드(15 자산, Admin API prefix 삭제로 잔여 0). 결과: `display_order` 고유·오름차순·새로고침 유지는 성립하나 순서가 위젯 완료 순서(매회 다름)라 선택 순서와 불일치. `onQueuesEnd`(큐 = 선택 순서) 로 배치 완료 후 `reorderMedia` 1회 호출하는 보정 추가 → 3회차 1,2,3,4,5 확인. 부수: dnd-kit `DndDescribedBy` hydration mismatch → `DndContext id={useId()}`. QA 게시물·계정 삭제(posts 32·users 2·roles 2). Playwright 팁: 위젯 iframe 은 파일 스냅샷에는 잡히고(`Browse` ref), `browser_file_upload` 는 저장소 루트 안 경로만 허용(`.playwright-mcp/` 사용).
