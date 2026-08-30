@@ -5,6 +5,20 @@
 
 ---
 
+## [2026-08-30] ship | Phase G1 마감 — film 영상 썸네일 publish + 문서
+
+G1 잔여 확인: Step 3 DB 마이그레이션은 07-10 에 이미 완료돼 있었으나(8/8 `du_10` URL), 이후 publish 가 한 번도 돌지 않아 `data/films.ts`·공개 사이트는 원본 URL 상태였음. `workflow_dispatch` 로 publish 실행 → `data/films.ts` URL 8줄 교체. 변환 URL 8개 CDN 워밍 + 실측: `/film` 프리로드 **48.7MB → 9.8MB (−80%)**.
+
+문서: [admin-setup §7.1](../docs/admin-setup.md) 영상 preset 추가, [admin-guide](../docs/admin-guide.md) film 업로더 절차·막힘 항목, [g1-plan §4](../docs/admin-phase-g1-plan.md) 게이트 실측, roadmap G1 체크. 부수: 07-10 로그가 언급한 admin-overview 의 "video thumbnail UI 편집 불가" stale 메모는 현재 문서에 존재하지 않음 (이미 제거됨). 다음: G2 (publish 폴링 타임아웃·초안 전환 확인).
+
+## [2026-07-10] audit | 어드민 사용성 감사 + 개선 로드맵 (Phase G1–G4)
+
+어드민 전 화면·전 액션 사용성 감사 수행. 결과: mock/가짜 기능 없음, 게시 파이프라인 실동작 확인. 주요 발견 — ① film `video_thumbnail_url` 이 텍스트 입력만 있어 Cloudinary 콘솔 수동 업로드 필요 (최대 마찰), ② publish 폴링 무한 대기, ③ publish 토글 무확인, ④ 기술 용어 노출·한/영 혼용.
+
+**산출물**: [docs/admin-improvement-roadmap.md](../docs/admin-improvement-roadmap.md) — Phase G1(film 영상 썸네일 업로드) → G2(신뢰성) → G3(편집 경험) → G4(기술 부채). G1∥G2 병렬 가능, G3 은 G1 뒤(같은 폼 파일), G4 는 타입 재생성 때문에 마지막 단독. 참고: [[decisions/0001-admin-architecture]].
+
+부수 발견: admin-overview 의 "video thumbnail URL 은 UI 편집 불가" 메모는 stale — `section-fields.tsx:90-103` 에 film 전용 입력 필드 존재.
+
 ## [2026-06-16] decision | ADR-0002 Supabase keep-alive cron
 
 무료 플랜 Supabase 프로젝트가 7일 미사용으로 일시정지됨 (resume 마감 2026-09-04). 근본 원인은 ADR-0001의 의도된 성질 — 공개 사이트가 정적(`data/*.ts`)이라 방문자 트래픽이 DB를 안 건드림. DB 접근 주체는 어드민·publish job뿐이라, 어드민 미사용 7일이면 요청 0 → 정지.

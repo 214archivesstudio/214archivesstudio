@@ -231,7 +231,9 @@ npm run seed
 
 ## 12. 다음 작업 (Phase 3c + 4 ship 이후)
 
-Phase 3c + 4 까지 ship 됨. 다음 후보:
+Phase 3c + 4 까지 ship 됨. 이후 2026-07-10 사용성 감사로 [admin-improvement-roadmap](./admin-improvement-roadmap.md) (Phase G1–G4) 가 수립됐고 G1(film 영상 썸네일 업로드)은 ship 완료 — 아래 목록은 그 로드맵에 흡수됨.
+
+다음 후보:
 
 - **첫 운영**: 실제 작가가 어드민에서 게시물 등록 → 갤러리 업로드 → "사이트에 반영" 까지의 full 흐름을 사용자 테스트
 - **이메일 enrichment**: publish_jobs UI 의 `triggered_by` UUID → 이메일 표시

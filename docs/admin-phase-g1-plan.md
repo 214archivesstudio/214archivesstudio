@@ -1,6 +1,6 @@
 # 관리자 페이지 — Phase G1 작업 계획 (film 영상 썸네일 업로드)
 
-> **상태**: 📋 계획 확정 (2026-07-10). 착수 전.
+> **상태**: ✅ ship 완료 (코드·DB 마이그레이션 2026-07-10, publish·문서 마감 2026-08-30). 실측 결과는 §4 참조.
 > **범위**: film 게시물의 "영상 썸네일 URL" 텍스트 입력을 Cloudinary 영상 업로드 위젯으로 교체 + 기존 8개 게시물 URL 마이그레이션. 이 하나로 film 섹션이 어드민만으로 완결 운영됨.
 > **참고**: [admin-improvement-roadmap](./admin-improvement-roadmap.md) · [admin-phase-3c-4-plan](./admin-phase-3c-4-plan.md) · [admin-setup §7](./admin-setup.md)
 
@@ -137,12 +137,28 @@ where section = 'film'
 
 ## 4. 검증 게이트 종합 (ship 조건)
 
-- [ ] `tsc --noEmit` · `npx eslint app/admin` 통과
-- [ ] 신규 film 게시물을 **어드민만으로** 등록 → publish → 공개 사이트 hover 재생까지 완주 (Cloudinary 콘솔 무접속)
-- [ ] 기존 8개 카드 hover·배경 영상 회귀 없음
-- [ ] `/film` 프리로드 총 전송량 감소 (Network 탭 before/after 기록)
-- [ ] 30초 영상 업로드 시 10초 트리밍 동작
-- [ ] `NEXT_PUBLIC_CLOUDINARY_VIDEO_UPLOAD_PRESET` 미설정 환경에서 안내 박스 표시 (크래시 없음)
+- [x] `tsc --noEmit` · `npx eslint app/admin` 통과 (2026-07-10 커밋 `d1cfce6`·`662beb3`)
+- [ ] 신규 film 게시물을 **어드민만으로** 등록 → publish → 공개 사이트 hover 재생까지 완주 (Cloudinary 콘솔 무접속) — *실 신규 film 게시물이 생길 때 확인*
+- [x] 기존 8개 카드 hover·배경 영상 회귀 없음 — 변환 URL 8개 모두 200 OK, `video/mp4` (2026-08-30)
+- [x] `/film` 프리로드 총 전송량 감소 — **48.7MB → 9.8MB (−80%)**, 아래 실측표
+- [ ] 30초 영상 업로드 시 10초 트리밍 동작 — *신규 업로드 시 확인* (기존 8개는 `du_10` 적용 URL로 마이그레이션 완료)
+- [x] `NEXT_PUBLIC_CLOUDINARY_VIDEO_UPLOAD_PRESET` 미설정 환경에서 안내 박스 표시 (컴포넌트 env 가드, `thumbnail-uploader` 동일 패턴)
+
+### 4.1 마이그레이션 실측 (2026-08-30, `curl` content-length)
+
+| slug | 원본 | 변환(`du_10,q_auto,vc_auto,w_1280`) |
+|---|---|---|
+| 01-unveil | 6.09MB | 1.08MB |
+| 02-set-it-off | 7.14MB | 1.17MB |
+| 03-not4nerd | 6.03MB | 1.58MB |
+| 04-ewha | 6.38MB | 1.87MB |
+| 05-all-at-once | 5.26MB | 1.51MB |
+| 06-never-forget | 6.27MB | 0.62MB |
+| 07-shanghai | 4.86MB | 1.11MB |
+| 08-about | 6.69MB | 0.82MB |
+| **합계** | **48.7MB** | **9.8MB** |
+
+진행 기록: Step 0–3 은 2026-07-10 완료 (DB `posts.video_thumbnail_url` 8건 모두 변환 URL 확인). Step 4 publish 는 2026-08-30 `workflow_dispatch` 로 실행 — 그 사이 publish 가 한 번도 돌지 않아 `data/films.ts` 가 원본 URL 상태로 남아 있었음. sync diff 는 `data/films.ts` URL 8줄 외 변경 없음.
 
 ---
 

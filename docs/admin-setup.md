@@ -103,6 +103,26 @@ Seed complete: 30/30 posts upserted.
 
 > **왜 unsigned?** signed upload는 서버 시그니처가 필요해 어드민에서 매번 Server Action을 거쳐야 합니다. unsigned로 두되 RLS와 admin 라우트 보호로 권한을 통제합니다. preset에 size·format·folder 제약이 걸려 있어 악용 위험은 낮음.
 
+### 7.1 영상 썸네일 preset (Phase G1, film 전용)
+
+film 게시물의 hover 영상 썸네일을 어드민에서 업로드하려면 **영상 전용 unsigned preset**이 별도로 필요합니다 (이미지 preset의 용량·포맷 제약과 분리하기 위함).
+
+1. **Settings → Upload → Upload presets → Add upload preset**
+2. 다음 값으로 생성:
+   - **Preset name**: `214archives_admin_video`
+   - **Signing Mode**: **Unsigned**
+   - **Asset folder**: `214archives/film`
+   - **Unique filename**: ON / **Overwrite**: OFF
+   - **Allowed formats**: `mp4, webm, mov`
+   - **Max file size**: 200MB
+3. `.env.local` 과 Vercel 환경 변수에 추가:
+   ```
+   NEXT_PUBLIC_CLOUDINARY_VIDEO_UPLOAD_PRESET=214archives_admin_video
+   ```
+4. 어드민에서 film 게시물 편집 → "영상 썸네일" 업로더가 안내 박스 대신 업로드 버튼으로 표시되면 완료.
+
+> 업로드된 원본은 그대로 보존되고, DB에는 `du_10,q_auto,vc_auto,w_1280` 변환이 적용된 딜리버리 URL(앞 10초·자동 압축·최대 폭 1280)이 저장됩니다. 상세: [admin-phase-g1-plan §2](./admin-phase-g1-plan.md).
+
 ## 8. GitHub Actions Publish Trigger (Phase 4)
 
 어드민의 "사이트에 반영" 버튼은 `repository_dispatch`로 [.github/workflows/publish.yml](../.github/workflows/publish.yml)을 트리거합니다. 두 가지 셋업이 필요:
@@ -149,6 +169,7 @@ Seed complete: 30/30 posts upserted.
 | `NEXT_PUBLIC_SITE_URL` | `https://214archives.studio` | dev 의 `localhost:3001` 과 다름 |
 | `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` | 클라우드 네임 | 이미 등록돼 있을 수 있음 |
 | `NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET` | 7번 에서 만든 preset | 어드민 업로드 위젯용 |
+| `NEXT_PUBLIC_CLOUDINARY_VIDEO_UPLOAD_PRESET` | 7.1 에서 만든 영상 preset | film 영상 썸네일 업로더용 |
 
 등록 후 **Deployments → 최신 Production → Redeploy** (또는 main 에 빈 commit push) 로 env 를 적용합니다. 재배포 없이는 새 env 가 반영 안 됨.
 
