@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { cloneElement, isValidElement, useId, type ReactElement, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 interface FieldProps {
@@ -11,6 +11,12 @@ interface FieldProps {
   readonly className?: string;
 }
 
+/**
+ * Label + control + error. When `error` is set and `children` is a single
+ * element, the control receives `aria-describedby` pointing at the error text
+ * so screen readers announce it. The error node carries `data-field-error`
+ * so the form can scroll to the first failing field.
+ */
 export function Field({
   label,
   hint,
@@ -20,6 +26,14 @@ export function Field({
   htmlFor,
   className,
 }: FieldProps) {
+  const errorId = useId();
+  const control =
+    error && isValidElement(children)
+      ? cloneElement(children as ReactElement<Record<string, unknown>>, {
+          "aria-describedby": errorId,
+        })
+      : children;
+
   return (
     <div className={cn("mb-6", className)}>
       <label htmlFor={htmlFor} className="block">
@@ -34,10 +48,12 @@ export function Field({
             </span>
           )}
         </div>
-        {children}
+        {control}
       </label>
       {error && (
-        <p className="mt-1 text-[11px] text-[#e2a98c]">{error}</p>
+        <p id={errorId} data-field-error className="mt-1 text-[11px] text-[#e2a98c]">
+          {error}
+        </p>
       )}
     </div>
   );

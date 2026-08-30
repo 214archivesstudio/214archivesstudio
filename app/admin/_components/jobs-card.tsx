@@ -75,7 +75,10 @@ export function JobsCard({ jobs }: JobsCardProps) {
                   </Pill>
                 </td>
                 <td className="px-6 py-4 align-middle">
-                  <span className="line-clamp-2 text-[12px] text-accent">
+                  <span
+                    className="line-clamp-2 text-[12px] text-accent"
+                    title={j.message && j.error ? j.error : undefined}
+                  >
                     {j.message || j.error || "—"}
                   </span>
                 </td>

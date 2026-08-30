@@ -128,7 +128,7 @@ export function VideoThumbnailUploader({
       </details>
 
       {fieldError && (
-        <p className="text-[12px] text-[#e2a98c]">{fieldError}</p>
+        <p data-field-error className="text-[12px] text-[#e2a98c]">{fieldError}</p>
       )}
     </div>
   );

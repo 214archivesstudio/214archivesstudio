@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { Btn, type BtnVariant } from "../../_components/ui/Btn";
 
 interface DeleteDialogProps {
@@ -30,13 +30,48 @@ export function DeleteDialog({
 }: DeleteDialogProps) {
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const panelRef = useRef<HTMLDivElement>(null);
 
+  // 초기 포커스(취소 버튼) · Tab 순환 · 배경 스크롤 잠금 · 닫힐 때 포커스 복원
   useEffect(() => {
+    const panel = panelRef.current;
+    if (!panel) return;
+    const previousFocus = document.activeElement as HTMLElement | null;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const focusables = () =>
+      Array.from(
+        panel.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), [href], input, textarea, select, [tabindex]:not([tabindex="-1"])',
+        ),
+      );
+    focusables()[0]?.focus();
+
     function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const els = focusables();
+      if (els.length === 0) return;
+      const first = els[0];
+      const last = els[els.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     }
     document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = previousOverflow;
+      previousFocus?.focus();
+    };
   }, [onClose]);
 
   function handleConfirm() {
@@ -60,7 +95,10 @@ export function DeleteDialog({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="w-full max-w-sm border border-[#2a2a2a] bg-background rounded-[2px] p-6 space-y-5">
+      <div
+        ref={panelRef}
+        className="w-full max-w-sm border border-[#2a2a2a] bg-background rounded-[2px] p-6 space-y-5"
+      >
         <h2
           id="delete-dialog-title"
           className="text-[15px] font-normal tracking-[0.06em] text-foreground"

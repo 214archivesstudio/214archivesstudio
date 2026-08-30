@@ -5,6 +5,10 @@
 
 ---
 
+## [2026-08-30] ship | Phase H Step 0 + H1 — 연속 저장 검증 통과, 피드백·안전망 8건
+
+Step 0: 편집 화면 연속 저장 v1→v2→v3 성공 — 정적 리뷰 Open Q 해소, H1 편입 없음. H1: 저장 토스트, 검증 에러 clear-on-edit(token 파생 방식), 첫 에러 스크롤+상단 요약, Field/Input/Textarea aria 연결, `app/admin/error.tsx`·`not-found.tsx`, 다이얼로그 초기 포커스·Tab 트랩·스크롤 잠금·포커스 복원, alt "저장됨", 게시 실패 사람 문장(원문은 툴팁). 검증: tsc·eslint·build + Playwright 실주행(임시 계정, 종료 후 삭제). 다음: H2 (셸 반응형 + 팀 화면 제거).
+
 ## [2026-08-30] plan | Phase H — 어드민 평가 후속 개선 계획 + 팀 화면 제거 결정
 
 G1–G4 직후 임시 admin 계정으로 어드민 전 흐름을 Playwright 실주행(14개, 오동작 0) + critic 정적 리뷰 교차 검증. 판정 REVISE: 저장 성공 피드백 없음, 모바일 셸 오버플로(375px scrollWidth 683), 다중 업로드 순서 경쟁, 서버 컴포넌트 UTC 시각, 검색어 쉼표 크래시, 에러 화면 부재, 수동 publish 미반영(drift 거짓 8건 — 버튼으로 정상화). **결정**: 개인 포트폴리오라 팀 화면 제거(`user_roles`·RLS 는 유지), editor 관련 3건은 보류. 산출물: [docs/admin-phase-h-plan.md](../docs/admin-phase-h-plan.md) — H1 피드백·안전망 → H2 셸·팀 제거 → H3 정합성 → H4 게시 파이프라인 (+H5 부채), ~8h. Step 0 로 "편집 화면 연속 저장" 재현 검증 선행.

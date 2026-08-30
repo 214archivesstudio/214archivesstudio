@@ -14,6 +14,7 @@ export function Textarea({
   return (
     <textarea
       rows={rows}
+      aria-invalid={invalid ? true : undefined}
       {...rest}
       className={cn(
         "w-full bg-transparent text-[15px] text-foreground placeholder:text-[#555]",

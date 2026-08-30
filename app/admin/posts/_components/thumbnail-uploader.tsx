@@ -117,7 +117,7 @@ export function ThumbnailUploader({
       </CldUploadWidget>
 
       {fieldError && (
-        <p className="text-[12px] text-[#e2a98c]">{fieldError}</p>
+        <p data-field-error className="text-[12px] text-[#e2a98c]">{fieldError}</p>
       )}
     </div>
   );

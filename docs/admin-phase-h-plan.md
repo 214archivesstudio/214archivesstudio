@@ -1,6 +1,6 @@
 # 관리자 페이지 — Phase H 작업 계획 (평가 후속 개선)
 
-> **상태**: 📋 계획 (2026-08-30 수립). 착수 전.
+> **상태**: 🔧 진행 중 — Step 0 ✅ · H1 ✅ (2026-08-30) · H2–H4 착수 전.
 > **입력**: 2026-08-30 어드민 사용성·기능 평가 — Playwright 실주행 14개 흐름 + 코드 정적 리뷰(critic) 교차 검증. 판정 REVISE. 보고서: [어드민 사용성·기능 평가](https://claude.ai/code/artifact/c0a3e239-fc09-4c8b-a1af-7f9e0a582a89) (비공개 아티팩트).
 > **범위**: 평가에서 나온 High 6 · Med 14 · Low 3 중 **개인 포트폴리오 운영(admin 1인)** 에 실제로 영향 있는 것. 팀 화면 제거 포함.
 > **참고**: [admin-improvement-roadmap](./admin-improvement-roadmap.md) (G1–G4 완료) · [admin-overview](./admin-overview.md) · [ADR-0001](../wiki/decisions/0001-admin-architecture.md)
@@ -48,6 +48,8 @@ G1–G4 로드맵을 마친 직후 어드민을 처음으로 **로그인해서 �
 
 **verify**: 연속 2회 저장 성공.
 
+> ✅ 2026-08-30 실행: 임시 게시물에서 v1→v2→v3 연속 저장 성공, 충돌 에러 없음. `useActionState` 가 리렌더마다 바인딩된 action 을 갱신하므로 정상. **H1 편입 없음.**
+
 ### Step H1 — 피드백·안전망 (~2시간) 🔴
 
 | # | 작업 | 대상 파일 | 비고 |
@@ -62,6 +64,10 @@ G1–G4 로드맵을 마친 직후 어드민을 처음으로 **로그인해서 �
 | H1-8 | 실패한 게시 메시지 사람 문장 매핑 | `_actions/publish.ts`, `jobs-card.tsx` | 401/403 → "GitHub 토큰이 만료됐거나 권한이 없습니다", 404 → "저장소 설정 확인". 원문은 `title` 툴팁 |
 
 **verify (브라우저)**: 편집 저장 → 토스트. 빈 제목 제출 → 상단 요약 + 스크롤 + 입력하면 에러 즉시 소멸. `/admin/posts/없는-id` → not-found 화면에서 목록 복귀. 삭제 다이얼로그 열면 포커스가 취소 버튼, Tab 이 밖으로 안 나감.
+
+> ✅ 2026-08-30 ship. Playwright 실주행 결과: 저장 토스트 "저장했어요" 표시 · 빈 제목 제출 시 "입력 1곳을 확인해 주세요" + scrollY 850→113 + 제목 필드 포커스 + `aria-invalid="true"` / `aria-describedby`→에러 문구 · 제목 입력 즉시 에러·요약 소멸 · 다이얼로그 초기 포커스 "취소", Tab 2회에 순환, Escape 후 포커스가 "삭제…" 버튼으로 복원 + `body overflow` 해제 · 존재하지 않는 id → 404 화면(셸 안, 목록/대시보드 링크). H1-7(alt 저장됨)·H1-8(실패 문구)은 이미지 업로드·GitHub 실패를 재현하지 않아 코드 검증만.
+>
+> 구현 메모: clear-on-edit 는 서버 `fieldErrors` 를 로컬로 복사하지 않고 `{token: state, keys}` 로 "이 제출 결과에서 지운 키" 만 기억해 파생 — effect 내 setState 없이 `react-hooks/set-state-in-effect` 통과. `Field` 는 `useId` 로 에러 id 를 만들고 단일 자식일 때만 `cloneElement` 로 `aria-describedby` 주입(업로더처럼 복합 자식은 스킵). 실패 문구는 `publish_jobs.message` 에 사람 문장, `error` 에 원문을 두고 활동 표에서 `title` 툴팁으로 노출.
 
 ### Step H2 — 셸 반응형 + 팀 화면 제거 (~1.5시간) 🔴
 

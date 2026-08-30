@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import Image from "next/image";
 import { CldImage } from "next-cloudinary";
 import { useSortable } from "@dnd-kit/sortable";
@@ -120,6 +120,14 @@ function AltInput({ media, onAltChange }: AltInputProps) {
   const [savedAlt, setSavedAlt] = useState(media.alt ?? "");
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [justSaved, setJustSaved] = useState(false);
+  const savedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (savedTimer.current) clearTimeout(savedTimer.current);
+    };
+  }, []);
 
   function handleBlur() {
     if (alt === savedAlt) return;
@@ -128,6 +136,9 @@ function AltInput({ media, onAltChange }: AltInputProps) {
       try {
         await onAltChange(media.id, alt);
         setSavedAlt(alt);
+        setJustSaved(true);
+        if (savedTimer.current) clearTimeout(savedTimer.current);
+        savedTimer.current = setTimeout(() => setJustSaved(false), 1500);
       } catch (err) {
         setError((err as Error).message);
         setAlt(savedAlt);
@@ -147,6 +158,11 @@ function AltInput({ media, onAltChange }: AltInputProps) {
         className="w-full border-0 border-b border-[#2a2a2a] bg-transparent px-0 py-1 text-[11px] text-accent placeholder:text-[#555] outline-none transition-colors focus:border-foreground disabled:opacity-60"
       />
       {error && <p className="text-[10px] text-[#e2a98c]">{error}</p>}
+      {justSaved && !error && (
+        <p className="text-[10px] text-muted" aria-live="polite">
+          저장됨
+        </p>
+      )}
     </>
   );
 }

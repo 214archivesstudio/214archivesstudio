@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import Link from "next/link";
+import { toast } from "sonner";
 import { Btn } from "../../_components/ui/Btn";
 import { CardLabel } from "../../_components/ui/Card";
 import { Field } from "../../_components/ui/Field";
@@ -13,6 +14,7 @@ import {
   createPost,
   updatePost,
   type ActionResult,
+  type FieldErrors,
 } from "../_actions/posts";
 import { SectionPicker } from "./section-picker";
 import { SectionFields } from "./section-fields";
@@ -55,10 +57,47 @@ export function PostForm({ mode, initial }: PostFormProps) {
     undefined,
   );
 
-  const fieldErrors = state && !state.ok ? state.fieldErrors : undefined;
+  const serverFieldErrors = state && !state.ok ? state.fieldErrors : undefined;
   const errorMessage = state && !state.ok ? state.error : undefined;
 
+  // 서버 검증 에러는 사용자가 해당 필드를 고치는 즉시 지운다. `token` 으로
+  // 어느 제출 결과에 대한 clear 인지 묶어, 다음 제출 결과가 오면 자동 초기화.
+  const [cleared, setCleared] = useState<{
+    readonly token: unknown;
+    readonly keys: ReadonlySet<string>;
+  }>({ token: undefined, keys: new Set() });
+  const fieldErrors: FieldErrors | undefined = serverFieldErrors
+    ? Object.fromEntries(
+        Object.entries(serverFieldErrors).filter(
+          ([key]) => !(cleared.token === state && cleared.keys.has(key)),
+        ),
+      )
+    : undefined;
+  const fieldErrorCount = Object.keys(fieldErrors ?? {}).length;
+
+  function clearFieldError(name: string) {
+    setCleared((prev) => ({
+      token: state,
+      keys: new Set(prev.token === state ? [...prev.keys, name] : [name]),
+    }));
+  }
+
+  const formRef = useRef<HTMLFormElement>(null);
   const dirtyRef = useRef(false);
+
+  // 제출 결과 피드백: 성공 토스트 / 실패 시 첫 에러 필드로 스크롤
+  useEffect(() => {
+    if (!state) return;
+    if (state.ok) {
+      if (isEdit) toast.success("저장했어요");
+      return;
+    }
+    const first = formRef.current?.querySelector<HTMLElement>(
+      '[aria-invalid="true"], [data-field-error]',
+    );
+    first?.scrollIntoView({ block: "center", behavior: "smooth" });
+    if (first?.matches("input, textarea")) first.focus({ preventScroll: true });
+  }, [state, isEdit]);
 
   useEffect(() => {
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
@@ -80,18 +119,21 @@ export function PostForm({ mode, initial }: PostFormProps) {
 
   return (
     <form
+      ref={formRef}
       action={(formData) => {
         dirtyRef.current = false;
         formAction(formData);
       }}
-      onChange={() => {
+      onChange={(event) => {
         dirtyRef.current = true;
+        const name = (event.target as unknown as { name?: string }).name;
+        if (name) clearFieldError(name);
       }}
       className="space-y-10"
     >
-      {errorMessage && (
+      {(errorMessage || fieldErrorCount > 0) && (
         <div className="rounded-[2px] border border-[#5a3322] bg-[#e2a98c]/5 px-3 py-2 text-[13px] text-[#e2a98c]">
-          {errorMessage}
+          {errorMessage ?? `입력 ${fieldErrorCount}곳을 확인해 주세요.`}
         </div>
       )}
 
@@ -177,7 +219,10 @@ export function PostForm({ mode, initial }: PostFormProps) {
             video_thumbnail_url: initial?.video_thumbnail_url,
           }}
           fieldErrors={fieldErrors}
-          onDirty={() => { dirtyRef.current = true; }}
+          onDirty={() => {
+            dirtyRef.current = true;
+            clearFieldError("video_thumbnail_url");
+          }}
         />
       </div>
 
@@ -189,7 +234,10 @@ export function PostForm({ mode, initial }: PostFormProps) {
           initialHeight={initial?.thumbnail_height}
           initialAlt={initial?.thumbnail_alt ?? undefined}
           fieldError={fieldErrors?.thumbnail_public_id}
-          onDirty={() => { dirtyRef.current = true; }}
+          onDirty={() => {
+            dirtyRef.current = true;
+            clearFieldError("thumbnail_public_id");
+          }}
         />
         <div className="mt-4">
           <Field

@@ -11,6 +11,20 @@ import type { ActionResult } from "../posts/_actions/posts";
 const GITHUB_API = "https://api.github.com";
 const EVENT_TYPE = "publish-content";
 
+/** 운영자에게 보여줄 문장. 원문(status + body)은 publish_jobs.error 에 그대로 남긴다. */
+function describeDispatchFailure(status: number | null): string {
+  if (status === 401 || status === 403) {
+    return "GitHub 토큰이 만료됐거나 권한이 없습니다. 관리자에게 토큰 갱신을 요청하세요.";
+  }
+  if (status === 404) {
+    return "GitHub 저장소 설정을 찾을 수 없습니다 (GITHUB_DISPATCH_REPO 확인).";
+  }
+  if (status === null) {
+    return "GitHub에 연결하지 못했습니다. 잠시 후 다시 시도하세요.";
+  }
+  return `GitHub 요청이 실패했습니다 (${status}). 잠시 후 다시 시도하세요.`;
+}
+
 export async function triggerPublish(): Promise<ActionResult<{ jobId: string }>> {
   const user = await requireAdmin();
 
@@ -41,6 +55,7 @@ export async function triggerPublish(): Promise<ActionResult<{ jobId: string }>>
 
   let dispatchOk = false;
   let dispatchErr: string | null = null;
+  let dispatchStatus: number | null = null;
   try {
     const response = await fetch(`${GITHUB_API}/repos/${repo}/dispatches`, {
       method: "POST",
@@ -56,6 +71,7 @@ export async function triggerPublish(): Promise<ActionResult<{ jobId: string }>>
       }),
     });
     dispatchOk = response.ok;
+    dispatchStatus = response.status;
     if (!response.ok) {
       const text = await response.text();
       dispatchErr = `${response.status} ${response.statusText}: ${text.slice(0, 200)}`;
@@ -65,18 +81,17 @@ export async function triggerPublish(): Promise<ActionResult<{ jobId: string }>>
   }
 
   if (!dispatchOk) {
+    const friendly = describeDispatchFailure(dispatchStatus);
     await supabase
       .from("publish_jobs")
       .update({
         status: "failed",
+        message: friendly,
         error: dispatchErr ?? "dispatch unknown error",
         completed_at: new Date().toISOString(),
       })
       .eq("id", jobId);
-    return {
-      ok: false,
-      error: `GitHub Actions 트리거 실패: ${dispatchErr ?? "unknown"}`,
-    };
+    return { ok: false, error: friendly };
   }
 
   revalidatePath("/admin");
