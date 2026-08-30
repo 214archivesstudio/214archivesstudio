@@ -82,7 +82,7 @@ export async function triggerPublish(): Promise<ActionResult<{ jobId: string }>>
 
   if (!dispatchOk) {
     const friendly = describeDispatchFailure(dispatchStatus);
-    await supabase
+    const { error: compensateErr } = await supabase
       .from("publish_jobs")
       .update({
         status: "failed",
@@ -91,6 +91,14 @@ export async function triggerPublish(): Promise<ActionResult<{ jobId: string }>>
         completed_at: new Date().toISOString(),
       })
       .eq("id", jobId);
+    if (compensateErr) {
+      // pending 행이 남아 버튼이 잠긴다 — 10분 타임아웃(G2-1)이 풀어주지만 사용자에게 알린다.
+      console.error("publish_jobs compensation failed", { jobId, error: compensateErr.message });
+      return {
+        ok: false,
+        error: `${friendly} (게시 상태 기록도 실패해 10분 뒤 자동으로 해제됩니다)`,
+      };
+    }
     return { ok: false, error: friendly };
   }
 

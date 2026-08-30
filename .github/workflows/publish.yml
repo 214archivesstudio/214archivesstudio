@@ -1,8 +1,10 @@
 name: Publish Content
 
-# Triggered by the admin "사이트에 반영" button via repository_dispatch with
+# Triggered by the admin "변경사항 게시" button via repository_dispatch with
 # client_payload.job_id (publish_jobs.id in Supabase). workflow_dispatch is a
-# manual fallback for ops/recovery; job_id is optional there.
+# manual fallback for ops/recovery; job_id is optional there — when omitted the
+# workflow inserts its own publish_jobs row so the dashboard's drift/last-publish
+# stays truthful (Phase H4-1).
 on:
   repository_dispatch:
     types: [publish-content]
@@ -26,7 +28,6 @@ jobs:
     env:
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-      JOB_ID: ${{ github.event.client_payload.job_id || github.event.inputs.job_id }}
       RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
     steps:
       - uses: actions/checkout@v4
@@ -41,6 +42,31 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      # JOB_ID is resolved here (not at job level) so a manual run can create its
+      # own row and every later step sees the same value via GITHUB_ENV.
+      - name: Resolve job id
+        env:
+          INPUT_JOB_ID: ${{ github.event.client_payload.job_id || github.event.inputs.job_id }}
+        run: |
+          JOB_ID="$INPUT_JOB_ID"
+          MANUAL="false"
+          if [ -z "$JOB_ID" ]; then
+            MANUAL="true"
+            RESP=$(curl -sS -X POST \
+              "$SUPABASE_URL/rest/v1/publish_jobs" \
+              -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+              -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+              -H "Content-Type: application/json" \
+              -H "Prefer: return=representation" \
+              -d '{"status":"pending","message":"수동 실행 (GitHub Actions)"}') || RESP=""
+            JOB_ID=$(printf '%s' "$RESP" | jq -r '.[0].id // empty' 2>/dev/null || true)
+            if [ -z "$JOB_ID" ]; then
+              echo "::warning::publish_jobs row could not be created for this manual run; dashboard drift will not update."
+            fi
+          fi
+          echo "JOB_ID=$JOB_ID" >> "$GITHUB_ENV"
+          echo "MANUAL=$MANUAL" >> "$GITHUB_ENV"
 
       - name: Mark job running
         if: env.JOB_ID != ''
@@ -79,8 +105,10 @@ jobs:
             if [ "${{ steps.commit.outputs.diff_empty }}" = "true" ]; then
               MSG="변경 사항 없음 (이미 사이트와 동기화됨)"
             else
-              MSG="사이트에 반영됨"
+              # git push 만 끝난 시점 — 실제 반영은 Vercel 빌드 후 (1~3분)
+              MSG="빌드 시작됨 · 1~3분 후 사이트 반영"
             fi
+            if [ "$MANUAL" = "true" ]; then MSG="$MSG · 수동 실행"; fi
             ERR=""
           else
             STATUS="failed"

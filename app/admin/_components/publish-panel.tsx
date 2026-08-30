@@ -68,8 +68,12 @@ export function PublishPanel({
       }
       const elapsed = Date.now() - new Date(job.created_at).getTime();
       if (elapsed < PUBLISH_TIMEOUT_MS) return;
-      // 서버 기록 실패(예: editor 권한)여도 UI 는 타임아웃으로 전환한다.
-      await markJobTimedOut(job.id);
+      // 서버 기록이 실패해도(권한·네트워크) UI 는 반드시 타임아웃으로 전환한다.
+      try {
+        await markJobTimedOut(job.id);
+      } catch {
+        // 기록 실패는 무시 — 행은 남지만 다음 로드에서 다시 타임아웃 처리된다.
+      }
       if (cancelled) return;
       setActiveJobId(null);
       setTimedOut(true);

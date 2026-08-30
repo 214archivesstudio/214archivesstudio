@@ -5,6 +5,10 @@
 
 ---
 
+## [2026-08-30] ship | Phase H4 — 게시 파이프라인 (코드 완료, 라이브 검증은 push 후)
+
+publish.yml: `JOB_ID` 를 첫 단계 "Resolve job id" 에서 `GITHUB_ENV` 로 확정, 수동 실행이면 REST insert 로 `publish_jobs` 행 생성(비차단), 결과 문구 "빌드 시작됨 · 1~3분 후 사이트 반영"(+ "· 수동 실행"). `getLastSuccessAt` 이 `created_at` 반환(sync 시각 이전 기준) + `completed_at IS NOT NULL`. 패널 `markJobTimedOut` try/catch, 보상 UPDATE 실패 시 로깅 + "10분 뒤 자동 해제" 안내. 검증: 스니펫 로컬 실행(행 생성·파싱·삭제), js-yaml, tsc·eslint·build. **주의**: 워크플로는 origin 파일로 실행되므로 `gh workflow run` 검증은 push 후. 남은 것: H5(여유 시), H6 문서 마감.
+
 ## [2026-08-30] ship | Phase H3 — 정합성 (업로드 순번·KST 시각·검색 살균·최신순)
 
 다중 업로드 순번(위젯 세션 카운터 → 서버 `max+1+index`, 로컬 `display_order` 정렬, `created_at` 2차 키), 서버 컴포넌트 시각 KST + "오전/오후" 직접 조립(ICU 의존 제거), 검색어 PostgREST 메타문자 살균 + 검색 중 탭 카운트 숨김 + 검색 지우기, 목록 기본 정렬 `updated_at DESC`, drift "외 N건", 용어 3곳, created 배너 → 1회성 토스트(`history.replaceState` + `setTimeout 0`). 실주행 검증 완료(업로드 순서는 코드 검증만). 다음: H4 (게시 파이프라인).

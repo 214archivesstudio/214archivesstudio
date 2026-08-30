@@ -1,6 +1,6 @@
 # 관리자 페이지 — Phase H 작업 계획 (평가 후속 개선)
 
-> **상태**: 🔧 진행 중 — Step 0 ✅ · H1 ✅ · H2 ✅ · H3 ✅ (2026-08-30) · H4 착수 전.
+> **상태**: 🔧 진행 중 — Step 0 ✅ · H1 ✅ · H2 ✅ · H3 ✅ · H4 ✅ 코드 완료 (2026-08-30, **라이브 검증은 push 후**) · H5 여유 시 · H6 문서 마감 잔여.
 > **입력**: 2026-08-30 어드민 사용성·기능 평가 — Playwright 실주행 14개 흐름 + 코드 정적 리뷰(critic) 교차 검증. 판정 REVISE. 보고서: [어드민 사용성·기능 평가](https://claude.ai/code/artifact/c0a3e239-fc09-4c8b-a1af-7f9e0a582a89) (비공개 아티팩트).
 > **범위**: 평가에서 나온 High 6 · Med 14 · Low 3 중 **개인 포트폴리오 운영(admin 1인)** 에 실제로 영향 있는 것. 팀 화면 제거 포함.
 > **참고**: [admin-improvement-roadmap](./admin-improvement-roadmap.md) (G1–G4 완료) · [admin-overview](./admin-overview.md) · [ADR-0001](../wiki/decisions/0001-admin-architecture.md)
@@ -117,6 +117,12 @@ G1–G4 로드맵을 마친 직후 어드민을 처음으로 **로그인해서 �
 | H4-6 | 보상 UPDATE 실패 로깅 | `_actions/publish.ts:67–80` | 실패 시 반환 메시지에 "10분 뒤 자동 해제" |
 
 **verify**: `gh workflow run publish.yml` (job_id 없이) → publish_jobs 에 행 생성 + 대시보드 "마지막 게시 방금". 어드민 버튼 publish → 최근 활동 문구 확인.
+
+> ✅ 2026-08-30 코드 완료. **라이브 검증 보류** — `workflow_dispatch` 는 origin 의 워크플로 파일을 실행하므로 push 전에는 새 워크플로를 돌릴 수 없다. 대신 "Resolve job id" 단계의 셸 스니펫을 로컬 env 로 그대로 실행해 검증: REST insert → `{"status":"pending","message":"수동 실행 (GitHub Actions)","triggered_by":null}` 행 생성, `jq` 로 id 파싱 성공, 테스트 행 삭제(204). YAML 은 js-yaml 파싱 통과. `tsc`·`eslint`·`next build` 통과.
+>
+> **push 후 확인 절차**: ① `gh workflow run publish.yml` (입력 없이) → 완료 후 대시보드 최근 활동에 "완료 · 변경 사항 없음 … · 수동 실행" 행 + "마지막 게시 방금" ② 어드민 "변경사항 게시" → 활동 표 문구 "빌드 시작됨 · 1~3분 후 사이트 반영"(변경 있을 때).
+>
+> 구현 메모: `JOB_ID` 를 job-level `env:` 에서 빼고 첫 단계 "Resolve job id" 가 `GITHUB_ENV` 로 확정 — job-level env 와 `GITHUB_ENV` 의 우선순위 모호성을 피하고 이후 단계(`Mark job running`/`Mark job result`)는 무변경. 행 생성 실패는 `::warning::` 만 내고 게시는 계속(비차단). drift 기준은 `getLastSuccessAt` 이 `created_at` 을 반환하도록 바꿔 호출부(`getDriftCount`/`listDriftPosts`/`DriftBadge`/`publish-panel`) 무변경. `completed_at IS NOT NULL` 가드 포함.
 
 ### Step H5 — 잠재 부채 (여유 시, ~3시간) ⚪
 

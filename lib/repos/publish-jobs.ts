@@ -25,21 +25,28 @@ export async function listRecentPublishJobs(
 }
 
 /**
- * timestamp of the most recently completed (success) publish, or null if there
- * has never been one. Used to compute drift.
+ * Start time (`created_at`) of the most recent successful publish, or null if
+ * there has never been one. Used to compute drift.
+ *
+ * Why created_at, not completed_at: the workflow reads content in its Sync step
+ * well before it marks the job complete. A post saved in that window would be
+ * missing from the site yet invisible to drift if we compared against
+ * completed_at. created_at ≤ sync time, so it errs on "show as unsynced".
+ * Rows whose completed_at is null are ignored (never finalised).
  */
 export async function getLastSuccessAt(): Promise<string | null> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("publish_jobs")
-    .select("completed_at")
+    .select("created_at")
     .eq("status", "success")
-    .order("completed_at", { ascending: false })
+    .not("completed_at", "is", null)
+    .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();
 
   if (error) throw new Error(`getLastSuccessAt failed: ${error.message}`);
-  return (data as { completed_at: string | null } | null)?.completed_at ?? null;
+  return (data as { created_at: string } | null)?.created_at ?? null;
 }
 
 /**
