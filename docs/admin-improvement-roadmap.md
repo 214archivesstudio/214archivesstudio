@@ -1,6 +1,7 @@
 # 관리자 페이지 — 개선 로드맵 (Phase G1–G4)
 
 > **상태**: ✅ 전 Phase ship 완료 (G1–G4, 2026-08-30). 각 §1 구현 메모 참조. 잔여: 공개 사이트 코드 lint 3건 (G4-2 메모).
+> **후속**: 2026-08-30 실주행 평가(REVISE) → [admin-phase-h-plan](./admin-phase-h-plan.md) (피드백·반응형·정합성·게시 파이프라인 + 팀 화면 제거).
 > **범위**: 기존 어드민(Phase 3c+4 ship 완료본)의 사용성 개선. 신규 기능이 아니라 실사용 마찰 제거가 목적.
 > **참고**: [admin-phase-3c-4-plan](./admin-phase-3c-4-plan.md) · [admin-overview](./admin-overview.md) · [ADR-0001](../wiki/decisions/0001-admin-architecture.md)
 

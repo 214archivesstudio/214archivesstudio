@@ -5,6 +5,10 @@
 
 ---
 
+## [2026-08-30] plan | Phase H — 어드민 평가 후속 개선 계획 + 팀 화면 제거 결정
+
+G1–G4 직후 임시 admin 계정으로 어드민 전 흐름을 Playwright 실주행(14개, 오동작 0) + critic 정적 리뷰 교차 검증. 판정 REVISE: 저장 성공 피드백 없음, 모바일 셸 오버플로(375px scrollWidth 683), 다중 업로드 순서 경쟁, 서버 컴포넌트 UTC 시각, 검색어 쉼표 크래시, 에러 화면 부재, 수동 publish 미반영(drift 거짓 8건 — 버튼으로 정상화). **결정**: 개인 포트폴리오라 팀 화면 제거(`user_roles`·RLS 는 유지), editor 관련 3건은 보류. 산출물: [docs/admin-phase-h-plan.md](../docs/admin-phase-h-plan.md) — H1 피드백·안전망 → H2 셸·팀 제거 → H3 정합성 → H4 게시 파이프라인 (+H5 부채), ~8h. Step 0 로 "편집 화면 연속 저장" 재현 검증 선행.
+
 ## [2026-08-30] ship | Phase G4 — 생성 타입 도입·lint 복구·이메일 열 제거·용어 정리 (로드맵 G1–G4 완료)
 
 G4-1 `npm run gen:types` → `types/supabase.ts`, `types/database.ts` 는 alias 로 축소, `as never` 0건. G4-2 `lint: eslint .` (+`handoff/` ignore) — 어드민·lib·types 0건, 공개 사이트 코드 3건 잔존(React Compiler 규칙, 별도 작업). G4-3 `triggered_by_email` 열 제거. G4-4 어드민 UI 의 GitHub/Vercel/Supabase/RLS 노출 문구 정리. 검증: `tsc`·`eslint app/admin lib types`·`next build` 통과. 이로써 [admin-improvement-roadmap](../docs/admin-improvement-roadmap.md) G1–G4 전부 ship. ADR-0001 Open Q 3건 취소선 처리.
