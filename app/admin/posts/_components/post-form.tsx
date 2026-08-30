@@ -21,14 +21,8 @@ import { SectionFields } from "./section-fields";
 import { SlugInput } from "./slug-input";
 import { ThumbnailUploader } from "./thumbnail-uploader";
 import type { PostRow, PostSection } from "@/types/database";
+import { SECTION_LABEL } from "@/lib/sections";
 
-const SECTION_LABEL: Record<PostSection, string> = {
-  showreel: "Showreel",
-  archives: "Archives",
-  film: "Film",
-  photography: "Photography",
-  personal: "Personal",
-};
 
 interface PostFormProps {
   readonly mode: "create" | "edit";

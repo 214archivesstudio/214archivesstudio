@@ -11,14 +11,8 @@ import { DeletePostButton } from "../_components/delete-post-button";
 import { CreatedToast } from "../_components/created-toast";
 import { MediaManager } from "../_components/media/MediaManager";
 import type { PostSection } from "@/types/database";
+import { SECTION_LABEL } from "@/lib/sections";
 
-const SECTION_LABEL: Record<PostSection, string> = {
-  showreel: "Showreel",
-  archives: "Archives",
-  film: "Film",
-  photography: "Photography",
-  personal: "Personal",
-};
 
 interface PageProps {
   readonly params: Promise<{ id: string }>;
@@ -63,7 +57,7 @@ export default async function EditPostPage({ params, searchParams }: PageProps) 
         }
       />
 
-      {created === "1" && <CreatedToast />}
+      {created === "1" && <CreatedToast postId={post.id} />}
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
         <div className="space-y-10">
@@ -90,6 +84,8 @@ export default async function EditPostPage({ params, searchParams }: PageProps) 
             canToggle={user.role === "admin"}
           />
           <MediaManager
+            // 서버 미디어 목록이 바뀌면(다른 탭 편집·revalidate) 로컬 상태를 서버 값으로 재동기화
+            key={media.map((m) => `${m.id}:${m.display_order}:${m.alt ?? ""}`).join("|")}
             postId={post.id}
             section={post.section}
             initialMedia={media}

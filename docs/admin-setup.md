@@ -50,6 +50,8 @@ supabase db push
 다음이 적용됩니다:
 - `00001_initial_schema.sql` — 테이블·enum·RLS·트리거
 - `00002_seed_first_admin.sql` — `214archivesstudio@gmail.com`을 `admin` 역할로 등록
+- `00003_is_admin_service_role.sql` — service role 의 admin 판정 보정
+- `00004_reorder_post_media.sql` — 미디어 순서 변경용 SQL 함수 `reorder_post_media` (어드민 드래그 정렬이 호출)
 
 `00002`가 "First admin user not found" 에러를 내면 3단계로 돌아가 사용자를 먼저 만드세요.
 

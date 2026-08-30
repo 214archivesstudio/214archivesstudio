@@ -1,6 +1,6 @@
 # 관리자 페이지 — Phase H 작업 계획 (평가 후속 개선)
 
-> **상태**: ✅ ship + 프로덕션 배포·검증 완료 (2026-08-30) — Step 0 · H1 · H2 · H3 · H4(라이브 검증 ✅) · H6. 잔여: H3-1 이미지 5장 동시 업로드 순서 확인(실업로드 필요), H5 미착수(여유 시).
+> **상태**: ✅ 전 단계 완료 (2026-08-30) — Step 0 · H1 · H2 · H3 · H4(라이브 검증 ✅) · H5 · H6. 잔여: H3-1 이미지 5장 동시 업로드 순서 확인(실업로드 필요).
 > **입력**: 2026-08-30 어드민 사용성·기능 평가 — Playwright 실주행 14개 흐름 + 코드 정적 리뷰(critic) 교차 검증. 판정 REVISE. 보고서: [어드민 사용성·기능 평가](https://claude.ai/code/artifact/c0a3e239-fc09-4c8b-a1af-7f9e0a582a89) (비공개 아티팩트).
 > **범위**: 평가에서 나온 High 6 · Med 14 · Low 3 중 **개인 포트폴리오 운영(admin 1인)** 에 실제로 영향 있는 것. 팀 화면 제거 포함.
 > **참고**: [admin-improvement-roadmap](./admin-improvement-roadmap.md) (G1–G4 완료) · [admin-overview](./admin-overview.md) · [ADR-0001](../wiki/decisions/0001-admin-architecture.md)
@@ -137,6 +137,10 @@ G1–G4 로드맵을 마친 직후 어드민을 처음으로 **로그인해서 �
 | H5-7 | 죽은 코드·중복 — `ui/index.ts`·`SaveBar`·`Select` 삭제, 섹션 라벨 맵 `lib/sections.ts` 단일화 | 6곳 |
 | H5-8 | `video_thumbnail_url` URL 검증 | `post-schema.ts:46` |
 | H5-9 | 미디어 그리드 `TouchSensor` 추가 (실기기 스크롤 확인 후) | `media/MediaGrid.tsx:34` |
+
+> ✅ 2026-08-30 ship (9/9). 실주행: 로그인 상태로 `/admin/login?error=x` → 셸 없이 로그인 폼(`x-pathname` 동작), env 배너 미표시(env 정상), 영상 2개 추가 후 키보드 정렬(Space·→·Space) → RPC 로 순서 변경 · 새로고침 후 유지 · 에러 없음, 로컬 sync 페이지네이션 실행 → `data/` diff 0. `tsc`·`eslint app/admin lib scripts`·`next build` 통과.
+>
+> 구현 메모: ① **H5-5 는 upsert 대신 RPC** — PostgREST upsert 는 NOT NULL 열 없이 부분 행을 못 넣어 `migration 00004 reorder_post_media(p_post_id, p_ids)` (SECURITY INVOKER, `unnest … with ordinality`) 로 단일 UPDATE. `supabase db push` 로 프로덕션 적용 + `npm run gen:types` 재생성. ② H5-3 은 미들웨어가 **요청 헤더**에 `x-pathname` 을 넣음(응답 헤더는 서버 컴포넌트 `headers()` 에 안 보임). ③ H5-6 은 `MediaManager` 에 서버 미디어 파생 `key` — revalidate 로 목록이 바뀌면 리마운트해 재동기화(useOptimistic 보다 단순). ④ H5-9 는 `PointerSensor` → `MouseSensor(distance 6)` + `TouchSensor(delay 200, tolerance 8)`; 실기기 확인은 운영자 항목. ⑤ H5-1 은 두 업로더 모두 env 누락 시에도 hidden input 을 렌더 + 영상은 URL 직접 입력 폴백, `lib/env.ts` `getMissingAdminEnv()` 로 레이아웃 상단 경고 배너(차단 아님). ⑥ H5-7 은 `lib/sections.ts` 로 6곳 통합, `ui/index.ts`·`SaveBar`·`Select`·`tokens.ts` 삭제. ⑦ 검증 중 발견: 서버 액션 revalidate 후 라우터가 `?created=1` URL 을 복원해 created 토스트가 재발화 → `history.replaceState` 제거, `sessionStorage` 게시물당 1회 가드로 교체.
 
 ### Step H6 — 문서·wiki 마감 (~30분)
 

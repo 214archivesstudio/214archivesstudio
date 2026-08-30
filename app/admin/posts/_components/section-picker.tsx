@@ -1,19 +1,8 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { SECTIONS } from "@/lib/sections";
 import type { PostSection } from "@/types/database";
-
-const OPTIONS: ReadonlyArray<{
-  readonly value: PostSection;
-  readonly label: string;
-  readonly note: string;
-}> = [
-  { value: "showreel", label: "Showreel", note: "단일 영상" },
-  { value: "archives", label: "Archives", note: "도시·연도 + 갤러리" },
-  { value: "film", label: "Film", note: "영상 + 갤러리" },
-  { value: "photography", label: "Photography", note: "클라이언트 + 갤러리" },
-  { value: "personal", label: "Personal", note: "갤러리 (영상 선택)" },
-];
 
 interface SectionPickerProps {
   readonly selected: PostSection;
@@ -23,7 +12,7 @@ interface SectionPickerProps {
 export function SectionPicker({ selected, onSelect }: SectionPickerProps) {
   return (
     <div className="mt-2 grid grid-cols-2 gap-3 md:grid-cols-5">
-      {OPTIONS.map((opt) => {
+      {SECTIONS.map((opt) => {
         const active = opt.value === selected;
         return (
           <button

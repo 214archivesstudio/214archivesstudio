@@ -27,11 +27,27 @@ export function VideoThumbnailUploader({
   const [url, setUrl] = useState(initialUrl);
 
   const preset = process.env.NEXT_PUBLIC_CLOUDINARY_VIDEO_UPLOAD_PRESET;
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+  const missingEnv = !preset
+    ? "NEXT_PUBLIC_CLOUDINARY_VIDEO_UPLOAD_PRESET"
+    : !cloudName
+      ? "NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME"
+      : null;
 
-  if (!preset) {
+  // env 가 빠져도 hidden input 은 항상 렌더 — 안 그러면 저장 시 기존 URL 이 null 로 덮인다 (H5-1).
+  if (missingEnv) {
     return (
-      <div className="rounded-[2px] border border-[#5a3322] bg-[#e2a98c]/5 px-3 py-2 text-[12px] text-[#e2a98c]">
-        영상 업로드를 사용하려면 <code className="font-mono">NEXT_PUBLIC_CLOUDINARY_VIDEO_UPLOAD_PRESET</code> 환경 변수를 설정하세요. (docs/admin-setup.md §7)
+      <div className="space-y-3">
+        <input type="hidden" name="video_thumbnail_url" value={url} />
+        <div className="rounded-[2px] border border-[#5a3322] bg-[#e2a98c]/5 px-3 py-2 text-[12px] text-[#e2a98c]">
+          영상 업로드를 사용하려면 <code className="font-mono">{missingEnv}</code> 환경 변수를 설정하세요. (docs/admin-setup.md §7.1) 기존 값은 유지됩니다.
+        </div>
+        <Input
+          type="url"
+          value={url}
+          onChange={(event) => setUrl(event.target.value)}
+          placeholder="https://res.cloudinary.com/…/video/upload/…mp4"
+        />
       </div>
     );
   }
@@ -46,8 +62,6 @@ export function VideoThumbnailUploader({
   };
 
   const handleSuccess = (info: CloudinaryVideoUploadInfo) => {
-    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-    if (!cloudName) return;
     if (typeof info.version !== "number" || !info.public_id) return;
     setUrl(
       `https://res.cloudinary.com/${cloudName}/video/upload/${VIDEO_TRANSFORMATION}/v${info.version}/${info.public_id}.mp4`,

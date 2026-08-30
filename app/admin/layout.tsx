@@ -3,6 +3,7 @@ import Link from "next/link";
 import { headers } from "next/headers";
 import { Toaster } from "sonner";
 import { getCurrentAdminUser } from "@/lib/auth";
+import { getMissingAdminEnv } from "@/lib/env";
 import { AdminHeader } from "./_components/ui/AdminHeader";
 import { UserPill } from "./_components/ui/UserPill";
 import { DriftBadge } from "./_components/drift-badge";
@@ -19,6 +20,8 @@ export default async function AdminLayout({ children }: { children: ReactNode })
 
   // Middleware should have redirected; this is a safety net.
   if (!user) return <>{children}</>;
+
+  const missingEnv = getMissingAdminEnv();
 
   return (
     <div className="min-h-screen bg-background text-foreground font-sans">
@@ -45,6 +48,12 @@ export default async function AdminLayout({ children }: { children: ReactNode })
         }
       />
       <main className="mx-auto max-w-[1440px] px-4 pb-24 pt-6 md:px-12 md:pt-8">
+        {missingEnv.length > 0 && (
+          <p className="mb-6 rounded-[2px] border border-[#3a2e1f] bg-[#d6a877]/[0.08] px-4 py-3 text-[12px] text-[#d6a877]">
+            업로드 환경 변수가 비어 있어 이미지·영상 업로드가 동작하지 않습니다:{" "}
+            <code className="font-mono">{missingEnv.join(", ")}</code> — docs/admin-setup.md §7 참고.
+          </p>
+        )}
         {children}
       </main>
       <Toaster position="bottom-right" theme="dark" />

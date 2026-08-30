@@ -1,12 +1,3 @@
-/**
- * GENERATED — do not edit by hand.
- *
- *   npm run gen:types
- *   (= supabase gen types typescript --linked --schema public > types/supabase.ts)
- *
- * App code imports the friendlier aliases from ./database.ts, not this file.
- */
-
 export type Json =
   | string
   | number
@@ -216,6 +207,10 @@ export type Database = {
       }
       is_admin: { Args: never; Returns: boolean }
       is_authenticated_admin_user: { Args: never; Returns: boolean }
+      reorder_post_media: {
+        Args: { p_ids: string[]; p_post_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "editor"

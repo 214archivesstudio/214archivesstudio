@@ -5,6 +5,10 @@
 
 ---
 
+## [2026-08-30] ship | Phase H5 — 잠재 부채 9건 (RPC 정렬·sync 페이지네이션·env 가드 등)
+
+migration 00004 `reorder_post_media` (SECURITY INVOKER) 프로덕션 적용 + 타입 재생성, `reorderMedia` 단일 RPC. sync `.range()` 페이지네이션(diff 0 확인). 두 업로더 env 누락 시 hidden input 유지 + `lib/env.ts` 배너. 미들웨어 요청 헤더 `x-pathname`(로그인 페이지 셸 이중 렌더 해소). 스키마에서 showreel/film/personal 의 city·year_label·client 제거, `video_thumbnail_url` https .mp4 검증. `lib/sections.ts` 단일 출처 + `ui/index.ts`·SaveBar·Select·tokens 삭제. MediaManager 서버 파생 key 재동기화. MouseSensor+TouchSensor. 부수: created 토스트를 sessionStorage 1회 가드로(라우터가 `?created=1` 복원하던 문제). 실주행: x-pathname·키보드 정렬 RPC·새로고침 유지 확인. 임시 계정·게시물 삭제.
+
 ## [2026-08-30] deploy | push → Vercel 배포 → H4 라이브 검증 완료
 
 로컬 10 커밋 push(`64e6799..ba22acb`). Vercel Production 배포 success(GitHub Deployments 6165656722). 프로덕션에 임시 admin 으로 로그인해 확인: Team 제거·어드민 404·KST 시각("오후 5:53", UTC 호스트에서도 정확)·375px 오버플로 0. `gh workflow run publish.yml` 수동 실행 → 워크플로가 스스로 `publish_jobs` 행 생성("· 수동 실행", triggered_by null) → 대시보드 "마지막 게시 방금". 임시 계정 삭제(auth 2·user_roles 2 원본). 검증 중 프로덕션 대시보드 콘솔에 React #418(하이드레이션 텍스트 불일치) 1건 → `publish-panel` 상대 시각 span 에 `suppressHydrationWarning` (서버·클라이언트 시계 차로 "방금"/"1분 전" 갈림). 잔여: H3-1 실업로드 순서 확인, H5, 공개 사이트 lint 3건.

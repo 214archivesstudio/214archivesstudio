@@ -31,21 +31,43 @@ type Post = PostRow & { readonly media: ReadonlyArray<MediaRow> };
 // DB fetch
 // ---------------------------------------------------------------------------
 
-async function fetchPublished(client: SupabaseClient): Promise<ReadonlyArray<Post>> {
-  const { data: postRows, error: postErr } = await client
-    .from("posts")
-    .select("*")
-    .eq("published", true);
-  if (postErr) throw new Error(`posts query: ${postErr.message}`);
-  if (!postRows || postRows.length === 0) return [];
+/** PostgREST 는 요청당 최대 1000행(db-max-rows)만 돌려준다. 초과분이 조용히 잘리지 않도록 페이지로 끝까지 읽는다. */
+const PAGE_SIZE = 1000;
 
-  const ids = (postRows as ReadonlyArray<PostRow>).map((p) => p.id);
-  const { data: mediaRows, error: mediaErr } = await client
-    .from("post_media")
-    .select("*")
-    .in("post_id", ids)
-    .order("display_order", { ascending: true });
-  if (mediaErr) throw new Error(`post_media query: ${mediaErr.message}`);
+async function fetchAllRows<T>(
+  label: string,
+  page: (from: number, to: number) => PromiseLike<{ data: unknown; error: { message: string } | null }>,
+): Promise<ReadonlyArray<T>> {
+  const rows: T[] = [];
+  for (let from = 0; ; from += PAGE_SIZE) {
+    const { data, error } = await page(from, from + PAGE_SIZE - 1);
+    if (error) throw new Error(`${label} query: ${error.message}`);
+    const chunk = (data ?? []) as T[];
+    rows.push(...chunk);
+    if (chunk.length < PAGE_SIZE) break;
+  }
+  if (rows.length >= PAGE_SIZE) {
+    console.warn(`  ⚠ ${label}: ${rows.length} rows — paginated across ${Math.ceil(rows.length / PAGE_SIZE)} pages`);
+  }
+  return rows;
+}
+
+async function fetchPublished(client: SupabaseClient): Promise<ReadonlyArray<Post>> {
+  const postRows = await fetchAllRows<PostRow>("posts", (from, to) =>
+    client.from("posts").select("*").eq("published", true).order("id").range(from, to),
+  );
+  if (postRows.length === 0) return [];
+
+  const ids = postRows.map((p) => p.id);
+  const mediaRows = await fetchAllRows<MediaRow>("post_media", (from, to) =>
+    client
+      .from("post_media")
+      .select("*")
+      .in("post_id", ids)
+      .order("display_order", { ascending: true })
+      .order("id")
+      .range(from, to),
+  );
 
   const mediaByPost = new Map<string, MediaRow[]>();
   for (const m of (mediaRows ?? []) as ReadonlyArray<MediaRow>) {
@@ -54,7 +76,7 @@ async function fetchPublished(client: SupabaseClient): Promise<ReadonlyArray<Pos
     mediaByPost.set(m.post_id, arr);
   }
 
-  return (postRows as ReadonlyArray<PostRow>)
+  return postRows
     .map((p) => ({ ...p, media: mediaByPost.get(p.id) ?? [] }))
     .sort(comparePostsForEmit);
 }

@@ -222,20 +222,14 @@ export async function reorderMedia(
 
   const supabase = await createClient();
 
-  // Parallelized per-row updates. Each enforces both id and post_id to prevent
-  // accidentally retargeting media of another post; RLS adds a second line of
-  // defense. Failure of any one is reported so the UI can revert optimistically.
-  const updates = orderedIds.map((id, idx) =>
-    supabase
-      .from("post_media")
-      .update({ display_order: idx })
-      .eq("id", id)
-      .eq("post_id", postId),
-  );
-
-  const results = await Promise.all(updates);
-  const failed = results.find((r) => r.error);
-  if (failed?.error) return mapPostgresError(failed.error);
+  // 단일 SQL 문(reorder_post_media, migration 00004)으로 원자적 갱신 — 부분 실패로
+  // DB 가 반쯤 섞인 채 남지 않는다. SECURITY INVOKER 라 RLS 는 그대로 적용되고,
+  // 함수 내부에서 post_id 를 다시 검사해 다른 포스트의 미디어는 건드리지 않는다.
+  const { error } = await supabase.rpc("reorder_post_media", {
+    p_post_id: postId,
+    p_ids: [...orderedIds],
+  });
+  if (error) return mapPostgresError(error);
 
   revalidatePost(postId);
   return { ok: true };

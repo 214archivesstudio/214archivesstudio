@@ -127,8 +127,7 @@ app/
 │   │   └── ui/                     # 디자인 시스템 atoms
 │   │       ├── AdminHeader.tsx · UserPill.tsx · PageHead.tsx
 │   │       ├── Btn.tsx · Card.tsx · Pill.tsx · StatusDot.tsx
-│   │       ├── Field.tsx · Input.tsx · Textarea.tsx   # aria-invalid / aria-describedby 연결
-│   │       └── (index.ts · SaveBar.tsx · Select.tsx · tokens.ts — 미사용, H5-7 정리 후보)
+│   │       └── Field.tsx · Input.tsx · Textarea.tsx   # aria-invalid / aria-describedby 연결
 │   └── posts/
 │       ├── page.tsx                # 목록 (최신순 · 섹션 탭 · 검색 · 페이지네이션)
 │       ├── new/page.tsx            # 생성
@@ -153,6 +152,8 @@ lib/
 ├── auth.ts                         # getCurrentAdminUser · requireAuthenticatedAdmin · requireAdmin
 ├── repos/posts.ts                  # listPosts(살균 검색) · findPostById · findPostMedia · countPostsBySection
 ├── repos/publish-jobs.ts           # listRecentPublishJobs · getLastSuccessAt(created_at) · drift · findActiveJobId
+├── sections.ts                     # 섹션 목록·라벨 단일 출처
+├── env.ts                          # 업로드 env 누락 점검 (레이아웃 배너)
 ├── validation/post-schema.ts       # zod 섹션별 discriminated union
 └── video.ts                        # parseVideoUrl · YouTube 썸네일 URL (client-safe)
 
@@ -161,7 +162,9 @@ middleware.ts                        # /admin/* 라우트 보호
 
 supabase/migrations/
 ├── 00001_initial_schema.sql        # posts/post_media/user_roles/publish_jobs + RLS + 트리거
-└── 00002_seed_first_admin.sql      # 첫 admin user_roles 등록
+├── 00002_seed_first_admin.sql      # 첫 admin user_roles 등록
+├── 00003_is_admin_service_role.sql
+└── 00004_reorder_post_media.sql    # 미디어 순서 원자적 갱신 RPC
 
 scripts/sync-from-supabase.ts        # Supabase → data/*.ts (publish 워크플로가 실행)
 types/supabase.ts                    # GENERATED (npm run gen:types) — 편집 금지
@@ -248,7 +251,7 @@ npm run seed
 | ~~**다중 업로드 순서 경쟁 · UTC 시각 · 검색어 쉼표 크래시**~~ | ✅ 2026-08-30 (H3) | 클라이언트 순번 부여, `Asia/Seoul` 직접 조립, PostgREST 메타문자 살균. 업로드 순서는 실업로드 확인 필요 |
 | ~~**어드민 밖 수동 publish 가 drift 에 미반영**~~ | ✅ 2026-08-30 (H4, 코드) | 워크플로가 `job_id` 없이도 `publish_jobs` 행 생성. drift 기준 `created_at`. **라이브 검증은 push 후** (`admin-phase-h-plan` §H4) |
 | **editor 권한 UI 가 RLS 와 불일치** | 편집 화면 삭제 버튼에 권한 분기 없음, 권한 부족 시 "충돌" 문구 | 보류 — editor 0명. 두 번째 운영자 생기면 한 ship 으로 (`admin-phase-h-plan` §6) |
-| **Cloudinary env 누락 시 무언 데이터 소실 · sync 1000행 상한** | 환경 변수 하나로 `video_thumbnail_url` null 저장, `post_media` 1000행 초과분 게시 누락 | H5 후보 (미착수). 현재 규모(미디어 ~330행)에서는 미발생 |
+| ~~**Cloudinary env 누락 시 무언 데이터 소실 · sync 1000행 상한**~~ | ✅ 2026-08-30 (H5) | 업로더가 env 누락 시에도 hidden input 유지 + 레이아웃 경고 배너, sync `.range()` 페이지네이션. 함께: `reorder_post_media` RPC(migration 00004), `x-pathname` 미들웨어 설정, 스키마 정리, `lib/sections.ts`, TouchSensor |
 
 ---
 
@@ -262,7 +265,7 @@ G1–G4 는 2026-08-30 전부 ship, 같은 날 실주행 평가(REVISE) 후속�
 
 - **push + 라이브 검증**: 로컬 커밋을 push → Vercel 배포 → `gh workflow run publish.yml` 로 H4 확인 → 이미지 5장 동시 업로드로 H3-1 확인
 - **첫 운영**: 실제 작가가 어드민에서 게시물 등록 → 갤러리 업로드 → "변경사항 게시" 까지의 full 흐름을 사용자 테스트
-- **H5 부채** (여유 시): Cloudinary env 가드, sync 페이지네이션, `x-pathname`, 스키마 정리, reorder upsert, 죽은 코드
+- ~~H5 부채~~ — 2026-08-30 ship (9/9)
 - ~~이메일 enrichment~~ · ~~as never 정리~~ · ~~ESLint flat config~~ — G4 (2026-08-30) · ~~영상 oembed~~ — G3 YouTube · ~~Phase 3d Team 관리~~ — H2 폐기
 
 ---

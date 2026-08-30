@@ -12,7 +12,12 @@ import type { Database } from "@/types/database";
  *  - everything else     — public (passes through)
  */
 export async function updateSession(request: NextRequest): Promise<NextResponse> {
-  let response = NextResponse.next({ request });
+  // app/admin/layout.tsx 가 로그인 페이지 여부를 판단할 때 읽는 요청 헤더.
+  // (요청 헤더에 넣어야 서버 컴포넌트의 headers() 에서 보인다 — 응답 헤더는 안 보임)
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-pathname", request.nextUrl.pathname);
+  const nextWithHeaders = () => NextResponse.next({ request: { headers: requestHeaders } });
+  let response = nextWithHeaders();
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -35,7 +40,7 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
       },
       setAll(cookiesToSet) {
         cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-        response = NextResponse.next({ request });
+        response = nextWithHeaders();
         cookiesToSet.forEach(({ name, value, options }) =>
           response.cookies.set(name, value, options),
         );

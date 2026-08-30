@@ -43,7 +43,11 @@ const baseFields = {
     .positive("썸네일 높이가 잘못됐습니다"),
   thumbnail_alt: optionalString,
   video_url: optionalString,
-  video_thumbnail_url: optionalString,
+  // film 전용. 어드민 업로더가 만드는 Cloudinary mp4 URL 형식만 허용 (오타 URL 이 사이트로 새는 것 방지)
+  video_thumbnail_url: optionalString.refine(
+    (v) => v === null || /^https:\/\/\S+\.mp4(\?\S*)?$/i.test(v),
+    "https:// 로 시작하는 .mp4 URL 이어야 합니다",
+  ),
   display_order: z.coerce.number().int().nonnegative().default(0),
 };
 
@@ -63,28 +67,21 @@ const photographySchema = z.object({
   year_label: optionalString,
 });
 
+// showreel/film/personal 은 city·year_label·client 를 쓰지 않는다 — 스키마에서도
+// 받지 않아야 "받았지만 저장 시 버려지는" 필드가 생기지 않는다 (H5-4).
 const showreelSchema = z.object({
   section: z.literal("showreel"),
   ...baseFields,
-  city: optionalString,
-  year_label: optionalString,
-  client: optionalString,
 });
 
 const filmSchema = z.object({
   section: z.literal("film"),
   ...baseFields,
-  client: optionalString,
-  city: optionalString,
-  year_label: optionalString,
 });
 
 const personalSchema = z.object({
   section: z.literal("personal"),
   ...baseFields,
-  client: optionalString,
-  city: optionalString,
-  year_label: optionalString,
 });
 
 export const postSchema = z.discriminatedUnion("section", [

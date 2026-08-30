@@ -8,6 +8,8 @@ import { Btn } from "./ui/Btn";
 import { Card, CardLabel } from "./ui/Card";
 import { Pill } from "./ui/Pill";
 import type { DriftItem } from "@/lib/repos/publish-jobs";
+import { SECTION_LABEL } from "@/lib/sections";
+import type { PostSection } from "@/types/database";
 
 interface PublishPanelProps {
   readonly canPublish: boolean;
@@ -20,13 +22,6 @@ interface PublishPanelProps {
 const POLL_INTERVAL_MS = 5_000;
 /** 실측 빌드 2–3분. 초과 시 stuck 으로 간주하고 failed 로 기록한다. */
 const PUBLISH_TIMEOUT_MS = 10 * 60_000;
-const SECTION_LABEL: Record<string, string> = {
-  showreel: "Showreel",
-  archives: "Archives",
-  film: "Film",
-  photography: "Photography",
-  personal: "Personal",
-};
 
 function relativeTime(iso: string): string {
   const diffMs = Date.now() - new Date(iso).getTime();
@@ -150,7 +145,7 @@ export function PublishPanel({
             >
               <div className="min-w-0">
                 <div className="text-[11px] uppercase tracking-[0.1em] text-muted">
-                  {SECTION_LABEL[d.section] ?? d.section}
+                  {SECTION_LABEL[d.section as PostSection] ?? d.section}
                 </div>
                 <div className="mt-1 truncate text-[13px] text-foreground">
                   {d.title}

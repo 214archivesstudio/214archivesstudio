@@ -9,14 +9,8 @@ import { StatusDot } from "../../_components/ui/StatusDot";
 import { deletePost } from "../_actions/posts";
 import { DeleteDialog } from "./delete-dialog";
 import type { PostRow, PostSection } from "@/types/database";
+import { SECTION_LABEL } from "@/lib/sections";
 
-const SECTION_LABEL: Record<PostSection, string> = {
-  showreel: "Showreel",
-  archives: "Archives",
-  film: "Film",
-  photography: "Photography",
-  personal: "Personal",
-};
 
 interface PostsTableProps {
   readonly posts: ReadonlyArray<PostRow>;

@@ -34,10 +34,16 @@ export function ThumbnailUploader({
 
   const preset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
 
+  // env 가 빠져도 hidden input 은 렌더해 기존 썸네일 값이 저장 시 사라지지 않게 한다 (H5-1).
   if (!preset) {
     return (
-      <div className="rounded-[2px] border border-[#5a3322] bg-[#e2a98c]/5 px-3 py-2 text-[12px] text-[#e2a98c]">
-        업로드를 사용하려면 <code className="font-mono">NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET</code> 환경 변수를 설정하세요. (docs/admin-setup.md §7)
+      <div className="space-y-3">
+        <input type="hidden" name="thumbnail_public_id" value={publicId} />
+        <input type="hidden" name="thumbnail_width" value={width} />
+        <input type="hidden" name="thumbnail_height" value={height} />
+        <div className="rounded-[2px] border border-[#5a3322] bg-[#e2a98c]/5 px-3 py-2 text-[12px] text-[#e2a98c]">
+          업로드를 사용하려면 <code className="font-mono">NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET</code> 환경 변수를 설정하세요. (docs/admin-setup.md §7) 기존 썸네일은 유지됩니다.
+        </div>
       </div>
     );
   }

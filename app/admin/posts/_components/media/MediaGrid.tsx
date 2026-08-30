@@ -4,7 +4,8 @@ import {
   DndContext,
   type DragEndEvent,
   KeyboardSensor,
-  PointerSensor,
+  MouseSensor,
+  TouchSensor,
   closestCenter,
   useSensor,
   useSensors,
@@ -30,8 +31,10 @@ export function MediaGrid({
   onAltChange,
   onDeleteClick,
 }: MediaGridProps) {
+  // Touch 는 지연 활성화 — 짧은 터치/스크롤은 드래그로 가로채지 않는다 (H5-9).
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(MouseSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 8 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
 

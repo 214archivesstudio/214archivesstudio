@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { SECTIONS } from "@/lib/sections";
 import type { PostSection } from "@/types/database";
 
 interface SectionTabsProps {
@@ -11,11 +12,7 @@ interface SectionTabsProps {
 
 const TABS: ReadonlyArray<{ section: PostSection | null; label: string }> = [
   { section: null, label: "전체" },
-  { section: "showreel", label: "Showreel" },
-  { section: "archives", label: "Archives" },
-  { section: "film", label: "Film" },
-  { section: "photography", label: "Photography" },
-  { section: "personal", label: "Personal" },
+  ...SECTIONS.map((s) => ({ section: s.value, label: s.label })),
 ];
 
 function tabHref(section: PostSection | null, search: string): string {
