@@ -101,7 +101,7 @@ RLS 정책 + Postgres 트리거(`guard_publish_toggle`)로 이중 방어. 첫 ad
 | **Phase 3c — 미디어 매니저** | ✅ 완료 | 다중 이미지 업로드, reorder (`@dnd-kit`), alt onBlur 저장, 삭제. personal 섹션에 영상 항목 추가 |
 | **Phase 4 — Publish 빌드 트리거** | ✅ 완료 | `scripts/sync-from-supabase.ts`, `.github/workflows/publish.yml` (`repository_dispatch`), 어드민 "사이트에 반영" 버튼 + drift 지표 + 폴링 |
 | **사이드 트랙 — Admin Header fix** | ✅ 완료 | `app/(public)/` route group 분리 (Step 1) |
-| **(옵션) Phase 3d — Team 관리** | 보류 | 두 번째 사용자 초대 + 역할 부여 UI |
+| ~~**(옵션) Phase 3d — Team 관리**~~ | ❌ 폐기 (2026-08-30) | 개인 포트폴리오 결정으로 팀 화면 자체를 제거. `user_roles`·RLS 는 유지 |
 
 ---
 
@@ -240,7 +240,7 @@ Phase 3c + 4 까지 ship 됨. 이후 2026-07-10 사용성 감사로 [admin-impro
 - **첫 운영**: 실제 작가가 어드민에서 게시물 등록 → 갤러리 업로드 → "사이트에 반영" 까지의 full 흐름을 사용자 테스트
 - ~~이메일 enrichment~~ · ~~as never 정리~~ · ~~ESLint flat config~~ — G4 로 해소 (2026-08-30)
 - **영상 oembed**: 영상 미디어 카드에 platform thumbnail 자동 fetch
-- **Phase 3d Team 관리** (보류): 두 번째 admin/editor 초대 UI
+- ~~Phase 3d Team 관리~~ — 2026-08-30 폐기 (Phase H2 에서 `/admin/team` 제거)
 
 ---
 

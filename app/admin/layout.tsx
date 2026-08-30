@@ -23,13 +23,12 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   return (
     <div className="min-h-screen bg-background text-foreground font-sans">
       <AdminHeader
-        showTeam={user.role === "admin"}
         rightSlot={
           <>
             <DriftBadge />
             <Link
               href="/"
-              className="text-[12px] tracking-[0.05em] text-muted transition-colors duration-200 hover:text-foreground"
+              className="hidden text-[12px] tracking-[0.05em] text-muted transition-colors duration-200 hover:text-foreground md:inline"
             >
               사이트 보기 ↗
             </Link>
@@ -45,7 +44,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
           </>
         }
       />
-      <main className="mx-auto max-w-[1440px] px-12 pb-24 pt-8">
+      <main className="mx-auto max-w-[1440px] px-4 pb-24 pt-6 md:px-12 md:pt-8">
         {children}
       </main>
       <Toaster position="bottom-right" theme="dark" />

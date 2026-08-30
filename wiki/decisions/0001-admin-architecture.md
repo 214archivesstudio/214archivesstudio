@@ -158,6 +158,14 @@ Phase 3c (media manager) + Phase 4 (publish trigger) 한 ship으로 통합. 본�
 
 **Sync 의 1회성 마이그레이션** — `data/*.ts` 가 helper-free 리터럴 canonical form 으로 전환됨. `data/films.ts` 의 `buildVideoThumbnailUrl` + `VIDEO_THUMBNAIL_VERSIONS` 헬퍼 제거 → DB `posts.video_thumbnail_url` 컬럼이 source of truth. 마찬가지로 archives `createArchive`, photography `createPhotographyItem`, personal `createPhoto` 헬퍼 사라짐. 라운드트립 idempotency 는 두 번 연속 `npm run sync` 의 md5 일치로 검증.
 
+### 2026-08-30 — 팀 화면 폐기 (개인 포트폴리오)
+
+**결정**: `/admin/team` 라우트·헤더 nav "Team"·`lib/repos/user-roles.ts` 를 제거한다 (Phase H2). 사이트가 개인 포트폴리오로 확정돼 두 번째 운영자 초대·역할 부여 UI(Phase 3d) 는 필요 없다.
+
+**유지**: `user_roles` 테이블, RLS 정책, admin/editor 2단계 역할 모델은 스키마 무변경으로 남긴다 — 인증 모델의 근간이고 제거해도 얻는 게 없다. editor 는 "존재하지만 쓰지 않는" 역할. editor 관련 UI 정합 이슈 3건은 두 번째 운영자가 생길 때 한 ship 으로 처리 ([admin-phase-h-plan §6](../../docs/admin-phase-h-plan.md)).
+
+**근거**: 2026-08-30 실주행 평가에서 팀 화면이 실제로 모르는 정보(타인 UUID, 가짜 "오프라인")를 표시하고 있었고, 1인 운영에서는 화면 자체의 가치가 0.
+
 ## Open questions (실행 중 결정)
 
 - ~~**Publish 큐 락**~~ → 2026-05-15 amendment 에서 GH Actions concurrency group 으로 해결.

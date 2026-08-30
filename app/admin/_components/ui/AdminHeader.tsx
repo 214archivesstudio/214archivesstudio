@@ -13,11 +13,9 @@ interface NavItem {
 const NAV: ReadonlyArray<NavItem> = [
   { href: "/admin", label: "Dashboard" },
   { href: "/admin/posts", label: "Posts" },
-  { href: "/admin/team", label: "Team" },
 ];
 
 interface AdminHeaderProps {
-  readonly showTeam?: boolean;
   readonly rightSlot: ReactNode;
 }
 
@@ -26,21 +24,21 @@ function isActive(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function AdminHeader({ showTeam = true, rightSlot }: AdminHeaderProps) {
+export function AdminHeader({ rightSlot }: AdminHeaderProps) {
   const pathname = usePathname() ?? "";
-  const items = showTeam ? NAV : NAV.filter((n) => n.href !== "/admin/team");
 
   return (
     <header
       className={cn(
-        "sticky top-0 z-30 flex items-center justify-between gap-6 px-12 py-4",
+        "sticky top-0 z-30 flex items-center justify-between gap-3 px-4 py-3 md:gap-6 md:px-12 md:py-4",
         "border-b border-[#2a2a2a]",
         "bg-background/85 backdrop-blur-md supports-[backdrop-filter]:bg-background/70",
       )}
     >
-      <Link href="/admin" className="flex items-center gap-4 shrink-0">
+      <Link href="/admin" className="flex items-center gap-2 shrink-0 md:gap-4">
         <span className="text-[13px] tracking-[0.06em] text-foreground">
-          214Archives Studio
+          <span className="md:hidden">214</span>
+          <span className="hidden md:inline">214Archives Studio</span>
         </span>
         <span className="text-[11px] tracking-[0.15em] text-[#666]">·</span>
         <span className="text-[11px] uppercase tracking-[0.2em] text-muted">
@@ -48,8 +46,8 @@ export function AdminHeader({ showTeam = true, rightSlot }: AdminHeaderProps) {
         </span>
       </Link>
 
-      <nav className="flex gap-7">
-        {items.map((item) => (
+      <nav className="flex gap-4 md:gap-7">
+        {NAV.map((item) => (
           <Link
             key={item.href}
             href={item.href}
@@ -65,7 +63,7 @@ export function AdminHeader({ showTeam = true, rightSlot }: AdminHeaderProps) {
         ))}
       </nav>
 
-      <div className="flex items-center gap-5 shrink-0">{rightSlot}</div>
+      <div className="flex items-center gap-3 shrink-0 md:gap-5">{rightSlot}</div>
     </header>
   );
 }

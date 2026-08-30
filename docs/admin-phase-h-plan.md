@@ -1,6 +1,6 @@
 # 관리자 페이지 — Phase H 작업 계획 (평가 후속 개선)
 
-> **상태**: 🔧 진행 중 — Step 0 ✅ · H1 ✅ (2026-08-30) · H2–H4 착수 전.
+> **상태**: 🔧 진행 중 — Step 0 ✅ · H1 ✅ · H2 ✅ (2026-08-30) · H3–H4 착수 전.
 > **입력**: 2026-08-30 어드민 사용성·기능 평가 — Playwright 실주행 14개 흐름 + 코드 정적 리뷰(critic) 교차 검증. 판정 REVISE. 보고서: [어드민 사용성·기능 평가](https://claude.ai/code/artifact/c0a3e239-fc09-4c8b-a1af-7f9e0a582a89) (비공개 아티팩트).
 > **범위**: 평가에서 나온 High 6 · Med 14 · Low 3 중 **개인 포트폴리오 운영(admin 1인)** 에 실제로 영향 있는 것. 팀 화면 제거 포함.
 > **참고**: [admin-improvement-roadmap](./admin-improvement-roadmap.md) (G1–G4 완료) · [admin-overview](./admin-overview.md) · [ADR-0001](../wiki/decisions/0001-admin-architecture.md)
@@ -81,6 +81,10 @@ G1–G4 로드맵을 마친 직후 어드민을 처음으로 **로그인해서 �
 | H2-6 | 대시보드 통계 카드 모바일 | `app/admin/page.tsx` | 4열 → `grid-cols-2 md:grid-cols-4` (평가에서 미확인 — 구현 시 375px 확인) |
 
 **verify**: 375px 에서 `document.documentElement.scrollWidth === clientWidth` (대시보드·목록·편집·새 포스트 4화면). `/admin/team` → 404(not-found 화면). 헤더에 Team 없음.
+
+> ✅ 2026-08-30 ship. 375px 실측: 대시보드·목록·새 포스트·편집 4화면 모두 `scrollWidth 371 = clientWidth 371`. 편집 화면 세로 순서 공개 상태(y 275) → 미디어(444) → 위험 영역(1929). `/admin/team` → "찾을 수 없는 페이지입니다"(셸 안). 데스크톱 nav `Dashboard · Posts`, "사이트 보기" 데스크톱만 표시, 실행 로그 링크 1줄(15px).
+>
+> 구현 중 추가된 것 2건: ① 헤더 수정 후에도 대시보드가 575px 로 넘쳐 원인 추적 → **최근 활동 `<table>`** 이었음. `overflow-x-auto` 래퍼 + 셀 패딩 `px-4 md:px-6` + 메시지 열 `min-w-[200px]` 로 표 내부 스크롤. ② `not-found.tsx` 는 세그먼트 안의 `notFound()` 호출에만 적용돼 `/admin/team` 이 Next 기본 404 로 떨어짐 → `app/admin/[...missing]/page.tsx` catch-all 이 `notFound()` 호출. H2-6(통계 카드)은 이미 `grid-cols-2 md:grid-cols-4` 라 무변경. 모바일 로고는 "214" 로 축약. 팀 삭제 후 stale `.next/types` 가 tsc 를 깨뜨림 → `next build` 로 재생성(운영 메모: 라우트 삭제 후엔 빌드 먼저).
 
 ### Step H3 — 정합성 (~2.5시간) 🔴
 

@@ -31,7 +31,7 @@
 
 ```
 app/(public)/   공개 사이트 — archives · film · personal · photography · showreel · contact
-app/admin/      관리자 UI — dashboard · posts · team · login
+app/admin/      관리자 UI — dashboard · posts · login
 data/*.ts       빌드 타임 콘텐츠 (Supabase 동기화 산출물)
 scripts/        seed-from-data.ts · sync-from-supabase.ts
 supabase/       마이그레이션

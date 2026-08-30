@@ -86,7 +86,7 @@ export default async function EditPostPage({ params, searchParams }: PageProps) 
           </div>
         </div>
 
-        <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
+        <aside className="order-first space-y-6 lg:order-none lg:sticky lg:top-24 lg:self-start">
           <PublishToggle
             postId={post.id}
             initialPublished={post.published}

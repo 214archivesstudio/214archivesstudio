@@ -46,60 +46,64 @@ export function JobsCard({ jobs }: JobsCardProps) {
           아직 발행 기록이 없습니다.
         </p>
       ) : (
-        <table className="w-full border-collapse">
-          <thead>
-            <tr className="text-left text-[11px] uppercase tracking-[0.12em] text-[#666]">
-              <th className="px-6 py-2.5 font-normal">시간</th>
-              <th className="px-6 py-2.5 font-normal">상태</th>
-              <th className="px-6 py-2.5 font-normal">메시지</th>
-              <th className="px-6 py-2.5 text-right font-normal">로그</th>
-            </tr>
-          </thead>
-          <tbody>
-            {jobs.map((j) => (
-              <tr key={j.id} className="border-t border-[#2a2a2a]">
-                <td className="whitespace-nowrap px-6 py-4 align-middle text-[12px] text-muted">
-                  {fmtTime(j.created_at)}
-                </td>
-                <td className="whitespace-nowrap px-6 py-4 align-middle">
-                  <Pill
-                    tone={
-                      j.status === "failed"
-                        ? "danger"
-                        : j.status === "success"
-                          ? "default"
-                          : "warn"
-                    }
-                  >
-                    {STATUS_LABEL[j.status]}
-                  </Pill>
-                </td>
-                <td className="px-6 py-4 align-middle">
-                  <span
-                    className="line-clamp-2 text-[12px] text-accent"
-                    title={j.message && j.error ? j.error : undefined}
-                  >
-                    {j.message || j.error || "—"}
-                  </span>
-                </td>
-                <td className="px-6 py-4 text-right align-middle">
-                  {j.github_run_url ? (
-                    <a
-                      href={j.github_run_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[12px] text-muted underline-offset-2 hover:text-foreground hover:underline"
-                    >
-                      실행 로그 ↗
-                    </a>
-                  ) : (
-                    <span className="text-[12px] text-[#444]">—</span>
-                  )}
-                </td>
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="text-left text-[11px] uppercase tracking-[0.12em] text-[#666]">
+                <th className="px-4 py-2.5 font-normal md:px-6">시간</th>
+                <th className="px-4 py-2.5 font-normal md:px-6">상태</th>
+                <th className="px-4 py-2.5 font-normal md:px-6">메시지</th>
+                <th className="px-4 py-2.5 text-right font-normal md:px-6">
+                  로그
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {jobs.map((j) => (
+                <tr key={j.id} className="border-t border-[#2a2a2a]">
+                  <td className="whitespace-nowrap px-4 py-4 align-middle text-[12px] text-muted md:px-6">
+                    {fmtTime(j.created_at)}
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-4 align-middle md:px-6">
+                    <Pill
+                      tone={
+                        j.status === "failed"
+                          ? "danger"
+                          : j.status === "success"
+                            ? "default"
+                            : "warn"
+                      }
+                    >
+                      {STATUS_LABEL[j.status]}
+                    </Pill>
+                  </td>
+                  <td className="min-w-[200px] px-4 py-4 align-middle md:px-6">
+                    <span
+                      className="line-clamp-2 text-[12px] text-accent"
+                      title={j.message && j.error ? j.error : undefined}
+                    >
+                      {j.message || j.error || "—"}
+                    </span>
+                  </td>
+                  <td className="px-4 py-4 text-right align-middle md:px-6">
+                    {j.github_run_url ? (
+                      <a
+                        href={j.github_run_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="whitespace-nowrap text-[12px] text-muted underline-offset-2 hover:text-foreground hover:underline"
+                      >
+                        실행 로그 ↗
+                      </a>
+                    ) : (
+                      <span className="text-[12px] text-[#444]">—</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </Card>
   );

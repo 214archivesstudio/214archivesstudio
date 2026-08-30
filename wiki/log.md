@@ -5,6 +5,10 @@
 
 ---
 
+## [2026-08-30] ship | Phase H2 — 셸 반응형 + 팀 화면 제거
+
+`/admin/team`·`lib/repos/user-roles.ts`·nav Team 삭제 (ADR-0001 amendment: Phase 3d 폐기, `user_roles`/RLS 유지). 헤더·본문 `px-4 md:px-12`, 모바일 로고 "214", "사이트 보기" 데스크톱만, 편집 화면 `aside order-first`, 실행 로그 nowrap. 추가 발견: 대시보드 최근 활동 표가 모바일 오버플로 원인 → 표 내부 스크롤; `/admin/*` 미매칭은 `[...missing]` catch-all 로 어드민 404. 375px 4화면 오버플로 0 실측. 다음: H3 (정합성).
+
 ## [2026-08-30] ship | Phase H Step 0 + H1 — 연속 저장 검증 통과, 피드백·안전망 8건
 
 Step 0: 편집 화면 연속 저장 v1→v2→v3 성공 — 정적 리뷰 Open Q 해소, H1 편입 없음. H1: 저장 토스트, 검증 에러 clear-on-edit(token 파생 방식), 첫 에러 스크롤+상단 요약, Field/Input/Textarea aria 연결, `app/admin/error.tsx`·`not-found.tsx`, 다이얼로그 초기 포커스·Tab 트랩·스크롤 잠금·포커스 복원, alt "저장됨", 게시 실패 사람 문장(원문은 툴팁). 검증: tsc·eslint·build + Playwright 실주행(임시 계정, 종료 후 삭제). 다음: H2 (셸 반응형 + 팀 화면 제거).
