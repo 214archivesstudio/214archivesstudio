@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Image from "next/image";
 import { CldImage } from "next-cloudinary";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { cn } from "@/lib/utils";
+import { youtubeThumbnailUrl } from "@/lib/video";
 import type { PostMediaRow } from "@/types/database";
 
 interface MediaCardProps {
@@ -55,6 +57,15 @@ export function MediaCard({
               crop="fill"
               className="pointer-events-none h-full w-full object-cover"
             />
+          ) : media.video_platform === "youtube" && media.video_id ? (
+            <Image
+              src={youtubeThumbnailUrl(media.video_id)}
+              alt={media.video_title ?? "YouTube 영상"}
+              width={320}
+              height={180}
+              unoptimized
+              className="pointer-events-none h-full w-full object-cover"
+            />
           ) : (
             <div className="flex h-full w-full flex-col items-center justify-center gap-1 bg-black/60 text-[11px] text-muted">
               <span className="uppercase tracking-[0.1em] text-accent">
@@ -91,8 +102,8 @@ export function MediaCard({
       {isImage ? (
         <AltInput media={media} onAltChange={onAltChange} />
       ) : (
-        <span className="text-[10px] uppercase tracking-[0.1em] text-muted">
-          embedded video
+        <span className="truncate text-[10px] uppercase tracking-[0.1em] text-muted">
+          {media.video_platform} · {media.video_title ?? media.video_id}
         </span>
       )}
     </div>

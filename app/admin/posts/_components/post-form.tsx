@@ -16,6 +16,7 @@ import {
 } from "../_actions/posts";
 import { SectionPicker } from "./section-picker";
 import { SectionFields } from "./section-fields";
+import { SlugInput } from "./slug-input";
 import { ThumbnailUploader } from "./thumbnail-uploader";
 import type { PostRow, PostSection } from "@/types/database";
 
@@ -132,19 +133,12 @@ export function PostForm({ mode, initial }: PostFormProps) {
         </Field>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <Field
-            label="슬러그"
-            required
-            hint="kebab-case · 섹션 내 유일"
-            error={fieldErrors?.slug}
-          >
-            <Input
-              name="slug"
-              defaultValue={initial?.slug ?? ""}
-              placeholder="25-tokyo"
-              invalid={Boolean(fieldErrors?.slug)}
-            />
-          </Field>
+          <SlugInput
+            section={section}
+            initialSlug={initial?.slug ?? ""}
+            excludeId={isEdit ? initial?.id : undefined}
+            fieldError={fieldErrors?.slug}
+          />
           <Field
             label="날짜"
             required

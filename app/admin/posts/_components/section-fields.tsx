@@ -1,5 +1,8 @@
 "use client";
 
+import { useState } from "react";
+import VideoPlayer from "@/components/ui/VideoPlayer";
+import { tryParseVideoUrl } from "@/lib/video";
 import { Field } from "../../_components/ui/Field";
 import { Input } from "../../_components/ui/Input";
 import { VideoThumbnailUploader } from "./video-thumbnail-uploader";
@@ -25,6 +28,10 @@ export function SectionFields({
   fieldErrors,
   onDirty,
 }: SectionFieldsProps) {
+  const [videoUrl, setVideoUrl] = useState(initial.video_url ?? "");
+  const parsedVideo = tryParseVideoUrl(videoUrl);
+  const videoUrlInvalid = videoUrl.trim().length > 0 && parsedVideo === null;
+
   return (
     <>
       {section === "archives" && (
@@ -79,14 +86,26 @@ export function SectionFields({
           label="영상 URL"
           required={section === "showreel" || section === "film"}
           hint="YouTube 또는 Vimeo"
-          error={fieldErrors?.video_url}
+          error={
+            fieldErrors?.video_url ??
+            (videoUrlInvalid ? "유효한 YouTube 또는 Vimeo URL이 아닙니다" : undefined)
+          }
         >
           <Input
             name="video_url"
-            defaultValue={initial.video_url ?? ""}
+            value={videoUrl}
+            onChange={(e) => setVideoUrl(e.target.value)}
             placeholder="https://youtu.be/abc123"
-            invalid={Boolean(fieldErrors?.video_url)}
+            invalid={Boolean(fieldErrors?.video_url) || videoUrlInvalid}
           />
+          {parsedVideo && (
+            <div className="mt-3 max-w-md">
+              <VideoPlayer
+                key={`${parsedVideo.platform}:${parsedVideo.videoId}`}
+                video={{ ...parsedVideo, title: "영상 미리보기" }}
+              />
+            </div>
+          )}
         </Field>
       )}
 

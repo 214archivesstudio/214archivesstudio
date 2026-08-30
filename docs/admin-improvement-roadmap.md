@@ -1,6 +1,6 @@
 # 관리자 페이지 — 개선 로드맵 (Phase G1–G4)
 
-> **상태**: G1 ✅ (2026-08-30, [admin-phase-g1-plan](./admin-phase-g1-plan.md)) · G2 ✅ (2026-08-30, 아래 §1 G2 메모) · G3–G4 착수 전.
+> **상태**: G1 ✅ (2026-08-30, [admin-phase-g1-plan](./admin-phase-g1-plan.md)) · G2 ✅ · G3 ✅ (2026-08-30, 각 §1 메모) · G4 착수 전.
 > **범위**: 기존 어드민(Phase 3c+4 ship 완료본)의 사용성 개선. 신규 기능이 아니라 실사용 마찰 제거가 목적.
 > **참고**: [admin-phase-3c-4-plan](./admin-phase-3c-4-plan.md) · [admin-overview](./admin-overview.md) · [ADR-0001](../wiki/decisions/0001-admin-architecture.md)
 
@@ -53,7 +53,7 @@
 
 *구현 메모 (2026-08-30)*: G2-1 타임아웃은 페이지 마운트가 아니라 job `created_at` 기준 10분. 초과 시 `markJobTimedOut` 서버 액션으로 **DB 도 `failed` 로 기록** — UI 상태만 바꾸면 stuck `running` 행이 다음 로드에서 `findActiveJobId` 에 다시 잡혀 버튼이 영구 비활성화되기 때문 (위 리스크 표의 "UI 상태일 뿐" 메모는 이 결정으로 대체). G2-2 는 `DeleteDialog` 에 `confirmLabel/pendingLabel/confirmVariant` 옵션을 추가해 재사용. G2-3 은 상태 표기를 **공개 / 초안** 으로 통일 (Draft·게시됨·공개됨 정리) — 대문자 Pill(`DRIFT`, `SUCCESS`)·`GH ↗` 는 G4-4 범위로 유지. G2-4 는 `StatusDot` 에 `label` prop (라벨 미지정 시 `role="img"` + `aria-label`).
 
-### Phase G3 — 편집 경험 (~2일)
+### Phase G3 — 편집 경험 ✅ (ship 2026-08-30)
 
 | # | 작업 | 대상 파일 |
 |---|---|---|
@@ -63,6 +63,8 @@
 | G3-4 | 게시물 테이블 모바일 카드 레이아웃 | `posts-table.tsx:47-50` |
 
 **검증**: 중복 슬러그 입력 시 제출 전 경고. 모바일 뷰포트(375px)에서 목록 판독 가능.
+
+*구현 메모 (2026-08-30)*: G3-1 은 `checkSlugAvailable(section, slug, excludeId)` 서버 액션 + `slug-input.tsx` (400ms debounce, 편집 모드에서 자기 slug 제외). **advisory only** — 제출은 막지 않고 `unique(section, slug)` 가 최종 게이트. G3-2 는 YouTube 만 (`img.youtube.com/vi/<id>/mqdefault.jpg`, `next/image` unoptimized); Vimeo 는 oembed 호출이 필요하고 현재 콘텐츠에 0건이라 기존 텍스트 폴백 유지. G3-3 을 위해 `parseVideoUrl` 을 `lib/video.ts` 로 이동 (zod 없는 client-safe 모듈, `post-schema.ts` 는 re-export 로 기존 import 경로 유지) — 미리보기는 공개 사이트의 `VideoPlayer` 재사용. G3-4 는 `md:contents` 로 메타 3칸을 모바일에서 한 줄로 접는 방식 — 별도 카드 컴포넌트 없이 같은 마크업 유지.
 
 ### Phase G4 — 기술 부채·표현 정리 (여유 시)
 

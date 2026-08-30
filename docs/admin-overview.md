@@ -136,7 +136,8 @@ lib/
 │   └── middleware.ts               # 미들웨어 전용 + 세션 갱신
 ├── auth.ts                         # requireAuthenticatedAdmin, requireAdmin
 ├── repos/posts.ts                  # 타입 안전 query 헬퍼
-└── validation/post-schema.ts       # zod 섹션별 discriminated union
+├── validation/post-schema.ts       # zod 섹션별 discriminated union
+└── video.ts                        # parseVideoUrl · YouTube 썸네일 URL (client-safe, zod 없음)
 
 middleware.ts                        # /admin/* 라우트 보호
 

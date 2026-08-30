@@ -46,7 +46,7 @@ export function PostsTable({ posts, userRole }: PostsTableProps) {
           return (
             <div
               key={post.id}
-              className="grid grid-cols-[120px_1fr_140px_120px_100px_140px] items-center gap-5 border-b border-[#2a2a2a] py-4 transition-colors duration-200 hover:bg-white/[0.02]"
+              className="grid grid-cols-[88px_1fr] items-center gap-x-4 gap-y-2 border-b border-[#2a2a2a] py-4 transition-colors duration-200 hover:bg-white/[0.02] md:grid-cols-[120px_1fr_140px_120px_100px_140px] md:gap-5"
             >
               <Link
                 href={`/admin/posts/${post.id}`}
@@ -74,22 +74,25 @@ export function PostsTable({ posts, userRole }: PostsTableProps) {
                 </div>
               </div>
 
-              <div className="text-[12px] tracking-[0.05em] text-accent">
-                {SECTION_LABEL[post.section]}
+              {/* 모바일: 메타 한 줄. md 이상: contents 로 풀려 각각 그리드 셀이 된다. */}
+              <div className="col-start-2 flex flex-wrap items-center gap-x-3 gap-y-1 md:contents">
+                <div className="text-[12px] tracking-[0.05em] text-accent">
+                  {SECTION_LABEL[post.section]}
+                </div>
+
+                <div className="flex items-center gap-2 text-[12px] text-accent">
+                  <StatusDot
+                    status={post.published ? "published" : "draft"}
+                    label={post.published ? "공개" : "초안"}
+                  />
+                </div>
+
+                <div className="text-[12px] text-muted tabular-nums md:text-right">
+                  {post.date}
+                </div>
               </div>
 
-              <div className="flex items-center gap-2 text-[12px] text-accent">
-                <StatusDot
-                  status={post.published ? "published" : "draft"}
-                  label={post.published ? "공개" : "초안"}
-                />
-              </div>
-
-              <div className="text-right text-[12px] text-muted tabular-nums">
-                {post.date}
-              </div>
-
-              <div className="flex justify-end gap-2">
+              <div className="col-start-2 flex gap-2 md:col-auto md:justify-end">
                 <Link href={`/admin/posts/${post.id}`}>
                   <Btn variant="ghost" size="sm">편집</Btn>
                 </Link>

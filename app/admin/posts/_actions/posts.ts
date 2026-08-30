@@ -10,6 +10,7 @@ import {
   postSchema,
   type PostInput,
 } from "@/lib/validation/post-schema";
+import type { PostSection } from "@/types/database";
 
 export type FieldErrors = Partial<Record<string, string>>;
 
@@ -197,6 +198,29 @@ export async function updatePost(
 // ----------------------------------------------------------------------------
 // togglePublished (admin only)
 // ----------------------------------------------------------------------------
+
+/**
+ * Live slug availability for the form (debounced client-side). Advisory only —
+ * the (section, slug) unique constraint remains the final gate on write.
+ */
+export async function checkSlugAvailable(
+  section: PostSection,
+  slug: string,
+  excludeId?: string,
+): Promise<ActionResult<{ available: boolean }>> {
+  await requireAuthenticatedAdmin();
+  const supabase = await createClient();
+  let query = supabase
+    .from("posts")
+    .select("id")
+    .eq("section", section)
+    .eq("slug", slug)
+    .limit(1);
+  if (excludeId) query = query.neq("id", excludeId);
+  const { data, error } = await query.maybeSingle();
+  if (error) return { ok: false, error: error.message };
+  return { ok: true, data: { available: data === null } };
+}
 
 export async function togglePublished(
   postId: string,

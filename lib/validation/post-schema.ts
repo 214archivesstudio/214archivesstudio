@@ -1,5 +1,4 @@
 import { z } from "zod";
-import type { VideoPlatform } from "@/types/database";
 
 /**
  * Validation schema for posts. Section-discriminated.
@@ -98,29 +97,7 @@ export const postSchema = z.discriminatedUnion("section", [
 
 export type PostInput = z.infer<typeof postSchema>;
 
-/**
- * Parse a YouTube/Vimeo URL into platform + id.
- * Returns null for empty input, throws meaningful error for non-empty unsupported URLs.
- */
-export function parseVideoUrl(
-  url: string | null,
-): { platform: VideoPlatform; videoId: string } | null {
-  if (!url) return null;
-  const trimmed = url.trim();
-  if (trimmed.length === 0) return null;
-
-  const youtube = trimmed.match(
-    /youtu\.be\/([\w-]+)|youtube\.com\/(?:watch\?v=|embed\/|shorts\/)([\w-]+)/,
-  );
-  if (youtube) {
-    const id = youtube[1] ?? youtube[2];
-    if (id) return { platform: "youtube", videoId: id };
-  }
-  const vimeo = trimmed.match(/vimeo\.com\/(?:video\/)?(\d+)/);
-  if (vimeo && vimeo[1]) return { platform: "vimeo", videoId: vimeo[1] };
-
-  throw new Error("유효한 YouTube 또는 Vimeo URL이 아닙니다");
-}
+export { parseVideoUrl } from "@/lib/video";
 
 /**
  * Convert an arbitrary FormData into a plain object suitable for postSchema.parse.
