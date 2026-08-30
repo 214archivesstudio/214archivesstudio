@@ -156,7 +156,10 @@ export function PublishPanel({
                   {d.title}
                 </div>
               </div>
-              <div className="shrink-0 whitespace-nowrap text-[11px] text-[#666]">
+              <div
+                className="shrink-0 whitespace-nowrap text-[11px] text-[#666]"
+                suppressHydrationWarning
+              >
                 {relativeTime(d.updated_at)}
               </div>
             </div>
@@ -181,7 +184,8 @@ export function PublishPanel({
       <div className="mt-1 flex flex-col gap-3 border-t border-[#2a2a2a] pt-4">
         <div className="flex justify-between text-[12px] text-muted">
           <span>마지막 게시</span>
-          <span className="text-accent">
+          {/* 상대 시각은 서버·클라이언트 시계 차로 "방금"/"1분 전"이 갈릴 수 있어 하이드레이션 경고를 억제 (React #418) */}
+          <span className="text-accent" suppressHydrationWarning>
             {lastSuccessAt ? relativeTime(lastSuccessAt) : "기록 없음"}
           </span>
         </div>

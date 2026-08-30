@@ -1,6 +1,6 @@
 # 관리자 페이지 — Phase H 작업 계획 (평가 후속 개선)
 
-> **상태**: ✅ ship 완료 (2026-08-30) — Step 0 · H1 · H2 · H3 · H4 · H6. H4 라이브 검증과 H3-1 실업로드 확인은 **push 후** 운영자 절차(§H4, §3). H5 는 미착수(여유 시).
+> **상태**: ✅ ship + 프로덕션 배포·검증 완료 (2026-08-30) — Step 0 · H1 · H2 · H3 · H4(라이브 검증 ✅) · H6. 잔여: H3-1 이미지 5장 동시 업로드 순서 확인(실업로드 필요), H5 미착수(여유 시).
 > **입력**: 2026-08-30 어드민 사용성·기능 평가 — Playwright 실주행 14개 흐름 + 코드 정적 리뷰(critic) 교차 검증. 판정 REVISE. 보고서: [어드민 사용성·기능 평가](https://claude.ai/code/artifact/c0a3e239-fc09-4c8b-a1af-7f9e0a582a89) (비공개 아티팩트).
 > **범위**: 평가에서 나온 High 6 · Med 14 · Low 3 중 **개인 포트폴리오 운영(admin 1인)** 에 실제로 영향 있는 것. 팀 화면 제거 포함.
 > **참고**: [admin-improvement-roadmap](./admin-improvement-roadmap.md) (G1–G4 완료) · [admin-overview](./admin-overview.md) · [ADR-0001](../wiki/decisions/0001-admin-architecture.md)
@@ -120,7 +120,7 @@ G1–G4 로드맵을 마친 직후 어드민을 처음으로 **로그인해서 �
 
 > ✅ 2026-08-30 코드 완료. **라이브 검증 보류** — `workflow_dispatch` 는 origin 의 워크플로 파일을 실행하므로 push 전에는 새 워크플로를 돌릴 수 없다. 대신 "Resolve job id" 단계의 셸 스니펫을 로컬 env 로 그대로 실행해 검증: REST insert → `{"status":"pending","message":"수동 실행 (GitHub Actions)","triggered_by":null}` 행 생성, `jq` 로 id 파싱 성공, 테스트 행 삭제(204). YAML 은 js-yaml 파싱 통과. `tsc`·`eslint`·`next build` 통과.
 >
-> **push 후 확인 절차**: ① `gh workflow run publish.yml` (입력 없이) → 완료 후 대시보드 최근 활동에 "완료 · 변경 사항 없음 … · 수동 실행" 행 + "마지막 게시 방금" ② 어드민 "변경사항 게시" → 활동 표 문구 "빌드 시작됨 · 1~3분 후 사이트 반영"(변경 있을 때).
+> **✅ 2026-08-30 19:27 KST 라이브 검증**: push(`64e6799..ba22acb`) → Vercel Production 배포 success(30초) → `gh workflow run publish.yml` 입력 없이 실행(run 33306517452) → 전 단계 success, `publish_jobs` 에 `{status:success, message:"변경 사항 없음 (이미 사이트와 동기화됨) · 수동 실행", triggered_by:null, github_run_url}` 행 생성 → 프로덕션 대시보드 IN SYNC · "마지막 게시 방금" · 활동 첫 행 "오후 7:27 · 완료 · … · 수동 실행 · 실행 로그 ↗". 같은 세션에서 프로덕션 확인: nav Team 없음, `/admin/team` → 어드민 404, 통계 "공개", 활동 시각 KST(Vercel UTC 호스트에서 "오후 5:53"), 375px 목록 오버플로 0. "빌드 시작됨" 문구는 변경사항이 있는 게시에서 확인 예정(운영 중 자연 확인).
 >
 > 구현 메모: `JOB_ID` 를 job-level `env:` 에서 빼고 첫 단계 "Resolve job id" 가 `GITHUB_ENV` 로 확정 — job-level env 와 `GITHUB_ENV` 의 우선순위 모호성을 피하고 이후 단계(`Mark job running`/`Mark job result`)는 무변경. 행 생성 실패는 `::warning::` 만 내고 게시는 계속(비차단). drift 기준은 `getLastSuccessAt` 이 `created_at` 을 반환하도록 바꿔 호출부(`getDriftCount`/`listDriftPosts`/`DriftBadge`/`publish-panel`) 무변경. `completed_at IS NOT NULL` 가드 포함.
 

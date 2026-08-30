@@ -5,6 +5,10 @@
 
 ---
 
+## [2026-08-30] deploy | push → Vercel 배포 → H4 라이브 검증 완료
+
+로컬 10 커밋 push(`64e6799..ba22acb`). Vercel Production 배포 success(GitHub Deployments 6165656722). 프로덕션에 임시 admin 으로 로그인해 확인: Team 제거·어드민 404·KST 시각("오후 5:53", UTC 호스트에서도 정확)·375px 오버플로 0. `gh workflow run publish.yml` 수동 실행 → 워크플로가 스스로 `publish_jobs` 행 생성("· 수동 실행", triggered_by null) → 대시보드 "마지막 게시 방금". 임시 계정 삭제(auth 2·user_roles 2 원본). 검증 중 프로덕션 대시보드 콘솔에 React #418(하이드레이션 텍스트 불일치) 1건 → `publish-panel` 상대 시각 span 에 `suppressHydrationWarning` (서버·클라이언트 시계 차로 "방금"/"1분 전" 갈림). 잔여: H3-1 실업로드 순서 확인, H5, 공개 사이트 lint 3건.
+
 ## [2026-08-30] docs | Phase H6 마감 + 테스트 흔적 원상복구 확인
 
 admin-overview §7 코드 트리를 실제 구조로 재작성(존재하지 않던 `[id]/media/page.tsx` 등 정리, `error.tsx`·`not-found.tsx`·`[...missing]`·`created-toast`·`slug-input`·`lib/video.ts`·`repos/publish-jobs.ts` 반영), §11 H1–H4 해소 + 보류(editor)/H5 항목, §12 다음 작업(push→라이브 검증). wiki/index ADR amended 날짜. Phase H plan 상태 ✅. 원상복구 감사: QA 계정 0·user_roles 2·qa 게시물 0·고아 미디어 0·게시물 32(원본), 로컬 임시 파일 0. **다음**: push → Vercel 배포 → H4 라이브 검증 → 이미지 동시 업로드 확인.
