@@ -11,7 +11,7 @@ export const FILMS: ReadonlyArray<FilmItem> = [
       width: 1200,
       height: 800,
     },
-    videoThumbnailUrl: "https://res.cloudinary.com/dmsvmpsp5/video/upload/v1772596602/214archives/film/01-unveil/thumbnail.mp4",
+    videoThumbnailUrl: "https://res.cloudinary.com/dmsvmpsp5/video/upload/du_10,q_auto,vc_auto,w_1280/v1772596602/214archives/film/01-unveil/thumbnail.mp4",
     video: {
       platform: "youtube",
       videoId: "zCXXsKi0ucI",
@@ -78,7 +78,7 @@ export const FILMS: ReadonlyArray<FilmItem> = [
       width: 1200,
       height: 800,
     },
-    videoThumbnailUrl: "https://res.cloudinary.com/dmsvmpsp5/video/upload/v1772596609/214archives/film/04-ewha/thumbnail.mp4",
+    videoThumbnailUrl: "https://res.cloudinary.com/dmsvmpsp5/video/upload/du_10,q_auto,vc_auto,w_1280/v1772596609/214archives/film/04-ewha/thumbnail.mp4",
     video: {
       platform: "youtube",
       videoId: "o3hzeGvh9NQ",
@@ -133,7 +133,7 @@ export const FILMS: ReadonlyArray<FilmItem> = [
       width: 1200,
       height: 800,
     },
-    videoThumbnailUrl: "https://res.cloudinary.com/dmsvmpsp5/video/upload/v1772596616/214archives/film/07-shanghai/thumbnail.mp4",
+    videoThumbnailUrl: "https://res.cloudinary.com/dmsvmpsp5/video/upload/du_10,q_auto,vc_auto,w_1280/v1772596616/214archives/film/07-shanghai/thumbnail.mp4",
     video: {
       platform: "youtube",
       videoId: "cVQu7kwtWGE",
@@ -200,7 +200,7 @@ export const FILMS: ReadonlyArray<FilmItem> = [
       width: 1200,
       height: 800,
     },
-    videoThumbnailUrl: "https://res.cloudinary.com/dmsvmpsp5/video/upload/v1772596604/214archives/film/02-set-it-off/thumbnail.mp4",
+    videoThumbnailUrl: "https://res.cloudinary.com/dmsvmpsp5/video/upload/du_10,q_auto,vc_auto,w_1280/v1772596604/214archives/film/02-set-it-off/thumbnail.mp4",
     video: {
       platform: "youtube",
       videoId: "ZYsdtTsAw3o",
@@ -267,7 +267,7 @@ export const FILMS: ReadonlyArray<FilmItem> = [
       width: 1200,
       height: 800,
     },
-    videoThumbnailUrl: "https://res.cloudinary.com/dmsvmpsp5/video/upload/v1772596613/214archives/film/06-never-forget/thumbnail.mp4",
+    videoThumbnailUrl: "https://res.cloudinary.com/dmsvmpsp5/video/upload/du_10,q_auto,vc_auto,w_1280/v1772596613/214archives/film/06-never-forget/thumbnail.mp4",
     video: {
       platform: "youtube",
       videoId: "KpYlOKPSSJ4",
@@ -334,7 +334,7 @@ export const FILMS: ReadonlyArray<FilmItem> = [
       width: 1200,
       height: 800,
     },
-    videoThumbnailUrl: "https://res.cloudinary.com/dmsvmpsp5/video/upload/v1772596618/214archives/film/08-about/thumbnail.mp4",
+    videoThumbnailUrl: "https://res.cloudinary.com/dmsvmpsp5/video/upload/du_10,q_auto,vc_auto,w_1280/v1772596618/214archives/film/08-about/thumbnail.mp4",
     video: {
       platform: "youtube",
       videoId: "uif5b0nd8QE",
@@ -389,7 +389,7 @@ export const FILMS: ReadonlyArray<FilmItem> = [
       width: 1200,
       height: 800,
     },
-    videoThumbnailUrl: "https://res.cloudinary.com/dmsvmpsp5/video/upload/v1772596611/214archives/film/05-all-at-once/thumbnail.mp4",
+    videoThumbnailUrl: "https://res.cloudinary.com/dmsvmpsp5/video/upload/du_10,q_auto,vc_auto,w_1280/v1772596611/214archives/film/05-all-at-once/thumbnail.mp4",
     video: {
       platform: "youtube",
       videoId: "eilzomDSK5w",
@@ -407,7 +407,7 @@ export const FILMS: ReadonlyArray<FilmItem> = [
       width: 1200,
       height: 800,
     },
-    videoThumbnailUrl: "https://res.cloudinary.com/dmsvmpsp5/video/upload/v1772596606/214archives/film/03-not4nerd/thumbnail.mp4",
+    videoThumbnailUrl: "https://res.cloudinary.com/dmsvmpsp5/video/upload/du_10,q_auto,vc_auto,w_1280/v1772596606/214archives/film/03-not4nerd/thumbnail.mp4",
     video: {
       platform: "youtube",
       videoId: "MLWohM_5e6Q",
