@@ -44,7 +44,10 @@ export function SectionTabs({ active, counts, total, search }: SectionTabsProps)
             )}
           >
             <span>{tab.label}</span>
-            <span className="text-[11px] text-[#666]">{count}</span>
+            {/* 검색 중엔 카운트가 검색과 무관한 전체 수라 숨긴다 */}
+            {!search && (
+              <span className="text-[11px] text-[#666]">{count}</span>
+            )}
           </Link>
         );
       })}

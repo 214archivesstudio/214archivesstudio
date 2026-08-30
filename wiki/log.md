@@ -5,6 +5,10 @@
 
 ---
 
+## [2026-08-30] ship | Phase H3 — 정합성 (업로드 순번·KST 시각·검색 살균·최신순)
+
+다중 업로드 순번(위젯 세션 카운터 → 서버 `max+1+index`, 로컬 `display_order` 정렬, `created_at` 2차 키), 서버 컴포넌트 시각 KST + "오전/오후" 직접 조립(ICU 의존 제거), 검색어 PostgREST 메타문자 살균 + 검색 중 탭 카운트 숨김 + 검색 지우기, 목록 기본 정렬 `updated_at DESC`, drift "외 N건", 용어 3곳, created 배너 → 1회성 토스트(`history.replaceState` + `setTimeout 0`). 실주행 검증 완료(업로드 순서는 코드 검증만). 다음: H4 (게시 파이프라인).
+
 ## [2026-08-30] ship | Phase H2 — 셸 반응형 + 팀 화면 제거
 
 `/admin/team`·`lib/repos/user-roles.ts`·nav Team 삭제 (ADR-0001 amendment: Phase 3d 폐기, `user_roles`/RLS 유지). 헤더·본문 `px-4 md:px-12`, 모바일 로고 "214", "사이트 보기" 데스크톱만, 편집 화면 `aside order-first`, 실행 로그 nowrap. 추가 발견: 대시보드 최근 활동 표가 모바일 오버플로 원인 → 표 내부 스크롤; `/admin/*` 미매칭은 `[...missing]` catch-all 로 어드민 404. 375px 4화면 오버플로 0 실측. 다음: H3 (정합성).

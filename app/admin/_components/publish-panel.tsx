@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getJobStatus, markJobTimedOut, triggerPublish } from "../_actions/publish";
 import { Btn } from "./ui/Btn";
@@ -156,6 +157,14 @@ export function PublishPanel({
               </div>
             </div>
           ))}
+          {drift > driftItems.length && (
+            <Link
+              href="/admin/posts"
+              className="text-[12px] text-muted transition-colors hover:text-foreground"
+            >
+              외 {drift - driftItems.length}건 · 전체 목록 →
+            </Link>
+          )}
         </div>
       )}
 

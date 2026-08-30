@@ -25,9 +25,7 @@ export async function listPosts(filter: PostsListFilter = {}): Promise<PostsList
   let query = supabase
     .from("posts")
     .select("*", { count: "exact" })
-    .order("section", { ascending: true })
-    .order("display_order", { ascending: true })
-    .order("date", { ascending: false })
+    .order("updated_at", { ascending: false })
     .range(offset, offset + limit - 1);
 
   if (filter.section) {
@@ -37,9 +35,10 @@ export async function listPosts(filter: PostsListFilter = {}): Promise<PostsList
     query = query.eq("published", true);
   }
   if (filter.search) {
-    const term = filter.search.trim();
+    // PostgREST or-필터 문법 문자(쉼표·괄호·점)와 ilike 와일드카드(% _ * \)를 제거한다.
+    // 그대로 보간하면 "TOKYO, 2025" 같은 검색어가 400 을 낸다.
+    const term = filter.search.replace(/[,().*\\%_]/g, "").trim();
     if (term.length > 0) {
-      // ilike OR across title and slug. Postgres operator: 'or' filter syntax.
       query = query.or(`title.ilike.%${term}%,slug.ilike.%${term}%`);
     }
   }
@@ -77,7 +76,8 @@ export async function findPostMedia(
     .from("post_media")
     .select("*")
     .eq("post_id", postId)
-    .order("display_order", { ascending: true });
+    .order("display_order", { ascending: true })
+    .order("created_at", { ascending: true });
 
   if (error) {
     throw new Error(`findPostMedia failed: ${error.message}`);

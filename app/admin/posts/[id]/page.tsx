@@ -8,6 +8,7 @@ import { Pill } from "../../_components/ui/Pill";
 import { PostForm } from "../_components/post-form";
 import { PublishToggle } from "../_components/publish-toggle";
 import { DeletePostButton } from "../_components/delete-post-button";
+import { CreatedToast } from "../_components/created-toast";
 import { MediaManager } from "../_components/media/MediaManager";
 import type { PostSection } from "@/types/database";
 
@@ -52,7 +53,7 @@ export default async function EditPostPage({ params, searchParams }: PageProps) 
         title={post.title}
         subtitle={`${post.date} · ${media.length}개 미디어 · 마지막 편집 ${new Date(
           post.updated_at,
-        ).toLocaleString("ko-KR")}`}
+        ).toLocaleString("ko-KR", { timeZone: "Asia/Seoul" })}`}
         right={
           <div className="flex items-center gap-2.5">
             <Pill tone={post.published ? "default" : "warn"}>
@@ -62,11 +63,7 @@ export default async function EditPostPage({ params, searchParams }: PageProps) 
         }
       />
 
-      {created === "1" && (
-        <div className="mb-6 rounded-[2px] border border-[#2a2a2a] bg-white/[0.03] px-4 py-3 text-[13px] text-accent">
-          썸네일·기본 정보가 저장됐습니다. 이제 아래에서 갤러리를 추가하세요.
-        </div>
-      )}
+      {created === "1" && <CreatedToast />}
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
         <div className="space-y-10">

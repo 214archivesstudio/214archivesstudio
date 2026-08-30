@@ -30,6 +30,8 @@ export interface AddImageInput {
   readonly width: number;
   readonly height: number;
   readonly alt?: string | null;
+  /** 같은 배치 안의 완료 순번 (0부터). 병렬 업로드 시 display_order 충돌 방지. */
+  readonly index?: number;
 }
 
 // ----------------------------------------------------------------------------
@@ -56,7 +58,11 @@ export async function addImageMedia(
     .maybeSingle();
   if (maxErr) return mapPostgresError(maxErr);
 
-  const nextOrder = ((maxRow as { display_order: number } | null)?.display_order ?? -1) + 1;
+  // 병렬 호출이 같은 max 를 읽어도 index 가 다르면 순서가 보존된다 (plan H3 결정 #7).
+  const nextOrder =
+    ((maxRow as { display_order: number } | null)?.display_order ?? -1) +
+    1 +
+    (input.index ?? 0);
 
   const row = {
     post_id: postId,
@@ -126,7 +132,8 @@ export async function addVideoMedia(
     .maybeSingle();
   if (maxErr) return mapPostgresError(maxErr);
 
-  const nextOrder = ((maxRow as { display_order: number } | null)?.display_order ?? -1) + 1;
+  const nextOrder =
+    ((maxRow as { display_order: number } | null)?.display_order ?? -1) + 1;
 
   const row = {
     post_id: postId,

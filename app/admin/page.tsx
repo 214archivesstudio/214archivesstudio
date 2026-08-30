@@ -49,7 +49,7 @@ export default async function AdminDashboard() {
 
       <div className="mb-8 grid grid-cols-2 gap-4 md:grid-cols-4">
         <Stat label="전체 포스트" value={totalPosts ?? 0} note="모든 섹션 합산" />
-        <Stat label="공개됨" value={publishedPosts ?? 0} note="사이트에 노출 중" />
+        <Stat label="공개" value={publishedPosts ?? 0} note="사이트에 노출 중" />
         <Stat label="초안" value={drafts} note="비공개 항목" />
         <Stat
           label="미반영 변경"

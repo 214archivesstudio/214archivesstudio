@@ -63,7 +63,7 @@ export default async function AdminPostsPage({
       <PageHead
         eyebrow="콘텐츠"
         title="포스트"
-        subtitle={`전체 ${total}건 · 페이지 ${pageNum}/${totalPages} · 표시 중 게시 ${publishedDisplayed} · 초안 ${draftDisplayed}`}
+        subtitle={`전체 ${total}건 · 페이지 ${pageNum}/${totalPages} · 표시 중 공개 ${publishedDisplayed} · 초안 ${draftDisplayed}`}
         right={
           <Link href="/admin/posts/new">
             <Btn variant="primary" size="md">+ 새 포스트</Btn>
@@ -73,6 +73,14 @@ export default async function AdminPostsPage({
 
       <div className="mb-5 flex items-center gap-3">
         <div className="flex-1" />
+        {search && (
+          <Link
+            href={section ? `/admin/posts?section=${section}` : "/admin/posts"}
+            className="text-[12px] text-muted transition-colors hover:text-foreground"
+          >
+            검색 지우기 ×
+          </Link>
+        )}
         <SearchInput section={section ?? ""} defaultValue={search} />
       </div>
 

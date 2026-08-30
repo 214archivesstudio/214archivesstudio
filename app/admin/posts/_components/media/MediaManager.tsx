@@ -45,6 +45,7 @@ export function MediaManager({ postId, section, initialMedia }: MediaManagerProp
     publicId: string;
     width: number;
     height: number;
+    index: number;
   }) {
     setGlobalError(null);
     const result = await addImageMedia(postId, input);
@@ -56,7 +57,12 @@ export function MediaManager({ postId, section, initialMedia }: MediaManagerProp
       );
       return;
     }
-    setMedia((prev) => [...prev, result.data!.media]);
+    // 서버 응답 순서가 업로드 순서와 다를 수 있으므로 display_order 로 정렬한다.
+    setMedia((prev) =>
+      [...prev, result.data!.media].sort(
+        (x, y) => x.display_order - y.display_order,
+      ),
+    );
   }
 
   async function handleVideoSubmit(url: string): Promise<{
@@ -126,7 +132,7 @@ export function MediaManager({ postId, section, initialMedia }: MediaManagerProp
               type="button"
               onClick={() => setVideoModalOpen(true)}
             >
-              + 비디오
+              + 영상
             </Btn>
           )}
         </div>

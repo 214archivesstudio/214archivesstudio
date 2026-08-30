@@ -13,25 +13,37 @@ const STATUS_LABEL: Record<PublishJobRow["status"], string> = {
   running: "진행 중",
 };
 
-function fmtTime(iso: string): string {
-  const d = new Date(iso);
-  const today = new Date();
-  const isToday =
-    d.getFullYear() === today.getFullYear() &&
-    d.getMonth() === today.getMonth() &&
-    d.getDate() === today.getDate();
-  if (isToday) {
-    return d.toLocaleTimeString("ko-KR", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  }
-  return d.toLocaleString("ko-KR", {
-    month: "short",
+// 서버 컴포넌트라 호스트 TZ(Vercel = UTC)를 따르면 9시간 어긋난다. 운영은 한국 고정.
+const TIME_ZONE = "Asia/Seoul";
+
+/** KST 기준 연·월·일·시·분. ICU 데이터에 따라 "오후"가 "PM"으로 나오는 문제를 피하려 직접 조립한다. */
+function kstParts(d: Date) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: TIME_ZONE,
+    year: "numeric",
+    month: "numeric",
     day: "numeric",
-    hour: "2-digit",
+    hour: "numeric",
     minute: "2-digit",
-  });
+    hourCycle: "h23",
+  }).formatToParts(d);
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
+  return {
+    ymd: `${get("year")}-${get("month")}-${get("day")}`,
+    month: Number(get("month")),
+    day: Number(get("day")),
+    hour: Number(get("hour")),
+    minute: get("minute"),
+  };
+}
+
+function fmtTime(iso: string): string {
+  const t = kstParts(new Date(iso));
+  const period = t.hour < 12 ? "오전" : "오후";
+  const hour12 = t.hour % 12 === 0 ? 12 : t.hour % 12;
+  const time = `${period} ${hour12}:${t.minute}`;
+  const isToday = t.ymd === kstParts(new Date()).ymd;
+  return isToday ? time : `${t.month}월 ${t.day}일 ${time}`;
 }
 
 export function JobsCard({ jobs }: JobsCardProps) {
