@@ -5,6 +5,10 @@
 
 ---
 
+## [2026-08-30] docs | Phase H6 마감 + 테스트 흔적 원상복구 확인
+
+admin-overview §7 코드 트리를 실제 구조로 재작성(존재하지 않던 `[id]/media/page.tsx` 등 정리, `error.tsx`·`not-found.tsx`·`[...missing]`·`created-toast`·`slug-input`·`lib/video.ts`·`repos/publish-jobs.ts` 반영), §11 H1–H4 해소 + 보류(editor)/H5 항목, §12 다음 작업(push→라이브 검증). wiki/index ADR amended 날짜. Phase H plan 상태 ✅. 원상복구 감사: QA 계정 0·user_roles 2·qa 게시물 0·고아 미디어 0·게시물 32(원본), 로컬 임시 파일 0. **다음**: push → Vercel 배포 → H4 라이브 검증 → 이미지 동시 업로드 확인.
+
 ## [2026-08-30] ship | Phase H4 — 게시 파이프라인 (코드 완료, 라이브 검증은 push 후)
 
 publish.yml: `JOB_ID` 를 첫 단계 "Resolve job id" 에서 `GITHUB_ENV` 로 확정, 수동 실행이면 REST insert 로 `publish_jobs` 행 생성(비차단), 결과 문구 "빌드 시작됨 · 1~3분 후 사이트 반영"(+ "· 수동 실행"). `getLastSuccessAt` 이 `created_at` 반환(sync 시각 이전 기준) + `completed_at IS NOT NULL`. 패널 `markJobTimedOut` try/catch, 보상 UPDATE 실패 시 로깅 + "10분 뒤 자동 해제" 안내. 검증: 스니펫 로컬 실행(행 생성·파싱·삭제), js-yaml, tsc·eslint·build. **주의**: 워크플로는 origin 파일로 실행되므로 `gh workflow run` 검증은 push 후. 남은 것: H5(여유 시), H6 문서 마감.

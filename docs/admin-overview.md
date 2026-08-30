@@ -107,48 +107,63 @@ RLS 정책 + Postgres 트리거(`guard_publish_toggle`)로 이중 방어. 첫 ad
 
 ## 7. 코드 구조
 
+2026-08-30 기준 실제 파일 (Phase H 까지 반영).
+
 ```
 app/
 ├── admin/                          # 어드민 라우트 (미들웨어로 보호)
-│   ├── layout.tsx                  # 어드민 셸 (헤더 + nav + user/role 표시)
-│   ├── page.tsx                    # 대시보드 (게시물 카운트 통계)
+│   ├── layout.tsx                  # 어드민 셸 (AdminHeader + DriftBadge + UserPill + Toaster)
+│   ├── page.tsx                    # 대시보드 (통계 · 게시 패널 · 최근 활동)
+│   ├── error.tsx                   # 어드민 에러 화면 (다시 시도 / 목록으로)        ← H1
+│   ├── not-found.tsx               # 어드민 404 (셸 안)                               ← H1
+│   ├── [...missing]/page.tsx       # 미매칭 /admin/* → notFound()                     ← H2
 │   ├── login/page.tsx              # 이메일·비밀번호 로그인
 │   ├── logout/route.ts             # POST 로그아웃
-│   └── posts/                      # 게시물 관리
-│       ├── page.tsx                # 목록 ✅
-│       ├── new/page.tsx            # 생성 ✅
-│       ├── [id]/page.tsx           # 편집 ✅
-│       ├── [id]/media/page.tsx     # 미디어 매니저 (Phase 3c)
-│       ├── _actions/posts.ts       # Server Actions (create/update/delete/togglePublished)
+│   ├── _actions/publish.ts         # triggerPublish · getJobStatus · markJobTimedOut
+│   ├── _components/
+│   │   ├── publish-panel.tsx       # drift 목록 · 게시 버튼 · 폴링(10분 타임아웃)
+│   │   ├── jobs-card.tsx           # 최근 활동 표 (KST, 내부 스크롤)
+│   │   ├── drift-badge.tsx         # 헤더 미반영 배지
+│   │   └── ui/                     # 디자인 시스템 atoms
+│   │       ├── AdminHeader.tsx · UserPill.tsx · PageHead.tsx
+│   │       ├── Btn.tsx · Card.tsx · Pill.tsx · StatusDot.tsx
+│   │       ├── Field.tsx · Input.tsx · Textarea.tsx   # aria-invalid / aria-describedby 연결
+│   │       └── (index.ts · SaveBar.tsx · Select.tsx · tokens.ts — 미사용, H5-7 정리 후보)
+│   └── posts/
+│       ├── page.tsx                # 목록 (최신순 · 섹션 탭 · 검색 · 페이지네이션)
+│       ├── new/page.tsx            # 생성
+│       ├── [id]/page.tsx           # 편집 (폼 + 공개 상태 + 미디어 + 위험 영역)
+│       ├── _actions/posts.ts       # create/update/delete/togglePublished/checkSlugAvailable
+│       ├── _actions/media.ts       # addImage(순번)/addVideo/updateAlt/delete/reorder
 │       └── _components/
-│           ├── posts-table.tsx
-│           ├── post-form.tsx
-│           ├── section-fields.tsx
-│           ├── thumbnail-uploader.tsx
-│           ├── publish-toggle.tsx
-│           └── delete-dialog.tsx
-└── auth/callback/route.ts          # OAuth 콜백 (현재 미사용, 향후 OAuth 추가 시 재사용)
+│           ├── post-form.tsx       # useActionState · 저장 토스트 · 에러 clear-on-edit
+│           ├── slug-input.tsx      # debounce 중복 검사
+│           ├── section-fields.tsx  # 섹션별 필드 · 영상 URL 즉시 미리보기
+│           ├── section-picker.tsx · section-tabs.tsx · search-input.tsx
+│           ├── thumbnail-uploader.tsx · video-thumbnail-uploader.tsx
+│           ├── publish-toggle.tsx  # 공개/초안 (초안 전환 확인창)
+│           ├── delete-dialog.tsx   # 확인 다이얼로그 (포커스 트랩) · delete-post-button.tsx
+│           ├── created-toast.tsx   # ?created=1 1회성 토스트
+│           ├── posts-table.tsx     # 반응형 목록
+│           └── media/              # MediaManager · MediaGrid(dnd-kit) · MediaCard · AddImageButton · AddVideoModal
+└── auth/callback/route.ts          # OAuth 콜백 (현재 미사용)
 
 lib/
-├── supabase/                       # @supabase/ssr 클라이언트 헬퍼
-│   ├── client.ts                   # 브라우저용
-│   ├── server.ts                   # 서버 컴포넌트/액션용
-│   └── middleware.ts               # 미들웨어 전용 + 세션 갱신
-├── auth.ts                         # requireAuthenticatedAdmin, requireAdmin
-├── repos/posts.ts                  # 타입 안전 query 헬퍼
+├── supabase/                       # @supabase/ssr 클라이언트 (client · server · middleware)
+├── auth.ts                         # getCurrentAdminUser · requireAuthenticatedAdmin · requireAdmin
+├── repos/posts.ts                  # listPosts(살균 검색) · findPostById · findPostMedia · countPostsBySection
+├── repos/publish-jobs.ts           # listRecentPublishJobs · getLastSuccessAt(created_at) · drift · findActiveJobId
 ├── validation/post-schema.ts       # zod 섹션별 discriminated union
-└── video.ts                        # parseVideoUrl · YouTube 썸네일 URL (client-safe, zod 없음)
+└── video.ts                        # parseVideoUrl · YouTube 썸네일 URL (client-safe)
 
 middleware.ts                        # /admin/* 라우트 보호
+.github/workflows/publish.yml        # 게시: Resolve job id → sync → commit/push → 결과 기록
 
-supabase/
-├── migrations/
-│   ├── 00001_initial_schema.sql    # posts/post_media/user_roles/publish_jobs + RLS + 트리거
-│   └── 00002_seed_first_admin.sql  # 첫 admin user_roles 등록
-└── (.temp/ — CLI 캐시, gitignored)
+supabase/migrations/
+├── 00001_initial_schema.sql        # posts/post_media/user_roles/publish_jobs + RLS + 트리거
+└── 00002_seed_first_admin.sql      # 첫 admin user_roles 등록
 
-scripts/seed-from-csv.ts             # CSV → Supabase posts 30개 import
-
+scripts/sync-from-supabase.ts        # Supabase → data/*.ts (publish 워크플로가 실행)
 types/supabase.ts                    # GENERATED (npm run gen:types) — 편집 금지
 types/database.ts                    # 생성 타입 위의 alias (PostRow 등, Readonly)
 ```
@@ -226,8 +241,14 @@ npm run seed
 | ~~**`next lint`가 Next.js 16에서 작동 안 함**~~ | ✅ 2026-08-30 `lint: eslint .` 로 교체 | `handoff/` ignore. **잔존**: 공개 사이트 코드 3건(`LoadingAnimation` purity, `VideoPreloadContext` set-state-in-effect, `useVideoAutoplay` refs — React Compiler 신규 규칙) 은 어드민 범위 밖이라 미수정 |
 | **비밀번호 reset UI 없음** | 어드민이 비밀번호 잊으면 dashboard에서 직접 reset | 1–2명 환경이라 OK. 사용자 늘면 reset flow 추가 |
 | ~~**publish_jobs `triggered_by_email` 미연결**~~ | ✅ 2026-08-30 열 제거 | 대시보드가 트리거한 사람을 표시하지 않으므로 항상 null 이던 필드를 삭제. 필요해지면 auth admin API 로 enrichment |
-| **영상 미디어 카드의 시각 thumbnail 없음** | personal 섹션의 영상 항목이 platform + videoId 텍스트만 노출 | oembed fetch 도입 후보 (Phase 4.5) |
+| ~~**영상 미디어 카드의 시각 thumbnail 없음**~~ | ✅ 2026-08-30 (G3-2) | YouTube 는 `img.youtube.com` 정적 썸네일. Vimeo 는 oembed 필요 + 현재 0건이라 텍스트 폴백 |
 | **Publish 첫 실행 시 drift 가 모든 published 게시물** | `last_success = null` 이라 모든 row 가 "변경됨" 으로 카운트 | 첫 성공 publish 이후 정상화. 셋업 가이드에 명시 |
+| ~~**저장 성공 피드백·에러 화면 없음**~~ | ✅ 2026-08-30 (H1) | 저장 토스트, 검증 에러 clear-on-edit + 첫 에러 스크롤, `error.tsx`/`not-found.tsx`, 다이얼로그 포커스 트랩 |
+| ~~**모바일(375px) 셸 가로 오버플로**~~ | ✅ 2026-08-30 (H2) | 헤더·본문 반응형, 활동 표 내부 스크롤. 4화면 실측 0 |
+| ~~**다중 업로드 순서 경쟁 · UTC 시각 · 검색어 쉼표 크래시**~~ | ✅ 2026-08-30 (H3) | 클라이언트 순번 부여, `Asia/Seoul` 직접 조립, PostgREST 메타문자 살균. 업로드 순서는 실업로드 확인 필요 |
+| ~~**어드민 밖 수동 publish 가 drift 에 미반영**~~ | ✅ 2026-08-30 (H4, 코드) | 워크플로가 `job_id` 없이도 `publish_jobs` 행 생성. drift 기준 `created_at`. **라이브 검증은 push 후** (`admin-phase-h-plan` §H4) |
+| **editor 권한 UI 가 RLS 와 불일치** | 편집 화면 삭제 버튼에 권한 분기 없음, 권한 부족 시 "충돌" 문구 | 보류 — editor 0명. 두 번째 운영자 생기면 한 ship 으로 (`admin-phase-h-plan` §6) |
+| **Cloudinary env 누락 시 무언 데이터 소실 · sync 1000행 상한** | 환경 변수 하나로 `video_thumbnail_url` null 저장, `post_media` 1000행 초과분 게시 누락 | H5 후보 (미착수). 현재 규모(미디어 ~330행)에서는 미발생 |
 
 ---
 
@@ -235,12 +256,14 @@ npm run seed
 
 Phase 3c + 4 까지 ship 됨. 이후 2026-07-10 사용성 감사로 [admin-improvement-roadmap](./admin-improvement-roadmap.md) (Phase G1–G4) 가 수립됐고 G1(film 영상 썸네일 업로드)은 ship 완료 — 아래 목록은 그 로드맵에 흡수됨.
 
+G1–G4 는 2026-08-30 전부 ship, 같은 날 실주행 평가(REVISE) 후속으로 [admin-phase-h-plan](./admin-phase-h-plan.md) H1–H4 ship (H4 는 push 후 라이브 검증).
+
 다음 후보:
 
-- **첫 운영**: 실제 작가가 어드민에서 게시물 등록 → 갤러리 업로드 → "사이트에 반영" 까지의 full 흐름을 사용자 테스트
-- ~~이메일 enrichment~~ · ~~as never 정리~~ · ~~ESLint flat config~~ — G4 로 해소 (2026-08-30)
-- **영상 oembed**: 영상 미디어 카드에 platform thumbnail 자동 fetch
-- ~~Phase 3d Team 관리~~ — 2026-08-30 폐기 (Phase H2 에서 `/admin/team` 제거)
+- **push + 라이브 검증**: 로컬 커밋을 push → Vercel 배포 → `gh workflow run publish.yml` 로 H4 확인 → 이미지 5장 동시 업로드로 H3-1 확인
+- **첫 운영**: 실제 작가가 어드민에서 게시물 등록 → 갤러리 업로드 → "변경사항 게시" 까지의 full 흐름을 사용자 테스트
+- **H5 부채** (여유 시): Cloudinary env 가드, sync 페이지네이션, `x-pathname`, 스키마 정리, reorder upsert, 죽은 코드
+- ~~이메일 enrichment~~ · ~~as never 정리~~ · ~~ESLint flat config~~ — G4 (2026-08-30) · ~~영상 oembed~~ — G3 YouTube · ~~Phase 3d Team 관리~~ — H2 폐기
 
 ---
 

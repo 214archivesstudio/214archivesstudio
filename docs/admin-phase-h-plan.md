@@ -1,6 +1,6 @@
 # 관리자 페이지 — Phase H 작업 계획 (평가 후속 개선)
 
-> **상태**: 🔧 진행 중 — Step 0 ✅ · H1 ✅ · H2 ✅ · H3 ✅ · H4 ✅ 코드 완료 (2026-08-30, **라이브 검증은 push 후**) · H5 여유 시 · H6 문서 마감 잔여.
+> **상태**: ✅ ship 완료 (2026-08-30) — Step 0 · H1 · H2 · H3 · H4 · H6. H4 라이브 검증과 H3-1 실업로드 확인은 **push 후** 운영자 절차(§H4, §3). H5 는 미착수(여유 시).
 > **입력**: 2026-08-30 어드민 사용성·기능 평가 — Playwright 실주행 14개 흐름 + 코드 정적 리뷰(critic) 교차 검증. 판정 REVISE. 보고서: [어드민 사용성·기능 평가](https://claude.ai/code/artifact/c0a3e239-fc09-4c8b-a1af-7f9e0a582a89) (비공개 아티팩트).
 > **범위**: 평가에서 나온 High 6 · Med 14 · Low 3 중 **개인 포트폴리오 운영(admin 1인)** 에 실제로 영향 있는 것. 팀 화면 제거 포함.
 > **참고**: [admin-improvement-roadmap](./admin-improvement-roadmap.md) (G1–G4 완료) · [admin-overview](./admin-overview.md) · [ADR-0001](../wiki/decisions/0001-admin-architecture.md)
@@ -140,10 +140,12 @@ G1–G4 로드맵을 마친 직후 어드민을 처음으로 **로그인해서 �
 
 ### Step H6 — 문서·wiki 마감 (~30분)
 
-- [admin-overview](./admin-overview.md): 팀 화면 항목 제거, 라우트 표 갱신, §11 알려진 이슈 갱신
-- [admin-guide](./admin-guide.md): 게시 완료 문구, 목록 정렬 설명, 막힘 표 갱신
-- [ADR-0001](../wiki/decisions/0001-admin-architecture.md): "Phase 3d 팀 관리 보류" → **폐기** (개인 포트폴리오 결정) amendment 1줄
-- 본 문서 상태 갱신 + `wiki/log.md` ship 항목
+- [x] [admin-overview](./admin-overview.md): §7 코드 트리 실제 구조로 재작성, §11 알려진 이슈 H1–H4 해소 표시 + 보류/H5 항목, §12 다음 작업 (2026-08-30)
+- [x] [admin-guide](./admin-guide.md): 게시 완료 문구(H4), 목록 정렬 설명(H3), 막힘 표 — 각 ship 에서 반영
+- [x] [ADR-0001](../wiki/decisions/0001-admin-architecture.md): 2026-08-30 amendment "팀 화면 폐기" (H2) + `wiki/index.md` amended 날짜
+- [x] 본 문서 상태 갱신 + `wiki/log.md` ship 항목
+
+**테스트 흔적 원상복구 (2026-08-30 확인)**: 임시 QA 계정 0 (`auth.users` 2 = 원본), `user_roles` 2 (원본), `qa-temp*` 게시물 0, 고아 `post_media` 0, 게시물 총 32 (시작 시점과 동일), Cloudinary 업로드 없음. 오늘 `publish_jobs` 는 평가 중 버튼으로 실행한 정상 publish 1건만(수동 스니펫 테스트 행은 삭제). 로컬: 임시 스크립트·PNG 없음, dev 서버 종료, `.playwright-mcp/` 오늘 로그 삭제(gitignored), 저장소 미커밋은 세션 이전부터 있던 파일뿐.
 
 ---
 

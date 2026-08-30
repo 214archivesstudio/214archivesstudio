@@ -18,7 +18,7 @@
 
 ## Decisions (ADR)
 
-- [decisions/0001-admin-architecture](./decisions/0001-admin-architecture.md) — Supabase + build-time sync 어드민 아키텍처 (Accepted, 2026-05-02; amended 2026-05-03, 2026-05-15)
+- [decisions/0001-admin-architecture](./decisions/0001-admin-architecture.md) — Supabase + build-time sync 어드민 아키텍처 (Accepted, 2026-05-02; amended 2026-05-03, 2026-05-15, 2026-08-30 팀 화면 폐기)
 - [decisions/0002-supabase-keepalive](./decisions/0002-supabase-keepalive.md) — Supabase 무료 플랜 정지 방지 GitHub Actions keep-alive cron (Accepted, 2026-06-16)
 
 ## Codebase
