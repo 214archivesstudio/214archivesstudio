@@ -8,6 +8,7 @@ import { togglePublished } from "../_actions/posts";
 import { Btn } from "../../_components/ui/Btn";
 import { Card, CardLabel } from "../../_components/ui/Card";
 import { StatusDot } from "../../_components/ui/StatusDot";
+import { DeleteDialog } from "./delete-dialog";
 
 interface PublishToggleProps {
   readonly postId: string;
@@ -23,37 +24,47 @@ export function PublishToggle({
   const router = useRouter();
   const [published, setPublished] = useState(initialPublished);
   const [error, setError] = useState<string | null>(null);
+  const [confirmingDraft, setConfirmingDraft] = useState(false);
   const [isPending, startTransition] = useTransition();
+
+  async function applyToggle(next: boolean): Promise<{ ok: boolean; error?: string }> {
+    const result = await togglePublished(postId, next);
+    if (!result.ok) return { ok: false, error: result.error ?? "변경에 실패했습니다" };
+    setPublished(next);
+    router.refresh();
+    showToast(next);
+    return { ok: true };
+  }
 
   function handleToggle(next: boolean) {
     if (next === published) return;
     setError(null);
+    if (!next) {
+      // 공개 → 초안은 다음 게시 때 사이트에서 내려가므로 확인을 받는다.
+      setConfirmingDraft(true);
+      return;
+    }
     startTransition(async () => {
-      const result = await togglePublished(postId, next);
-      if (!result.ok) {
-        setError(result.error ?? "변경에 실패했습니다");
-        return;
-      }
-      setPublished(next);
-      router.refresh();
-      toast.success(
-        next ? "'공개'로 표시했어요" : "'Draft'로 표시했어요",
-        {
-          description: (
-            <span>
-              사이트에 반영하려면{" "}
-              <Link
-                href="/admin"
-                className="underline text-foreground hover:opacity-80"
-              >
-                대시보드 → '변경사항 게시'
-              </Link>
-              를 눌러주세요.
-            </span>
-          ),
-          duration: 8_000,
-        },
-      );
+      const result = await applyToggle(true);
+      if (!result.ok) setError(result.error ?? null);
+    });
+  }
+
+  function showToast(next: boolean) {
+    toast.success(next ? "'공개'로 표시했어요" : "'초안'으로 표시했어요", {
+      description: (
+        <span>
+          사이트에 반영하려면{" "}
+          <Link
+            href="/admin"
+            className="underline text-foreground hover:opacity-80"
+          >
+            대시보드 → &apos;변경사항 게시&apos;
+          </Link>
+          를 눌러주세요.
+        </span>
+      ),
+      duration: 8_000,
     });
   }
 
@@ -61,8 +72,10 @@ export function PublishToggle({
     <Card>
       <CardLabel>공개 상태</CardLabel>
       <div className="mb-3 flex items-center gap-2 text-[13px] text-foreground">
-        <StatusDot status={published ? "published" : "draft"} />
-        {published ? "공개됨" : "Draft"}
+        <StatusDot
+          status={published ? "published" : "draft"}
+          label={published ? "공개" : "초안"}
+        />
       </div>
       <p className="mb-4 text-[11px] tracking-[0.05em] text-muted">
         {canToggle
@@ -87,7 +100,7 @@ export function PublishToggle({
             disabled={isPending}
             onClick={() => handleToggle(false)}
           >
-            Draft
+            초안
           </Btn>
         </div>
       )}
@@ -95,6 +108,17 @@ export function PublishToggle({
         <p className="mt-3 rounded-[2px] border border-[#5a3322] bg-[#e2a98c]/5 px-3 py-2 text-[12px] text-[#e2a98c]">
           {error}
         </p>
+      )}
+      {confirmingDraft && (
+        <DeleteDialog
+          title="초안으로 전환할까요?"
+          description="다음 게시 때 공개 사이트에서 이 게시물이 내려갑니다. 언제든 다시 '공개'로 되돌릴 수 있습니다."
+          confirmLabel="초안으로 전환"
+          pendingLabel="전환 중…"
+          confirmVariant="secondary"
+          onConfirm={() => applyToggle(false)}
+          onClose={() => setConfirmingDraft(false)}
+        />
       )}
     </Card>
   );

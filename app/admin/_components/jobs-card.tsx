@@ -77,10 +77,11 @@ export function JobsCard({ jobs }: JobsCardProps) {
                 </td>
                 <td className="px-6 py-4 align-middle">
                   <div className="flex items-center gap-2 text-[12px] text-accent">
-                    <StatusDot status={STATUS_DOT[j.status]} />
-                    <span className="whitespace-nowrap">
-                      {STATUS_LABEL[j.status]}
-                    </span>
+                    <StatusDot
+                      status={STATUS_DOT[j.status]}
+                      label={STATUS_LABEL[j.status]}
+                      className="whitespace-nowrap"
+                    />
                     {(j.message || j.error) && (
                       <span className="line-clamp-2 text-[#666]">
                         · {j.message ?? j.error}

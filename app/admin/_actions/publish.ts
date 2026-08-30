@@ -93,3 +93,31 @@ export async function getJobStatus(
   if (!job) return { ok: false, error: "publish_job을 찾을 수 없습니다" };
   return { ok: true, data: job };
 }
+
+/**
+ * Client-side polling gives up after PUBLISH_TIMEOUT_MS. Persist that as a
+ * failed job so a stuck pending/running row can't re-seed polling on the next
+ * page load and keep the publish button disabled forever. No-op if the
+ * workflow already finalised the row.
+ */
+export async function markJobTimedOut(
+  jobId: string,
+): Promise<ActionResult<null>> {
+  await requireAdmin();
+  if (!jobId) return { ok: false, error: "jobId 필요" };
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("publish_jobs")
+    .update({
+      status: "failed",
+      error: "타임아웃: 10분 안에 완료되지 않았습니다",
+      completed_at: new Date().toISOString(),
+    } as never)
+    .eq("id", jobId)
+    .in("status", ["pending", "running"]);
+
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/admin");
+  return { ok: true, data: null };
+}

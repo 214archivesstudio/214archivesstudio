@@ -1,6 +1,6 @@
 # 관리자 페이지 — 개선 로드맵 (Phase G1–G4)
 
-> **상태**: G1 ✅ ship 완료 (2026-08-30) → [admin-phase-g1-plan](./admin-phase-g1-plan.md). G2–G4 착수 전 (권장 순서 G2 → G3 → G4).
+> **상태**: G1 ✅ (2026-08-30, [admin-phase-g1-plan](./admin-phase-g1-plan.md)) · G2 ✅ (2026-08-30, 아래 §1 G2 메모) · G3–G4 착수 전.
 > **범위**: 기존 어드민(Phase 3c+4 ship 완료본)의 사용성 개선. 신규 기능이 아니라 실사용 마찰 제거가 목적.
 > **참고**: [admin-phase-3c-4-plan](./admin-phase-3c-4-plan.md) · [admin-overview](./admin-overview.md) · [ADR-0001](../wiki/decisions/0001-admin-architecture.md)
 
@@ -40,7 +40,7 @@
 
 **검증**: film 게시물 편집 → mp4 업로드 → 미리보기 재생 확인 → publish → sync 후 `data/films.ts` 에 변환 URL 반영 → `/film` 카드·hover 배경 재생 확인.
 
-### Phase G2 — 실수 방지·신뢰성 (~1일)
+### Phase G2 — 실수 방지·신뢰성 ✅ (ship 2026-08-30)
 
 | # | 작업 | 대상 파일 |
 |---|---|---|
@@ -50,6 +50,8 @@
 | G2-4 | StatusDot 텍스트 라벨 + aria-label | `_components/ui/StatusDot.tsx` |
 
 **검증**: GitHub Actions secret 을 일부러 비운 상태에서 publish → 10분 후 failed 전환 확인. 공개 토글 시 다이얼로그 노출 확인.
+
+*구현 메모 (2026-08-30)*: G2-1 타임아웃은 페이지 마운트가 아니라 job `created_at` 기준 10분. 초과 시 `markJobTimedOut` 서버 액션으로 **DB 도 `failed` 로 기록** — UI 상태만 바꾸면 stuck `running` 행이 다음 로드에서 `findActiveJobId` 에 다시 잡혀 버튼이 영구 비활성화되기 때문 (위 리스크 표의 "UI 상태일 뿐" 메모는 이 결정으로 대체). G2-2 는 `DeleteDialog` 에 `confirmLabel/pendingLabel/confirmVariant` 옵션을 추가해 재사용. G2-3 은 상태 표기를 **공개 / 초안** 으로 통일 (Draft·게시됨·공개됨 정리) — 대문자 Pill(`DRIFT`, `SUCCESS`)·`GH ↗` 는 G4-4 범위로 유지. G2-4 는 `StatusDot` 에 `label` prop (라벨 미지정 시 `role="img"` + `aria-label`).
 
 ### Phase G3 — 편집 경험 (~2일)
 

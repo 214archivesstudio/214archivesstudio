@@ -5,6 +5,10 @@
 
 ---
 
+## [2026-08-30] ship | Phase G2 — publish 타임아웃·초안 전환 확인·표기 통일·StatusDot 라벨
+
+G2-1 publish 폴링 10분 타임아웃(job `created_at` 기준) + 초과 시 `markJobTimedOut` 서버 액션으로 DB `failed` 기록 + "다시 게시" 버튼. G2-2 공개→초안 전환 확인 다이얼로그 (`DeleteDialog` 라벨/variant prop 확장). G2-3 상태 표기 "공개/초안" 통일. G2-4 `StatusDot` `label` prop + aria-label. 검증: `tsc`·`eslint app/admin`·`next build` 통과. 브라우저 실검증(다이얼로그·타임아웃)은 어드민 로그인 자격이 없어 미수행 — 운영자 확인 필요. 다음: G3 (슬러그 실시간 검사, oembed 썸네일, 모바일 테이블).
+
 ## [2026-08-30] ship | Phase G1 마감 — film 영상 썸네일 publish + 문서
 
 G1 잔여 확인: Step 3 DB 마이그레이션은 07-10 에 이미 완료돼 있었으나(8/8 `du_10` URL), 이후 publish 가 한 번도 돌지 않아 `data/films.ts`·공개 사이트는 원본 URL 상태였음. `workflow_dispatch` 로 publish 실행 → `data/films.ts` URL 8줄 교체. 변환 URL 8개 CDN 워밍 + 실측: `/film` 프리로드 **48.7MB → 9.8MB (−80%)**.

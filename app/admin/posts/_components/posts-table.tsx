@@ -79,8 +79,10 @@ export function PostsTable({ posts, userRole }: PostsTableProps) {
               </div>
 
               <div className="flex items-center gap-2 text-[12px] text-accent">
-                <StatusDot status={post.published ? "published" : "draft"} />
-                {post.published ? "게시됨" : "초안"}
+                <StatusDot
+                  status={post.published ? "published" : "draft"}
+                  label={post.published ? "공개" : "초안"}
+                />
               </div>
 
               <div className="text-right text-[12px] text-muted tabular-nums">

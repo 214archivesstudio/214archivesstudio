@@ -56,7 +56,7 @@ export default async function EditPostPage({ params, searchParams }: PageProps) 
         right={
           <div className="flex items-center gap-2.5">
             <Pill tone={post.published ? "default" : "warn"}>
-              {post.published ? "공개됨" : "Draft"}
+              {post.published ? "공개" : "초안"}
             </Pill>
           </div>
         }

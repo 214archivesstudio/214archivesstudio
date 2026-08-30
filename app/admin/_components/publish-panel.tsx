@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { getJobStatus, triggerPublish } from "../_actions/publish";
+import { getJobStatus, markJobTimedOut, triggerPublish } from "../_actions/publish";
 import { Btn } from "./ui/Btn";
 import { Card, CardLabel } from "./ui/Card";
 import { Pill } from "./ui/Pill";
@@ -17,6 +17,8 @@ interface PublishPanelProps {
 }
 
 const POLL_INTERVAL_MS = 5_000;
+/** 실측 빌드 2–3분. 초과 시 stuck 으로 간주하고 failed 로 기록한다. */
+const PUBLISH_TIMEOUT_MS = 10 * 60_000;
 const SECTION_LABEL: Record<string, string> = {
   showreel: "Showreel",
   archives: "Archives",
@@ -46,21 +48,35 @@ export function PublishPanel({
   const router = useRouter();
   const [activeJobId, setActiveJobId] = useState<string | null>(initialActiveJobId);
   const [error, setError] = useState<string | null>(null);
+  const [timedOut, setTimedOut] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
     if (!activeJobId) return;
+    const jobId = activeJobId;
     let cancelled = false;
-    const timer = setInterval(async () => {
-      const result = await getJobStatus(activeJobId);
-      if (cancelled) return;
-      if (!result.ok || !result.data) return;
-      const status = result.data.status;
-      if (status === "success" || status === "failed") {
+
+    async function poll() {
+      const result = await getJobStatus(jobId);
+      if (cancelled || !result.ok || !result.data) return;
+      const job = result.data;
+      if (job.status === "success" || job.status === "failed") {
         setActiveJobId(null);
         router.refresh();
+        return;
       }
-    }, POLL_INTERVAL_MS);
+      const elapsed = Date.now() - new Date(job.created_at).getTime();
+      if (elapsed < PUBLISH_TIMEOUT_MS) return;
+      // 서버 기록 실패(예: editor 권한)여도 UI 는 타임아웃으로 전환한다.
+      await markJobTimedOut(job.id);
+      if (cancelled) return;
+      setActiveJobId(null);
+      setTimedOut(true);
+      router.refresh();
+    }
+
+    void poll();
+    const timer = setInterval(poll, POLL_INTERVAL_MS);
     return () => {
       cancelled = true;
       clearInterval(timer);
@@ -69,6 +85,7 @@ export function PublishPanel({
 
   function handleClick() {
     setError(null);
+    setTimedOut(false);
     startTransition(async () => {
       const result = await triggerPublish();
       if (!result.ok || !result.data) {
@@ -86,18 +103,26 @@ export function PublishPanel({
 
   const pillLabel = isPublishing
     ? "PUBLISHING"
-    : inSync
-      ? "IN SYNC"
-      : isFirstPublish
-        ? `INITIAL · ${drift}`
-        : `DRIFT · ${drift}`;
-  const pillTone = isPublishing || inSync ? "default" : "warn";
+    : timedOut
+      ? "TIMEOUT"
+      : inSync
+        ? "IN SYNC"
+        : isFirstPublish
+          ? `INITIAL · ${drift}`
+          : `DRIFT · ${drift}`;
+  const pillTone = isPublishing || inSync
+    ? "default"
+    : timedOut
+      ? "danger"
+      : "warn";
 
   const description = isPublishing
     ? "Vercel 빌드가 진행 중입니다. 완료되면 자동으로 새로고침됩니다."
-    : inSync
-      ? "Supabase의 모든 변경사항이 사이트에 반영되어 있습니다."
-      : `${drift}건의 변경사항이 아직 사이트에 반영되지 않았습니다. 게시를 누르면 Vercel 빌드가 시작됩니다.`;
+    : timedOut
+      ? "10분 안에 게시가 끝나지 않아 실패로 기록했습니다. 아래 최근 활동에서 GitHub 실행 상태를 확인한 뒤 다시 시도해 주세요."
+      : inSync
+        ? "Supabase의 모든 변경사항이 사이트에 반영되어 있습니다."
+        : `${drift}건의 변경사항이 아직 사이트에 반영되지 않았습니다. 게시를 누르면 Vercel 빌드가 시작됩니다.`;
 
   return (
     <Card className="flex flex-col gap-5">
@@ -158,7 +183,9 @@ export function PublishPanel({
               ? "트리거 중…"
               : isPublishing
                 ? "빌드 진행 중"
-                : "변경사항 게시"}
+                : timedOut
+                  ? "다시 게시"
+                  : "변경사항 게시"}
           </Btn>
         )}
         {!canPublish && (

@@ -1,13 +1,17 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { Btn } from "../../_components/ui/Btn";
+import { Btn, type BtnVariant } from "../../_components/ui/Btn";
 
 interface DeleteDialogProps {
   readonly title: string;
   readonly description?: string;
   readonly onConfirm: () => Promise<{ ok: boolean; error?: string }>;
   readonly onClose: () => void;
+  /** 확인 버튼 문구. 기본 "삭제" — 삭제 외 확인(초안 전환 등)에도 재사용한다. */
+  readonly confirmLabel?: string;
+  readonly pendingLabel?: string;
+  readonly confirmVariant?: BtnVariant;
 }
 
 /**
@@ -20,6 +24,9 @@ export function DeleteDialog({
   description,
   onConfirm,
   onClose,
+  confirmLabel = "삭제",
+  pendingLabel = "삭제 중…",
+  confirmVariant = "danger",
 }: DeleteDialogProps) {
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -36,7 +43,7 @@ export function DeleteDialog({
     startTransition(async () => {
       const result = await onConfirm();
       if (!result.ok) {
-        setError(result.error ?? "삭제에 실패했습니다.");
+        setError(result.error ?? `${confirmLabel}에 실패했습니다.`);
         return;
       }
       onClose();
@@ -72,8 +79,8 @@ export function DeleteDialog({
           <Btn variant="text" onClick={onClose} disabled={isPending}>
             취소
           </Btn>
-          <Btn variant="danger" onClick={handleConfirm} disabled={isPending}>
-            {isPending ? "삭제 중…" : "삭제"}
+          <Btn variant={confirmVariant} onClick={handleConfirm} disabled={isPending}>
+            {isPending ? pendingLabel : confirmLabel}
           </Btn>
         </div>
       </div>

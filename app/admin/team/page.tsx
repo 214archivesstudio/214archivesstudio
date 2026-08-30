@@ -78,8 +78,10 @@ export default async function TeamPage() {
                 </Pill>
               </div>
               <div className="flex items-center gap-2 text-[12px] text-muted">
-                <StatusDot status={isMe ? "published" : "draft"} />
-                {isMe ? "현재 세션" : "오프라인"}
+                <StatusDot
+                  status={isMe ? "published" : "draft"}
+                  label={isMe ? "현재 세션" : "오프라인"}
+                />
               </div>
               <div className="text-right text-[11px] tabular-nums text-[#666]">
                 {new Date(m.created_at).toLocaleDateString("ko-KR")}
