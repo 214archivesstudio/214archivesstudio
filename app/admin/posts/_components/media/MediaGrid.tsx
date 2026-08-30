@@ -1,5 +1,6 @@
 "use client";
 
+import { useId } from "react";
 import {
   DndContext,
   type DragEndEvent,
@@ -32,6 +33,9 @@ export function MediaGrid({
   onDeleteClick,
 }: MediaGridProps) {
   // Touch 는 지연 활성화 — 짧은 터치/스크롤은 드래그로 가로채지 않는다 (H5-9).
+  // dnd-kit 은 접근성 id(DndDescribedBy-N)를 인스턴스 카운터로 만들어 SSR 과 클라이언트가
+  // 어긋난다(hydration mismatch). 안정적인 id 를 넘기면 양쪽이 같은 값을 쓴다.
+  const dndId = useId();
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 6 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 8 } }),
@@ -56,7 +60,7 @@ export function MediaGrid({
   const ids = media.map((m) => m.id);
 
   return (
-    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+    <DndContext id={dndId} sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <SortableContext items={ids} strategy={rectSortingStrategy}>
         <div className="grid grid-cols-2 gap-2 md:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4">
           {media.map((m, i) => (

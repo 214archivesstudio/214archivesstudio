@@ -1,6 +1,6 @@
 # 관리자 페이지 — Phase H 작업 계획 (평가 후속 개선)
 
-> **상태**: ✅ 전 단계 완료 (2026-08-30) — Step 0 · H1 · H2 · H3 · H4(라이브 검증 ✅) · H5 · H6. 잔여: H3-1 이미지 5장 동시 업로드 순서 확인(실업로드 필요).
+> **상태**: ✅ 전 단계 완료 + 전 항목 검증 (2026-08-30) — Step 0 · H1 · H2 · H3(H3-1 실업로드 검증 ✅ + 선택 순서 보정 추가) · H4(라이브 검증 ✅) · H5 · H6. 운영자 확인 잔여: 실기기 터치 드래그(H5-9).
 > **입력**: 2026-08-30 어드민 사용성·기능 평가 — Playwright 실주행 14개 흐름 + 코드 정적 리뷰(critic) 교차 검증. 판정 REVISE. 보고서: [어드민 사용성·기능 평가](https://claude.ai/code/artifact/c0a3e239-fc09-4c8b-a1af-7f9e0a582a89) (비공개 아티팩트).
 > **범위**: 평가에서 나온 High 6 · Med 14 · Low 3 중 **개인 포트폴리오 운영(admin 1인)** 에 실제로 영향 있는 것. 팀 화면 제거 포함.
 > **참고**: [admin-improvement-roadmap](./admin-improvement-roadmap.md) (G1–G4 완료) · [admin-overview](./admin-overview.md) · [ADR-0001](../wiki/decisions/0001-admin-architecture.md)
@@ -101,7 +101,9 @@ G1–G4 로드맵을 마친 직후 어드민을 처음으로 **로그인해서 �
 
 **verify**: 이미지 5장 동시 업로드 → 그리드 순서 = 선택 순서 (3회 반복). 검색 `TOKYO, 2025` → 에러 없이 0건. 새 포스트 생성 후 목록 1페이지 최상단. 프로덕션 배포 후 최근 활동 시각이 KST.
 
-> ✅ 2026-08-30 ship. 실주행: 검색 `TOKYO, 2025` → 크래시 없이 0건 + 탭 카운트 숨김 + "검색 지우기 ×", `tokyo` → 1건. 새 포스트가 목록 최상단. 대시보드 시각 "오후 5:53" / "6월 16일 오후 10:03". 통계 카드 "공개", 부제 "표시 중 공개", "+ 영상". created 토스트 1회 + URL 쿼리 즉시 제거. **미검증**: H3-1 다중 업로드 순서 — 실제 Cloudinary 업로드가 필요해 코드 검증만 (운영자 확인 항목: 이미지 5장 동시 업로드 → 순서 보존).
+> ✅ 2026-08-30 ship. 실주행: 검색 `TOKYO, 2025` → 크래시 없이 0건 + 탭 카운트 숨김 + "검색 지우기 ×", `tokyo` → 1건. 새 포스트가 목록 최상단. 대시보드 시각 "오후 5:53" / "6월 16일 오후 10:03". 통계 카드 "공개", 부제 "표시 중 공개", "+ 영상". created 토스트 1회 + URL 쿼리 즉시 제거.
+>
+> ✅ **H3-1 실업로드 검증 (2026-08-30 저녁, 사용자가 Cloudinary API 키 제공)**: 색·크기가 다른 PNG 5장을 Cloudinary 위젯으로 3회 동시 업로드(총 15 자산, 검증 후 Admin API `prefix` 삭제 → 잔여 0). 1·2회차(보정 전): `display_order` 0·2·5·9·14 처럼 **고유·오름차순으로 고정되고 새로고침 후 유지**되지만 순서는 위젯 **완료 순서**(1회차 2,5,1,4,3 / 2회차 2,1,3,4,5)라 **선택 순서와 달랐고 매회 달랐음**. → 위젯 `onQueuesEnd` 가 큐(선택) 순서로 파일 목록을 주므로, 배치의 서버 insert 가 모두 끝난 뒤 그 순서로 `reorderMedia` 를 1회 호출하는 보정을 추가(`AddImageButton.onBatchComplete` → `MediaManager.finalizeBatchOrder`; pending 카운터와 batchOrder 중 늦게 오는 쪽이 finalize, 기존 항목 뒤에 배치). 3회차(보정 후): **1,2,3,4,5 선택 순서**, 새로고침 후 유지, 기존 10개 순서 불변. 부수: 새로고침 시 dnd-kit `DndDescribedBy-N` hydration mismatch 콘솔 에러 → `DndContext id={useId()}` 로 해소.
 >
 > 구현 메모: ① 시각은 `toLocale*` 의 `hour12` 가 이 Node ICU 에서 "PM" 으로 나와 `formatToParts(hourCycle h23)` 로 직접 "오전/오후" 조립 — 환경 무관하게 결정적. ② created 배너 → 토스트 전환 시 두 가지를 겪음: 서버 액션 redirect 직후 `router.replace` 가 무시돼 `history.replaceState` 로 교체(Next 가 라우터 상태와 동기화), 하드 로드에서는 자식 effect 가 layout `<Toaster>` 구독보다 먼저 돌아 토스트가 유실 → `setTimeout 0` 으로 미룸 + `id` 로 StrictMode 중복 제거. ③ 업로드 순번: 위젯 `open()` 시 카운터 0, `onSuccess` 마다 `index++`, 서버 `max + 1 + index`; 로컬 목록은 응답 순서가 달라도 `display_order` 로 정렬. `findPostMedia` 는 `created_at` 2차 정렬.
 

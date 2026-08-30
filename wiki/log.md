@@ -5,6 +5,10 @@
 
 ---
 
+## [2026-08-30] verify+fix | H3-1 다중 업로드 실검증 → 선택 순서 보정 추가
+
+사용자가 Cloudinary API 키 제공 → 위젯으로 PNG 5장 3회 동시 업로드(15 자산, Admin API prefix 삭제로 잔여 0). 결과: `display_order` 고유·오름차순·새로고침 유지는 성립하나 순서가 위젯 완료 순서(매회 다름)라 선택 순서와 불일치. `onQueuesEnd`(큐 = 선택 순서) 로 배치 완료 후 `reorderMedia` 1회 호출하는 보정 추가 → 3회차 1,2,3,4,5 확인. 부수: dnd-kit `DndDescribedBy` hydration mismatch → `DndContext id={useId()}`. QA 게시물·계정 삭제(posts 32·users 2·roles 2). Playwright 팁: 위젯 iframe 은 파일 스냅샷에는 잡히고(`Browse` ref), `browser_file_upload` 는 저장소 루트 안 경로만 허용(`.playwright-mcp/` 사용).
+
 ## [2026-08-30] fix | 공개 사이트 React Compiler lint 3건 해소 — `npm run lint` 에러 0
 
 `LoadingAnimation`: `useRef(Date.now())` → effect 내 지역 시작 시각, `progressRef` 렌더 쓰기 → effect, `fadingOut` state+effect → `isLoaded && animationDone` 파생. `VideoPreloadContext`: entries `useMemo`, `isLoaded = finished || entries.length === 0` 파생(effect 내 setState 제거). `useVideoAutoplay`: `enabledRef` 동기화 effect, `currentSrc`/`isPlaying` 을 `fellBack`·`playing` state 에서 파생(src 동기화 effect·pause 시 setState 제거). 동작 검증: `/film` 오버레이 종료·스크롤 복원·blob 8/8·autoplay·콘솔 에러 0. 남은 경고 3건은 `<img>`(의도).

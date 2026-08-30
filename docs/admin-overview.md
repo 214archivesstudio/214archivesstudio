@@ -248,7 +248,7 @@ npm run seed
 | **Publish 첫 실행 시 drift 가 모든 published 게시물** | `last_success = null` 이라 모든 row 가 "변경됨" 으로 카운트 | 첫 성공 publish 이후 정상화. 셋업 가이드에 명시 |
 | ~~**저장 성공 피드백·에러 화면 없음**~~ | ✅ 2026-08-30 (H1) | 저장 토스트, 검증 에러 clear-on-edit + 첫 에러 스크롤, `error.tsx`/`not-found.tsx`, 다이얼로그 포커스 트랩 |
 | ~~**모바일(375px) 셸 가로 오버플로**~~ | ✅ 2026-08-30 (H2) | 헤더·본문 반응형, 활동 표 내부 스크롤. 4화면 실측 0 |
-| ~~**다중 업로드 순서 경쟁 · UTC 시각 · 검색어 쉼표 크래시**~~ | ✅ 2026-08-30 (H3) | 클라이언트 순번 부여, `Asia/Seoul` 직접 조립, PostgREST 메타문자 살균. 업로드 순서는 실업로드 확인 필요 |
+| ~~**다중 업로드 순서 경쟁 · UTC 시각 · 검색어 쉼표 크래시**~~ | ✅ 2026-08-30 (H3) | 클라이언트 순번 부여 + `onQueuesEnd` 선택 순서 보정(실업로드 3회 검증), `Asia/Seoul` 직접 조립, PostgREST 메타문자 살균 |
 | ~~**어드민 밖 수동 publish 가 drift 에 미반영**~~ | ✅ 2026-08-30 (H4, 코드) | 워크플로가 `job_id` 없이도 `publish_jobs` 행 생성. drift 기준 `created_at`. **라이브 검증은 push 후** (`admin-phase-h-plan` §H4) |
 | **editor 권한 UI 가 RLS 와 불일치** | 편집 화면 삭제 버튼에 권한 분기 없음, 권한 부족 시 "충돌" 문구 | 보류 — editor 0명. 두 번째 운영자 생기면 한 ship 으로 (`admin-phase-h-plan` §6) |
 | ~~**Cloudinary env 누락 시 무언 데이터 소실 · sync 1000행 상한**~~ | ✅ 2026-08-30 (H5) | 업로더가 env 누락 시에도 hidden input 유지 + 레이아웃 경고 배너, sync `.range()` 페이지네이션. 함께: `reorder_post_media` RPC(migration 00004), `x-pathname` 미들웨어 설정, 스키마 정리, `lib/sections.ts`, TouchSensor |
