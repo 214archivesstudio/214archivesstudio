@@ -180,6 +180,7 @@ export function PostForm({ mode, initial }: PostFormProps) {
           <Field
             label="날짜"
             required
+            hint="공개 사이트는 날짜 최신순 정렬"
             error={fieldErrors?.date}
           >
             <Input
@@ -249,22 +250,6 @@ export function PostForm({ mode, initial }: PostFormProps) {
             />
           </Field>
         </div>
-      </div>
-
-      <div className="border-t border-[#2a2a2a] pt-6">
-        <CardLabel>정렬</CardLabel>
-        <Field
-          label="표시 순서"
-          hint="낮은 값이 먼저 표시"
-          error={fieldErrors?.display_order}
-        >
-          <Input
-            type="number"
-            name="display_order"
-            defaultValue={String(initial?.display_order ?? 0)}
-            invalid={Boolean(fieldErrors?.display_order)}
-          />
-        </Field>
       </div>
 
       <div className="flex items-center justify-between gap-4 border-t border-[#2a2a2a] pt-6">

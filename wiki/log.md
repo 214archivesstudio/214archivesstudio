@@ -5,6 +5,10 @@
 
 ---
 
+## [2026-08-31] feat | 게시물 폼 "표시 순서" 필드 제거 (죽은 필드 정리)
+
+검토 결과 posts.display_order 는 소비처가 없는 죽은 필드였음: 공개 사이트는 sync 의 date desc·slug asc 정렬, 어드민 목록은 updated_at desc, 갤러리 순서는 post_media.display_order(드래그)가 담당. 초기 seed 가 값을 채웠지만 sync 가 날짜 정렬을 채택하며 무의미해진 이력. 조치: 폼에서 정렬/표시 순서 블록 제거, 날짜 필드에 "공개 사이트는 날짜 최신순 정렬" 힌트 추가. DB 컬럼·zod default(0)는 유지(스키마 변경 없음) — 저장 시 0으로 수렴하나 읽는 곳이 없어 무해. 매뉴얼 동기화: 0-create 원고에서 표시 순서 단계 삭제, 해당 블록이 찍힌 스크린샷 8컷(9~13·15·23·24) 재촬영. 재촬영 추가 팁: sonner 토스트 고정용 클론 후 원본 toaster 를 제거하면 이후 토스트가 렌더될 호스트가 사라짐 — 다음 토스트 전에 페이지 새로고침 필요; admin 편집 화면은 window.scrollTo 가 아닌 document.scrollingElement.scrollTop 으로 스크롤. 관련: [[codebase/conventions]], [[codebase/admin-manual]].
+
 ## [2026-08-31] feat | 어드민 슬러그 → "URL 주소" 워딩 변경 + 날짜 기반 기본값 자동 채움
 
 사용자 질문("슬러그가 어디에 반영되나")에서 출발. 확인 결과 슬러그의 유일한 공개 반영처는 상세 페이지 URL(`/{section}/{slug}`, sync 시 `id`로 매핑)이며 자동 생성 로직은 없었음(`lib/utils.ts`의 `slugify()`는 미사용 dead code — 건드리지 않음). 변경: (1) 생성 폼에서 날짜 입력 시 `yy-mm-dd` 기본값 자동 채움 — 직접 수정한 값은 덮어쓰지 않고, 수정 모드에선 비활성(`slug-input.tsx`에 `dateValue` prop, `post-form.tsx` 날짜 입력을 controlled로 전환). (2) 워딩 "슬러그" → "URL 주소" 6곳(라벨·중복 메시지·검색 placeholder·zod 메시지 2건·서버 액션 메시지), 힌트를 `공개 주소: /{section}/{값}` 실시간 미리보기로 교체. 임시 admin + Playwright로 라이브 검증(자동 채움·날짜 변경 갱신·수동값 보존·수정 모드 무변경·중복 확인 연동), tsc·lint 에러 0, 계정/스크립트 정리 완료. (3) 후속: 같은 섹션·같은 날짜 중복 시 자동 순번 — 자동값이 "이미 사용 중"으로 판정되면 기존 checkSlugAvailable 콜백 안에서 `-2`, `-3`…(상한 50)을 붙여 재검사, 수동 입력값에는 불개입. 스텁 2건(`26-08-31`, `26-08-31-2`) 넣고 `26-08-31-3` 안착 + 수동 중복 입력 시 경고만 표시됨을 라이브 확인, 스텁·계정 삭제(posts 32 복원). React Compiler 주의: 이펙트 본문에서 동기 setState는 lint 에러 — setTimeout/async 콜백 안으로 옮겨 해결. 후속으로 매뉴얼도 동기화: `manual/docs` 원고 17곳 "슬러그"→"URL 주소"(0-create는 자동 채움·자동 순번 동작 설명 반영), 옛 라벨이 보이던 스크린샷 7컷(9~13 섹션별 새 포스트 폼, 15 편집 화면, 24 검증 에러) 로컬 dev + guide 임시 admin으로 재촬영 후 `docs/admin-manual.html` 재번들(1.99 MB 유지). 재촬영 팁: Playwright 스크린샷은 webp 직접 저장 가능하나 용량이 커서 `dwebp`→`cwebp -q 82` 재압축 필요; dev 모드 `nextjs-portal`(Next 배지) 제거 후 촬영; 생성 토스트는 sessionStorage `admin:post-created:<id>` 1회 가드 — 키 삭제 후 reload로 재현, fullPage 캡처 타이밍에 사라지므로 toaster DOM을 클론해 고정 후 촬영. 관련: [[codebase/conventions]], [[codebase/admin-manual]].
