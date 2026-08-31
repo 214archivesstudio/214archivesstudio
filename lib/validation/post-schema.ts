@@ -17,6 +17,34 @@ const optionalString = z
   .nullish()
   .transform((v) => v ?? null);
 
+// 생성 폼의 대기 갤러리 항목. 업로드는 이미 Cloudinary 에 끝났고,
+// 게시물 insert 와 함께 post_media 로 저장된다. 수정 폼은 보내지 않는다.
+const stagedImageSchema = z.object({
+  type: z.literal("image"),
+  public_id: z.string().min(1).max(300),
+  width: z.number().int().positive(),
+  height: z.number().int().positive(),
+  alt: z
+    .string()
+    .trim()
+    .max(300)
+    .nullish()
+    .transform((v) => (v && v.length > 0 ? v : null)),
+});
+
+const stagedVideoSchema = z.object({
+  type: z.literal("video"),
+  video_platform: z.enum(["youtube", "vimeo"]),
+  video_id: z.string().min(1).max(100),
+});
+
+const stagedMediaItemSchema = z.discriminatedUnion("type", [
+  stagedImageSchema,
+  stagedVideoSchema,
+]);
+
+export type StagedMediaItem = z.infer<typeof stagedMediaItemSchema>;
+
 const baseFields = {
   slug: z
     .string()
@@ -49,6 +77,18 @@ const baseFields = {
     "https:// 로 시작하는 .mp4 URL 이어야 합니다",
   ),
   display_order: z.coerce.number().int().nonnegative().default(0),
+  // hidden input 으로 JSON 문자열이 온다. 비어있거나 없으면 [].
+  staged_media: z.preprocess(
+    (v) => {
+      if (typeof v !== "string" || v.trim().length === 0) return [];
+      try {
+        return JSON.parse(v) as unknown;
+      } catch {
+        return v; // 배열 파싱 실패로 이어져 검증 에러가 된다
+      }
+    },
+    z.array(stagedMediaItemSchema).max(100, "갤러리 항목이 너무 많습니다"),
+  ).default([]),
 };
 
 const archivesSchema = z.object({

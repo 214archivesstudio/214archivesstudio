@@ -20,6 +20,7 @@ import { SectionPicker } from "./section-picker";
 import { SectionFields } from "./section-fields";
 import { SlugInput } from "./slug-input";
 import { ThumbnailUploader } from "./thumbnail-uploader";
+import { StagedMediaManager } from "./media/StagedMediaManager";
 import type { PostRow, PostSection } from "@/types/database";
 import { SECTION_LABEL } from "@/lib/sections";
 
@@ -251,6 +252,17 @@ export function PostForm({ mode, initial }: PostFormProps) {
           </Field>
         </div>
       </div>
+
+      {!isEdit && section !== "showreel" && (
+        <div className="border-t border-[#2a2a2a] pt-6">
+          <StagedMediaManager
+            section={section}
+            onDirty={() => {
+              dirtyRef.current = true;
+            }}
+          />
+        </div>
+      )}
 
       <div className="flex items-center justify-between gap-4 border-t border-[#2a2a2a] pt-6">
         <Link

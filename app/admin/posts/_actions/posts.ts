@@ -114,6 +114,22 @@ export async function createPost(
   const parsed = parseFormData(formData);
   if (!parsed.ok) return parsed;
 
+  const staged = parsed.input.staged_media;
+  if (staged.length > 0) {
+    if (parsed.input.section === "showreel") {
+      return { ok: false, error: "쇼릴 섹션은 갤러리를 사용할 수 없습니다" };
+    }
+    if (
+      parsed.input.section !== "personal" &&
+      staged.some((m) => m.type === "video")
+    ) {
+      return {
+        ok: false,
+        error: "영상 미디어는 personal 섹션 게시물에만 추가할 수 있습니다",
+      };
+    }
+  }
+
   let row;
   try {
     row = buildPostRow(parsed.input, user.id);
@@ -136,6 +152,35 @@ export async function createPost(
 
   const inserted = result.data as { id: string } | null;
   if (!inserted) return { ok: false, error: "생성된 게시물 ID를 받지 못했습니다" };
+
+  if (staged.length > 0) {
+    const mediaRows = staged.map((m, i) =>
+      m.type === "image"
+        ? {
+            post_id: inserted.id,
+            type: "image" as const,
+            public_id: m.public_id,
+            width: m.width,
+            height: m.height,
+            alt: m.alt,
+            display_order: i,
+          }
+        : {
+            post_id: inserted.id,
+            type: "video" as const,
+            video_platform: m.video_platform,
+            video_id: m.video_id,
+            video_title: null,
+            display_order: i,
+          },
+    );
+    const mediaResult = await supabase.from("post_media").insert(mediaRows);
+    if (mediaResult.error) {
+      // 갤러리가 빠진 채 절반만 생성된 게시물이 남지 않도록 되돌린다.
+      await supabase.from("posts").delete().eq("id", inserted.id);
+      return mapPostgresError(mediaResult.error);
+    }
+  }
 
   revalidatePath("/admin/posts");
   redirect(`/admin/posts/${inserted.id}?created=1`);
