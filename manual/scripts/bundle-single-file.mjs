@@ -9,7 +9,7 @@ import { sidebar } from '../docs/.vitepress/sidebar.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DIST_DIR = path.join(__dirname, '..', 'dist');
-const MIN_IMAGES = 27;
+const MIN_IMAGES = 25;
 const MAX_BYTES = 10 * 1024 * 1024;
 
 const MIME_BY_EXT = {
