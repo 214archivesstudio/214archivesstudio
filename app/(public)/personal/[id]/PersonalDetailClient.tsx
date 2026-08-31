@@ -2,12 +2,14 @@
 
 import { useParams } from "next/navigation";
 import { notFound } from "next/navigation";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { PERSONAL_WORKS } from "@/data/personal";
 import { CldImage } from "next-cloudinary";
 import { formatDate } from "@/lib/utils";
 import FadeIn from "@/components/common/FadeIn";
 import VideoPlayer from "@/components/ui/VideoPlayer";
+import Lightbox from "@/components/ui/Lightbox";
 import type { CloudinaryImage, VideoEmbed } from "@/types";
 
 function isVideoEmbed(
@@ -19,10 +21,15 @@ function isVideoEmbed(
 export default function PersonalDetailClient() {
   const params = useParams();
   const work = PERSONAL_WORKS.find((w) => w.id === params.id);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   if (!work) {
     notFound();
   }
+
+  const images = work.media.filter(
+    (item): item is CloudinaryImage => !isVideoEmbed(item),
+  );
 
   return (
     <div className="px-6 py-12 md:px-12">
@@ -52,21 +59,34 @@ export default function PersonalDetailClient() {
             {isVideoEmbed(item) ? (
               <VideoPlayer video={item} />
             ) : (
-              <CldImage
-                src={item.publicId}
-                width={1200}
-                height={800}
-                alt={item.alt}
-                sizes="(max-width: 768px) 100vw, 896px"
-                quality="auto"
-                format="auto"
-                priority={index === 0}
-                className="w-full rounded-sm"
-              />
+              <div
+                className="cursor-pointer"
+                onClick={() => setLightboxIndex(images.indexOf(item))}
+              >
+                <CldImage
+                  src={item.publicId}
+                  width={1200}
+                  height={800}
+                  alt={item.alt}
+                  sizes="(max-width: 768px) 100vw, 896px"
+                  quality="auto"
+                  format="auto"
+                  priority={index === 0}
+                  className="w-full rounded-sm"
+                />
+              </div>
             )}
           </motion.div>
         ))}
       </div>
+
+      {lightboxIndex !== null && (
+        <Lightbox
+          images={images}
+          initialIndex={lightboxIndex}
+          onClose={() => setLightboxIndex(null)}
+        />
+      )}
     </div>
   );
 }
