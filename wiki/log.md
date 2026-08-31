@@ -5,6 +5,10 @@
 
 ---
 
+## [2026-08-31] feat | 새 포스트 생성 폼에 갤러리(스테이징) 추가
+
+기존에는 갤러리를 생성 후 편집 화면에서만 넣을 수 있었음. 생성 폼에 갤러리 블록 추가(`StagedMediaManager`, showreel 제외·영상은 personal 만): 업로드는 즉시 Cloudinary, 항목은 hidden input(JSON `staged_media`)으로 폼과 함께 제출 → `createPost` 가 post_media 를 배열 순서 = display_order 로 일괄 insert, 실패 시 게시물 롤백. `MediaGrid`·`MediaCard`·`AddImageButton`·`AddVideoModal`·`DeleteDialog` 재사용(순수 UI라 로컬 상태로도 동작); 모달은 폼 중첩(nested form) 회피를 위해 `createPortal`, 갤러리 내 input 의 Enter 는 폼 제출 가드. 생성 토스트는 갤러리 동반 시 "갤러리 N개도 함께 저장됐어요". 라이브 검증: 실제 2장 업로드(선택 순서 보존) + 영상 1개 + alt 입력 → 생성 → DB display_order 0·1·2 & alt 확인, 임시 게시물·Cloudinary 자산·계정 정리. 매뉴얼은 원고만 갱신(0-create·1-gallery·archives), 스크린샷은 사용자 요청으로 미변경 — 생성 폼 컷(9~13·24)에 갤러리 블록이 없는 상태로 남음. 커밋 `7262b0b`·`32e3ace`.
+
 ## [2026-08-31] feat | 게시물 폼 "표시 순서" 필드 제거 (죽은 필드 정리)
 
 검토 결과 posts.display_order 는 소비처가 없는 죽은 필드였음: 공개 사이트는 sync 의 date desc·slug asc 정렬, 어드민 목록은 updated_at desc, 갤러리 순서는 post_media.display_order(드래그)가 담당. 초기 seed 가 값을 채웠지만 sync 가 날짜 정렬을 채택하며 무의미해진 이력. 조치: 폼에서 정렬/표시 순서 블록 제거, 날짜 필드에 "공개 사이트는 날짜 최신순 정렬" 힌트 추가. DB 컬럼·zod default(0)는 유지(스키마 변경 없음) — 저장 시 0으로 수렴하나 읽는 곳이 없어 무해. 매뉴얼 동기화: 0-create 원고에서 표시 순서 단계 삭제, 해당 블록이 찍힌 스크린샷 8컷(9~13·15·23·24) 재촬영. 재촬영 추가 팁: sonner 토스트 고정용 클론 후 원본 toaster 를 제거하면 이후 토스트가 렌더될 호스트가 사라짐 — 다음 토스트 전에 페이지 새로고침 필요; admin 편집 화면은 window.scrollTo 가 아닌 document.scrollingElement.scrollTop 으로 스크롤. 관련: [[codebase/conventions]], [[codebase/admin-manual]].
