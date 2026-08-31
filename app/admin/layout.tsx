@@ -29,6 +29,15 @@ export default async function AdminLayout({ children }: { children: ReactNode })
         rightSlot={
           <>
             <DriftBadge />
+            {/* 정적 단일 파일(public/admin/manual.html)이라 Link 대신 <a> 사용 */}
+            <a
+              href="/admin/manual.html"
+              target="_blank"
+              rel="noreferrer"
+              className="hidden text-[12px] tracking-[0.05em] text-muted transition-colors duration-200 hover:text-foreground md:inline"
+            >
+              가이드 ↗
+            </a>
             <Link
               href="/"
               className="hidden text-[12px] tracking-[0.05em] text-muted transition-colors duration-200 hover:text-foreground md:inline"

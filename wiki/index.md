@@ -29,7 +29,7 @@
 - [codebase/design-system](./codebase/design-system.md) — 색상, 폰트, 애니메이션, 브레이크포인트
 - [codebase/components](./codebase/components.md) — 컴포넌트 카탈로그
 - [codebase/conventions](./codebase/conventions.md) — 코딩 컨벤션, 명명 규칙, 불변성
-- [codebase/admin-manual](./codebase/admin-manual.md) — 어드민 VitePress 사용자 매뉴얼 (`manual/` 소스 → `docs/admin-manual.html` 단일 파일 번들)
+- [codebase/admin-manual](./codebase/admin-manual.md) — 어드민 VitePress 사용자 매뉴얼 (`manual/` 소스 → `public/admin/manual.html` 단일 파일 번들)
 
 ## Works — Archives (여행, 13개)
 

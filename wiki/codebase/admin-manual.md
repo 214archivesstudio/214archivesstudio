@@ -12,14 +12,14 @@ sources:
 
 ## Summary
 
-어드민(`/admin`) 사용법을 다루는 오프라인 사용자 매뉴얼. `manual/`에서 VitePress 1.6.3으로 원고·스크린샷을 관리하고, `bundle-single-file.mjs`가 빌드 결과를 이미지까지 전부 인라인한 단일 HTML(`docs/admin-manual.html`, 17페이지·27장·약 2 MB, 외부 요청 0)로 묶는다. 다른 프로젝트(AutoLink)의 데모 `arms-demo-manual.html`과 같은 형식(테마·페이지 배치·번들 방식)을 목표로 재현했다.
+어드민(`/admin`) 사용법을 다루는 오프라인 사용자 매뉴얼. `manual/`에서 VitePress 1.6.3으로 원고·스크린샷을 관리하고, `bundle-single-file.mjs`가 빌드 결과를 이미지까지 전부 인라인한 단일 HTML(`public/admin/manual.html`, 17페이지·25장·약 2 MB, 외부 요청 0)로 묶는다. 다른 프로젝트(AutoLink)의 데모 `arms-demo-manual.html`과 같은 형식(테마·페이지 배치·번들 방식)을 목표로 재현했다.
 
 ## 어디에 무엇이 있는가
 
 - `manual/docs/**` — VitePress 원고(마크다운) + 리소스. 시작하기(3) · 공통 조작(6) · 카테고리별 등록(5) · 운영 시나리오(1) · 주의사항 및 문제 해결(1) · 게시 전 체크리스트(1) = 17페이지.
 - `manual/docs/.vitepress/sidebar.mjs` — **라우트의 단일 출처**. `{ text, items: [{ text, link }] }[]` 형태로, `config.mts`의 `themeConfig.sidebar`와 `bundle-single-file.mjs`가 이 파일을 그대로 import해 공유한다. 페이지를 추가·이름 변경할 때 여기 한 곳만 고치면 사이드바와 번들 양쪽에 반영된다.
 - `manual/docs/.vitepress/theme/custom.css` — ARMS(AutoLink) 원본 그대로 복사 + 파일 끝에 1규칙만 추가: `.vp-doc img { border: 1px solid #e5e7eb; border-radius: 4px; }`. 어드민이 다크 UI라 라이트 테마 매뉴얼 안에서 스크린샷 경계를 명확히 하기 위함이며, 데모 대비 유일한 수정이다.
-- `manual/docs/img/N.webp` — 스크린샷. 페이지별이 아니라 **전역 순번** 1~27. `cwebp -q 82`로 변환, 개당 ≤300 KB 목표.
+- `manual/docs/img/N.webp` — 스크린샷. 페이지별이 아니라 **전역 순번** 1~25. `cwebp -q 82`로 변환, 개당 ≤300 KB 목표.
 - `manual/scripts/bundle-single-file.mjs` — 빌드 산출물(`dist/`)을 단일 HTML로 합치는 Node ESM 스크립트. 의존성은 `cheerio`(DOM 조작, 정규식 금지).
 
 ## 빌드
@@ -28,7 +28,7 @@ sources:
 cd manual && npm run bundle
 ```
 
-내부적으로 `vitepress build docs` → `node scripts/bundle-single-file.mjs ../docs/admin-manual.html` 순서로 실행된다(`manual/package.json`). `config.mts`의 `outDir`는 `../dist`인데, VitePress는 이 경로를 **docs 루트(`manual/docs/`) 기준**으로 해석하므로 실제 결과물은 `manual/dist/`에 생긴다 — 리포 루트 기준으로 착각하기 쉬운 지점.
+내부적으로 `vitepress build docs` → `node scripts/bundle-single-file.mjs ../public/admin/manual.html` 순서로 실행된다(`manual/package.json`). `config.mts`의 `outDir`는 `../dist`인데, VitePress는 이 경로를 **docs 루트(`manual/docs/`) 기준**으로 해석하므로 실제 결과물은 `manual/dist/`에 생긴다 — 리포 루트 기준으로 착각하기 쉬운 지점.
 
 ## 미리보기
 
@@ -58,7 +58,7 @@ cd manual && npm run docs:dev
 - 라우트마다 `<section class="page" id="page-<slug>">` 1개(`slug = route.replace(/^\//,'').replace(/\//g,'-')`, 예: `/common/1-gallery` → `common-1-gallery`).
 - 페이지 내부 헤딩 id는 `<slug>--<원래id>`로 재작성(`h1~h6[id]`, `a.header-anchor`). 페이지 간 상대 링크는 `#page-<slug>`(+ 해시가 있으면 `#<slug>--<hash>`)로 절대화한다.
 - 이미지·파비콘·로고는 전부 `data:` URI로 인라인(webp/svg/ico/woff2).
-- 자체 검증(`selfCheck`)을 통과해야 파일을 쓴다: `<script>` 정확히 1개(스크롤 스파이), `<link>` 정확히 1개(파비콘), `src`/`href`에 `http(s)://`나 `//`로 시작하는 값 0개, `section.page` 개수 = 라우트 개수, `img` 개수 ≥ 27, 출력 바이트 ≤ 10 MB. 하나라도 실패하면 어느 규칙인지 stderr에 찍고 `exit 1`.
+- 자체 검증(`selfCheck`)을 통과해야 파일을 쓴다: `<script>` 정확히 1개(스크롤 스파이), `<link>` 정확히 1개(파비콘), `src`/`href`에 `http(s)://`나 `//`로 시작하는 값 0개, `section.page` 개수 = 라우트 개수, `img` 개수 ≥ 25, 출력 바이트 ≤ 10 MB. 하나라도 실패하면 어느 규칙인지 stderr에 찍고 `exit 1`.
 
 ## 단일 파일이 의도적으로 안 하는 것
 
@@ -72,7 +72,7 @@ cd manual && npm run docs:dev
 - [manual/docs/.vitepress/sidebar.mjs](../../manual/docs/.vitepress/sidebar.mjs) — 라우트 단일 출처
 - [manual/docs/.vitepress/theme/custom.css](../../manual/docs/.vitepress/theme/custom.css) — ARMS 테마 + 이미지 테두리 1규칙
 - [manual/scripts/bundle-single-file.mjs](../../manual/scripts/bundle-single-file.mjs) — 단일 HTML 번들러
-- [docs/admin-manual.html](../../docs/admin-manual.html) — 산출물 (오프라인, 17페이지, 27이미지)
+- [public/admin/manual.html](../../public/admin/manual.html) — 산출물 (오프라인, 17페이지, 스크린샷 25장)
 - [docs/admin-manual-implementation-plan.md](../../docs/admin-manual-implementation-plan.md) — 구현 플랜 (P1–P5)
 - [docs/handoff-admin-manual.md](../../docs/handoff-admin-manual.md) — 형식 분석 + 촬영 레시피
 

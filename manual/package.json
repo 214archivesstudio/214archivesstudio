@@ -5,7 +5,7 @@
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
-    "bundle": "vitepress build docs && node scripts/bundle-single-file.mjs ../docs/admin-manual.html"
+    "bundle": "vitepress build docs && node scripts/bundle-single-file.mjs ../public/admin/manual.html"
   },
   "devDependencies": {
     "cheerio": "1.2.0",
