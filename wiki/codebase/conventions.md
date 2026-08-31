@@ -28,7 +28,7 @@ sources:
 - **컴포넌트 파일**: `PascalCase.tsx` (`ThumbnailGrid.tsx`)
 - **utility 파일**: `camelCase.ts` (`cloudinary.ts`, `utils.ts`)
 - **데이터 파일**: 복수형 `{section}s.ts` (`archives.ts`, `films.ts`)
-- **slug**: kebab-case (`22-london`, `lookbook-bready`)
+- **slug**: kebab-case (`22-london`, `lookbook-bready`). 어드민 UI 라벨은 "URL 주소". 생성 폼에서 날짜 입력 시 `yy-mm-dd` 기본값이 자동 채워지고, 같은 섹션에 이미 있으면 `-2`, `-3`… 순번이 자동으로 붙음(직접 수정한 값은 덮어쓰지 않음, 수정 모드에선 비활성)
 - **Cloudinary publicId**: `214archives/{section}/{slug}/{filename}` 패턴
 
 ## Cloudinary 사용 규칙

@@ -27,7 +27,7 @@ export function SearchInput({ section, defaultValue }: SearchInputProps) {
         type="text"
         name="q"
         defaultValue={defaultValue}
-        placeholder="제목 또는 슬러그 검색…"
+        placeholder="제목 또는 URL 주소 검색…"
         className="flex-1 bg-transparent text-[13px] text-foreground placeholder:text-[#555] outline-none"
       />
       <button

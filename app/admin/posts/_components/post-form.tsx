@@ -33,6 +33,7 @@ export function PostForm({ mode, initial }: PostFormProps) {
   const isEdit = mode === "edit";
   const initialSection = (initial?.section ?? "archives") as PostSection;
   const [section, setSection] = useState<PostSection>(initialSection);
+  const [date, setDate] = useState(initial?.date ?? "");
 
   const initialVideoUrl = initial
     ? buildVideoUrl(initial.video_platform, initial.video_id)
@@ -174,6 +175,7 @@ export function PostForm({ mode, initial }: PostFormProps) {
             initialSlug={initial?.slug ?? ""}
             excludeId={isEdit ? initial?.id : undefined}
             fieldError={fieldErrors?.slug}
+            dateValue={isEdit ? undefined : date}
           />
           <Field
             label="날짜"
@@ -183,7 +185,8 @@ export function PostForm({ mode, initial }: PostFormProps) {
             <Input
               type="date"
               name="date"
-              defaultValue={initial?.date ?? ""}
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
               invalid={Boolean(fieldErrors?.date)}
             />
           </Field>

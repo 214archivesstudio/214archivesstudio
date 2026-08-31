@@ -38,7 +38,7 @@ function mapPostgresError(error: { code?: string; message: string }): FailResult
   if (error.code === "23505") {
     return {
       ok: false,
-      fieldErrors: { slug: "이미 사용 중인 슬러그입니다" },
+      fieldErrors: { slug: "이미 사용 중인 주소입니다" },
     };
   }
   if (error.code === "42501") {

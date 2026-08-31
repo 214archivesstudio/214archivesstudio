@@ -21,8 +21,8 @@ const baseFields = {
   slug: z
     .string()
     .trim()
-    .min(1, "슬러그는 필수입니다")
-    .max(80, "슬러그는 80자 이내여야 합니다")
+    .min(1, "URL 주소는 필수입니다")
+    .max(80, "URL 주소는 80자 이내여야 합니다")
     .regex(slugRegex, "소문자/숫자/하이픈만 사용 가능합니다 (예: 25-tokyo)"),
   title: z.string().trim().min(1, "제목은 필수입니다").max(160),
   date: z
