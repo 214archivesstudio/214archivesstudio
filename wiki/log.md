@@ -5,6 +5,20 @@
 
 ---
 
+## [2026-08-31] feat | 어드민 슬러그 → "URL 주소" 워딩 변경 + 날짜 기반 기본값 자동 채움
+
+사용자 질문("슬러그가 어디에 반영되나")에서 출발. 확인 결과 슬러그의 유일한 공개 반영처는 상세 페이지 URL(`/{section}/{slug}`, sync 시 `id`로 매핑)이며 자동 생성 로직은 없었음(`lib/utils.ts`의 `slugify()`는 미사용 dead code — 건드리지 않음). 변경: (1) 생성 폼에서 날짜 입력 시 `yy-mm-dd` 기본값 자동 채움 — 직접 수정한 값은 덮어쓰지 않고, 수정 모드에선 비활성(`slug-input.tsx`에 `dateValue` prop, `post-form.tsx` 날짜 입력을 controlled로 전환). (2) 워딩 "슬러그" → "URL 주소" 6곳(라벨·중복 메시지·검색 placeholder·zod 메시지 2건·서버 액션 메시지), 힌트를 `공개 주소: /{section}/{값}` 실시간 미리보기로 교체. 임시 admin + Playwright로 라이브 검증(자동 채움·날짜 변경 갱신·수동값 보존·수정 모드 무변경·중복 확인 연동), tsc·lint 에러 0, 계정/스크립트 정리 완료. (3) 후속: 같은 섹션·같은 날짜 중복 시 자동 순번 — 자동값이 "이미 사용 중"으로 판정되면 기존 checkSlugAvailable 콜백 안에서 `-2`, `-3`…(상한 50)을 붙여 재검사, 수동 입력값에는 불개입. 스텁 2건(`26-08-31`, `26-08-31-2`) 넣고 `26-08-31-3` 안착 + 수동 중복 입력 시 경고만 표시됨을 라이브 확인, 스텁·계정 삭제(posts 32 복원). React Compiler 주의: 이펙트 본문에서 동기 setState는 lint 에러 — setTimeout/async 콜백 안으로 옮겨 해결. 주의: `docs/admin-manual.html`의 "슬러그" 표기는 이제 stale. 관련: [[codebase/conventions]].
+
+## [2026-08-31] ship | 어드민 사용자 매뉴얼(VitePress → 단일 HTML) P1–P5 완료
+
+`docs/admin-manual-implementation-plan.md`를 서브에이전트 implement+review 페어로 5단계 실행. P1 스캐폴드(VitePress 1.6.3, `manual/docs/.vitepress/{config.mts,sidebar.mjs,theme/}`, 사이드바 17항목) → P2 원고(17페이지, `admin-guide.md` 문장 불변으로 카테고리별 재배치, 2세션 병렬 작성) → P3 스크린샷(Playwright MCP로 27컷 촬영, 프로덕션 임시 admin 계정 사용 후 삭제, meme-video 컷 재촬영 1건) → P4 번들 스크립트(`manual/scripts/bundle-single-file.mjs`, cheerio 기반 — section.page 라우트별 1개·`#page-<slug>` 앵커·전 자산 data URI 인라인·자체 검증 5종) → P5 문서 마감(본 항목). 결과물: `docs/admin-manual.html` 17페이지·27장·1.97 MB·외부 요청 0.
+
+주요 발견: VitePress `outDir`은 리포 루트가 아니라 **docs 루트 기준**으로 해석됨(`../dist` → `manual/dist/`); 이미지 파일이 없으면 Vite가 빌드 자체를 실패시킴(`Could not resolve`) — P2는 0바이트 플레이스홀더로 우회 후 P3가 실제 파일로 교체; `markdown-it-attrs`는 VitePress에 이미 번들되어 있어 배지 문법(`` `공개`{.normal} ``)에 별도 설치 불필요; 체크리스트 페이지의 `- [ ]`를 렌더하려 `markdown-it-task-lists` 추가; 번들 스크립트의 스크롤 스파이는 "스크롤 맨 아래" 분기 추가(마지막 섹션이 짧아 일반 스크롤 계산으로는 활성화 안 되는 경우 보정); 스크린샷 중 YouTube 미리보기 iframe이 헤드리스 Chromium에서 검게 나오는 문제 발견 → 교차 출처 iframe을 한 번 연 뒤 `scrollY 0`에서 촬영하는 방식으로 우회. 상세: [[codebase/admin-manual]].
+
+## [2026-08-30] plan | 어드민 매뉴얼(arms-demo-manual.html 형식) 구현 플랜 작성
+
+`docs/admin-manual-implementation-plan.md`. 핸드오프(`docs/handoff-admin-manual.md`)를 P1 스캐폴드 → P2 원고 18페이지 → P3 Playwright 스크린샷 27컷 → P4 cheerio 단일 파일 번들(`manual/scripts/bundle-single-file.mjs` → `docs/admin-manual.html`) → P5 마감의 5단계로 정리, 단계별 검증 기준·페이지별 구조/컷 매핑·번들 알고리즘 명시. 핸드오프 대비 보완: 본문 내부 링크(`/common/1-gallery`)도 `#page-` 앵커로 재작성, 사이드바를 `sidebar.mjs`로 분리해 config와 번들이 공유, `outline`/`docFooter` 끔, 데모 스파이엔 클릭 핸들러가 없음을 확인. P2·P3는 병렬 가능.
+
 ## [2026-08-30] docs | admin-guide 를 카테고리별 시나리오 가이드로 재작성
 
 Phase H5 배포본 기준. 구조: 0 두 가지 개념(공개/초안 vs 변경사항 게시) → 1 공통 조작 A~F(생성·갤러리·수정·공개·게시·삭제) → 2 카테고리별(Showreel·Archives·Film·Photography·Personal: 필수/선택/갤러리 표 + 등록·수정·삭제) → 3 운영 시나리오 → 4 막힘 표 → 5 게시 전 체크리스트. 필수 필드·권한·미디어 규칙은 코드(section-fields, MediaManager, posts-table)로 재확인. 열람용 HTML 아티팩트도 발행.

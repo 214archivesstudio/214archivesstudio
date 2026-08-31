@@ -1,11 +1,8 @@
 # 214Archives Studio — 포트폴리오 웹사이트 기획서
 
-> **Every moment happens once. We archive it!**
-
 - **문서 버전:** v1.0
 - **작성일:** 2025년 2월 10일
 - **프로젝트:** 214Archives Studio 포트폴리오 웹사이트
-- **용도:** 개발 에이전트(Claude Code) 참조용
 
 ---
 

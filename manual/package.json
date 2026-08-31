@@ -1,0 +1,15 @@
+{
+  "name": "@214/manual",
+  "private": true,
+  "scripts": {
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs",
+    "bundle": "vitepress build docs && node scripts/bundle-single-file.mjs ../docs/admin-manual.html"
+  },
+  "devDependencies": {
+    "cheerio": "1.2.0",
+    "markdown-it-task-lists": "2.1.1",
+    "vitepress": "1.6.3"
+  }
+}

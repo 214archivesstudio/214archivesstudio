@@ -169,6 +169,8 @@ supabase/migrations/
 scripts/sync-from-supabase.ts        # Supabase → data/*.ts (publish 워크플로가 실행)
 types/supabase.ts                    # GENERATED (npm run gen:types) — 편집 금지
 types/database.ts                    # 생성 타입 위의 alias (PostRow 등, Readonly)
+
+manual/                               # VitePress 사용자 매뉴얼 소스 + 단일 파일 번들러; 산출물 docs/admin-manual.html; 빌드 `cd manual && npm run bundle`
 ```
 
 ---
@@ -267,6 +269,7 @@ G1–G4 는 2026-08-30 전부 ship, 같은 날 실주행 평가(REVISE) 후속�
 - **첫 운영**: 실제 작가가 어드민에서 게시물 등록 → 갤러리 업로드 → "변경사항 게시" 까지의 full 흐름을 사용자 테스트
 - ~~H5 부채~~ — 2026-08-30 ship (9/9)
 - ~~이메일 enrichment~~ · ~~as never 정리~~ · ~~ESLint flat config~~ — G4 (2026-08-30) · ~~영상 oembed~~ — G3 YouTube · ~~Phase 3d Team 관리~~ — H2 폐기
+- ~~사용자 매뉴얼~~ — 2026-08-31 완료: [docs/admin-manual.html](./admin-manual.html) (VitePress 17페이지 · 스크린샷 27장 · 오프라인 단일 파일)
 
 ---
 
@@ -274,6 +277,8 @@ G1–G4 는 2026-08-30 전부 ship, 같은 날 실주행 평가(REVISE) 후속�
 
 - 결정 사유 (ADR): [wiki/decisions/0001-admin-architecture.md](../wiki/decisions/0001-admin-architecture.md)
 - 셋업 가이드: [docs/admin-setup.md](./admin-setup.md)
+- 사용 가이드 원고: [docs/admin-guide.md](./admin-guide.md)
+- 사용자 매뉴얼 (단일 HTML): [docs/admin-manual.html](./admin-manual.html)
 - 시간순 활동 로그: [wiki/log.md](../wiki/log.md)
 - 프로젝트 개요: [wiki/overview.md](../wiki/overview.md)
 - 코드베이스 아키텍처: [wiki/codebase/architecture.md](../wiki/codebase/architecture.md)

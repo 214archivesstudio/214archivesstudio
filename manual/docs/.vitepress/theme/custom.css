@@ -1,0 +1,109 @@
+:root {
+  --vp-c-brand-1: #106cf2;
+  --vp-c-brand-3: #106cf2 !important;
+
+  --vp-c-bg-soft: #f3f7fe;
+}
+
+.vp-doc :not(pre, h1, h2, h3, h4, h5, h6) > code.master {
+  background-color: #efe0f8;
+  color: #912fd3;
+  font-weight: bold;
+}
+
+.vp-doc :not(pre, h1, h2, h3, h4, h5, h6) > code.admin {
+  background-color: #e3f2fd;
+  color: #1976d2;
+  font-weight: bold;
+}
+
+.vp-doc :not(pre, h1, h2, h3, h4, h5, h6) > code.normal {
+  background-color: #f1f8e9;
+  color: #388e3c;
+  font-weight: bold;
+}
+
+.vp-doc ol.alpha {
+  list-style-type: upper-alpha; /* A, B, C */
+}
+
+.vp-doc table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  word-break: keep-all;
+}
+
+.vp-doc p,
+.vp-doc a {
+  overflow-wrap: anywhere;
+}
+
+.VPFeature .details {
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+.vp-doc :not(pre, h1, h2, h3, h4, h5, h6) > code.disable {
+  background-color: #767676;
+  color: #f8f8f8;
+  font-weight: bold;
+}
+.vp-doc :not(pre, h1, h2, h3, h4, h5, h6) > code.error {
+  background-color: #f24922;
+  color: #ffebd9;
+  font-weight: bold;
+}
+.vp-doc :not(pre, h1, h2, h3, h4, h5, h6) > code.warning {
+  background-color: #ff9f42;
+  color: #4b1900;
+  font-weight: bold;
+}
+.vp-doc :not(pre, h1, h2, h3, h4, h5, h6) > code.restricted {
+  background-color: #fec942;
+  color: #331900;
+  font-weight: bold;
+}
+.vp-doc :not(pre, h1, h2, h3, h4, h5, h6) > code.normalDevice {
+  background-color: #66d574;
+  color: #003000;
+  font-weight: bold;
+}
+.vp-doc :not(pre, h1, h2, h3, h4, h5, h6) > code.end {
+  background-color: #3dadff;
+  color: #d6ffff;
+  font-weight: bold;
+}
+.vp-doc :not(pre, h1, h2, h3, h4, h5, h6) > code.disable2 {
+  background-color: #d9d9d9;
+  color: #2b2b2b;
+  font-weight: bold;
+}
+.vp-doc :not(pre, h1, h2, h3, h4, h5, h6) > code.error2 {
+  background-color: #ffc7c1;
+  color: #3e1f17;
+  font-weight: bold;
+}
+.vp-doc :not(pre, h1, h2, h3, h4, h5, h6) > code.warning2 {
+  background-color: #ffe1c2;
+  color: #3e2207;
+  font-weight: bold;
+}
+.vp-doc :not(pre, h1, h2, h3, h4, h5, h6) > code.restricted2 {
+  background-color: #feedbc;
+  color: #43301b;
+  font-weight: bold;
+}
+.vp-doc :not(pre, h1, h2, h3, h4, h5, h6) > code.normalDevice2 {
+  background-color: #ccf4d2;
+  color: #1d2915;
+  font-weight: bold;
+}
+.vp-doc :not(pre, h1, h2, h3, h4, h5, h6) > code.end2 {
+  background-color: #c2e4ff;
+  color: #112430;
+  font-weight: bold;
+}
+
+/* 214: 어드민 다크 UI 스크린샷 테두리 (ARMS 원본 대비 유일한 추가) */
+.vp-doc img { border: 1px solid #e5e7eb; border-radius: 4px; }

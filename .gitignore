@@ -45,3 +45,11 @@ next-env.d.ts
 .idea/
 *.swp
 *.swo
+
+# admin manual (VitePress)
+manual/node_modules/
+manual/docs/.vitepress/cache/
+manual/dist/
+
+# oh-my-claudecode local state
+.omc/
