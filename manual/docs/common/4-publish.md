@@ -17,7 +17,7 @@
 
 ![최근 활동](../img/5.webp)
 
-4. 1~3분 뒤 사이트에서 확인: `https://www.214archives.com/{섹션}/{슬러그}`
+4. 1~3분 뒤 사이트에서 확인: `https://www.214archives.com/{섹션}/{URL 주소}`
 
 ## 진행 확인
 
