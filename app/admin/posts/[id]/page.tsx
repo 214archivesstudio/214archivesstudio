@@ -57,7 +57,9 @@ export default async function EditPostPage({ params, searchParams }: PageProps) 
         }
       />
 
-      {created === "1" && <CreatedToast postId={post.id} />}
+      {created === "1" && (
+        <CreatedToast postId={post.id} mediaCount={media.length} />
+      )}
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
         <div className="space-y-10">

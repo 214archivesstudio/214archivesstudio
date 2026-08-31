@@ -5,6 +5,8 @@ import { toast } from "sonner";
 
 interface CreatedToastProps {
   readonly postId: string;
+  /** 생성 시 함께 저장된 갤러리 항목 수 — 안내 문구를 상황에 맞춘다. */
+  readonly mediaCount?: number;
 }
 
 /**
@@ -15,7 +17,7 @@ interface CreatedToastProps {
  * revalidate, which re-mounted this component and re-fired the toast. A
  * per-post sessionStorage flag makes the toast fire exactly once per tab.
  */
-export function CreatedToast({ postId }: CreatedToastProps) {
+export function CreatedToast({ postId, mediaCount = 0 }: CreatedToastProps) {
   useEffect(() => {
     const key = `admin:post-created:${postId}`;
     let alreadyShown = false;
@@ -30,12 +32,15 @@ export function CreatedToast({ postId }: CreatedToastProps) {
     const timer = setTimeout(() => {
       toast.success("썸네일·기본 정보가 저장됐어요", {
         id: "post-created",
-        description: "이제 오른쪽 미디어 패널에서 갤러리를 추가하세요.",
+        description:
+          mediaCount > 0
+            ? `갤러리 ${mediaCount}개도 함께 저장됐어요.`
+            : "이제 오른쪽 미디어 패널에서 갤러리를 추가하세요.",
         duration: 6_000,
       });
     }, 0);
     return () => clearTimeout(timer);
-  }, [postId]);
+  }, [postId, mediaCount]);
 
   return null;
 }
